@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package api.v1;
+
+//import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+service CommonService {
+  rpc Settings(SettingsRequest) returns (SettingsResponse) {}
+}
+
+message SettingsRequest {
+}
+
+message SettingsResponse {
+  optional string settings = 1 [(buf.validate.field).required = true];
+}

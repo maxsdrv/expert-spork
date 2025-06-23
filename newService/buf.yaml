@@ -1,0 +1,13 @@
+version: v2
+lint:
+  use:
+    - STANDARD 
+  ignore:
+    - api/proto/../modules
+breaking:
+  use:
+    - FILE
+modules:
+  - path: api/proto
+  - path: api/proto/../modules
+    name: buf.build/bufbuild/protovalidate
