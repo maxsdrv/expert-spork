@@ -42,6 +42,8 @@ commands:
   gen: |-
     export CI_SERVER_HOST=
     devspace --silent run run-tools-cmd gen_go_connectrpc_server api/proto internal/generated dds-provider
+    devspace --silent run gen_go_openapi_client api/external/dss-target-service-schema.yaml internal/generated/radariq-client/dss_target_service dss_target_service
+    devspace --silent run gen_go_openapi_client api/external/skycope-openapi.yaml internal/generated/radariq-client/skycope skycope
 
   buf: |-
     export PATH="$(go env GOPATH)/bin:$PATH"

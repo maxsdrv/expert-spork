@@ -1,0 +1,1265 @@
+openapi: 3.1.0
+info:
+  title: DDS Provider REST API
+  description: REST API of `dds-target-provider`.
+  version: 2.3.0
+servers:
+- url: http://localhost:19080/api/v1
+tags:
+- name: common
+  description: DDS Common API
+
+- name: device
+  description: DDS Device API
+- name: sensor
+  description: DDS Sensor API
+- name: jammer
+  description: DDS Jammer API
+- name: camera
+  description: DDS Camera API
+
+- name: alpha
+  description: Unimplemented draft
+- name: beta
+  description: Unstable implementation
+
+paths:
+  /common/get_api_version:
+    get:
+      tags:
+      - common
+      summary: Get current supported API version
+      operationId: get_api_version
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - api_version
+                properties:
+                  api_version:
+                    $ref: '#/components/schemas/version'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /common/get_license_status:
+    get:
+      tags:
+      - common
+      summary: Get current status of license checking
+      operationId: get_license_status
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/license_status'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /common/upload_license:
+    post:
+      tags:
+      - common
+      summary: Upload license file
+      operationId: upload_license
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - license_data
+              properties:
+                license_data:
+                  type: string
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "422":
+          $ref: '#/components/responses/422'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /device/set_disabled:
+    post:
+      tags:
+      - device
+      summary: Set device disabled
+      description: Manually switch device on/off
+      operationId: set_disabled
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - disabled
+              properties:
+                id:
+                  $ref: '#/components/schemas/unit_id'
+                disabled:
+                  type: boolean
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /device/get_position_mode:
+    get:
+      tags:
+      - device
+      summary: Get device position mode
+      description: Returns position mode
+      operationId: get_position_mode
+      parameters:
+        - name: id
+          in: query
+          description: ID of device to request
+          required: true
+          schema:
+            $ref: '#/components/schemas/unit_id'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - position_mode
+                properties:
+                  position_mode:
+                    $ref: '#/components/schemas/geo_position_mode'
+#      security:
+#      - bearer_auth: []
+  /common/get_settings:
+    get:
+      tags:
+      - common
+      summary: Get devices settings
+      operationId: get_settings 
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/settings'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /device/set_position_mode:
+    post:
+      tags:
+      - device
+      summary: Set device position mode
+      description: Manually set device position mode (automatic or manual)
+      operationId: set_position_mode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - position_mode
+              properties:
+                id:
+                  $ref: '#/components/schemas/unit_id'
+                position_mode:
+                  $ref: '#/components/schemas/geo_position_mode'
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "422":
+          $ref: '#/components/responses/422'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /device/set_position:
+    post:
+      tags:
+      - device
+      summary: Set device position
+      description: Manually set device position
+      operationId: set_position
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - position
+              properties:
+                id:
+                  $ref: '#/components/schemas/unit_id'
+                position:
+                  $ref: '#/components/schemas/geo_position'
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "422":
+          $ref: '#/components/responses/422'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /common/set_settings:
+    post:
+      tags:
+      - common
+      summary: Set devices settings
+      operationId: set_settings 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/settings'
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /sensor/get_sensors:
+    get:
+      tags:
+      - sensor
+      summary: Get a list of configured sensors
+      operationId: get_sensors
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sensor_list'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /sensor/get_sensor_info:
+    get:
+      tags:
+      - sensor
+      summary: Get sensor info by ID
+      description: Returns a single sensor info
+      operationId: get_sensor_info
+      parameters:
+        - name: id
+          in: query
+          description: ID of sensor to request
+          required: true
+          schema:
+            $ref: '#/components/schemas/unit_id'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - sensor_info
+                properties:
+                  sensor_info:
+                    $ref: '#/components/schemas/sensor_info'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /sensor/get_jammer_mode:
+    get:
+      tags:
+      - sensor
+      summary: Get jammer mode
+      description: Gets current jammer mode - automatic or manual
+      operationId: get_jammer_mode
+      parameters:
+        - name: id
+          in: query
+          description: ID of sensor to request
+          required: true
+          schema:
+            $ref: '#/components/schemas/unit_id'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - jammer_mode
+                properties:
+                  jammer_mode:
+                    $ref: '#/components/schemas/jammer_mode'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /sensor/set_jammer_mode:
+    post:
+      tags:
+      - sensor
+      summary: Set jammer mode
+      description: |
+             Sets current jammer mode - automatic or manual
+             MANUAL:
+             - accepts requests via set_jammer_bands 
+             AUTO:
+             - starts jamming of any DRONE object 
+             - jamming runs for "timeout" duration then stops and runs again if detection event is present
+             - manual requests via set_jammer_bands take preference above automatic jamming (except for empty bands request which does not stop jamming in AUTO mode currently)
+             Switching:
+             - switching of modes is allowed at any moment
+             - if mode changed while jamming runs it will run until timeout, then may run again according to the new mode
+      operationId: set_jammer_mode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - jammer_mode
+                - timeout
+              properties:
+                id:
+                  $ref: '#/components/schemas/unit_id'
+                jammer_mode:
+                  $ref: '#/components/schemas/jammer_mode'
+                timeout:
+                  type: integer
+                  description: Timeout for AUTO mode in seconds, ignored for MANUAL
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /jammer/get_jammers:
+    get:
+      tags:
+      - jammer
+      summary: Get jammers list
+      description: Get summary of all jammers
+      operationId: get_jammers
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/jammer_list'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /jammer/get_jammer_info:
+    get:
+      tags:
+      - jammer
+      summary: Find jammer by ID
+      description: Returns a single jammer
+      operationId: get_jammer
+      parameters:
+        - name: id
+          in: query
+          description: ID of jammer to return
+          required: true
+          schema:
+            $ref: '#/components/schemas/unit_id'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - jammer_info
+                properties:
+                  jammer_info:
+                    $ref: '#/components/schemas/jammer_info'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /jammer/get_groups:
+    get:
+      tags:
+      - jammer
+      summary: Get jammer groups list
+      description: Returns list of jammer groups
+      operationId: get_jammer_groups
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - jammer_groups
+                properties:
+                  jammer_groups:
+                    $ref: '#/components/schemas/jammer_groups'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /jammer/set_jammer_bands:
+    post:
+      tags:
+      - jammer
+      summary: Sets jammer's per-band activity for manual mode
+      description: |
+        - empty bands array stops all bands immediately
+        - after duration seconds jamming stops
+        - if requested while already started the new request will start instead of existing one
+        - on device error no action but 200 response before
+        - timer_status presense in jammer_info indicates timer is run
+      operationId: set_jammer_bands
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - bands_active
+                - duration
+              properties:
+                id:
+                  $ref: '#/components/schemas/unit_id'
+                bands_active:
+                  $ref: '#/components/schemas/bands_active'
+                duration:
+                  description: Jammer will be stopped after the 'duration' seconds
+                  type: integer
+                ws_reply_id:
+                  $ref: '#/components/schemas/ws_reply_id'
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /target/get_targets:
+    get:
+      tags:
+      - target
+      - beta
+      summary: Get targets list
+      description: Get summary of all active targets
+      operationId: get_targets
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/target_list'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /target/get_target_data:
+    get:
+      tags:
+      - target
+      - beta
+      summary: Find target by ID
+      description: Returns a single target
+      operationId: get_target
+      parameters:
+        - name: target_id
+          in: query
+          description: ID of target to return
+          required: true
+          schema:
+            $ref: '#/components/schemas/unit_id'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/target_data'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /target/subscribe:
+    post:
+      tags:
+      - target
+      - alpha
+      summary: Enable subscription on target changes
+      description: Subscribe for receiveing notifications for following events - target_detected, target_data_updated, target_lost
+      operationId: target_subscribe
+      requestBody:
+        content:
+          application/json:
+            {}
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /target/unsubscribe:
+    post:
+      tags:
+      - target
+      - alpha
+      summary: Disable subscription on target changes
+      description: Unsubscribe from receiveing all target notifications
+      operationId: target_unsubscribe
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /track/get_tracks:
+    get:
+      tags:
+      - track
+      - alpha
+      summary: Get tracks list
+      description: Get summary of all active tracks
+      operationId: get_tracks
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/track_list'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /target/get_track:
+    get:
+      tags:
+      - track
+      - alpha
+      summary: Find target by ID
+      description: Returns a single target
+      operationId: get_track
+      parameters:
+        - name: track_id
+          in: query
+          description: ID of track to return
+          required: true
+          schema:
+            $ref: '#/components/schemas/unit_id'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/track_data'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /track/subscribe:
+    post:
+      tags:
+      - track
+      - alpha
+      summary: Enable subscription on track changes
+      description: Subscribe for receiveing notifications for following events - track_started, track_updated, track_finished
+      operationId: track_subscribe
+      requestBody:
+        content:
+          application/json:
+            {}
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+  /track/unsubscribe:
+    post:
+      tags:
+      - track
+      - alpha
+      summary: Disable subscription on track changes
+      description: Unsubscribe from receiveing all track notifications
+      operationId: track_unsubscribe
+      responses:
+        "200":
+          $ref: '#/components/responses/200'
+        "400":
+          $ref: '#/components/responses/400'
+        "500":
+          $ref: '#/components/responses/500'
+#      security:
+#      - bearer_auth: []
+
+
+  /camera/get_id:
+    get:
+      tags:
+        - camera
+        - beta
+      summary: Get ID for the camera in camera service
+      operationId: get_id
+      parameters:
+        - name: id
+          in: query
+          description: ID of sensor to request
+          required: true
+          schema:
+            $ref: '#/components/schemas/unit_id'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/camera_id'
+
+components:
+  responses:
+    "200":
+      description: Successful operation
+      content: {}
+    "400":
+      description: Bad request
+      content: {}
+    "422":
+      description: Unprocessable entity
+      content: {}
+    "500":
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+
+  schemas:
+    alarm_status:
+      type: object
+      required:
+        - level
+      properties:
+        level:
+          type: string
+          enum: [NONE, MEDIUM, HIGH, CRITICAL]
+        score:
+          type: number
+          format: double
+    bands_active:
+      type: array
+      description: List of active bands. Skycope backend requires the right order of labels. Bands not listed will be switched Off.
+      examples:
+        - ["2.4GHz", "5.8GHz"]
+      items:
+        type: string
+    band:
+      type: object
+      description: Band label and its activity status
+      required:
+        - label
+        - active
+      properties:
+        label:
+          type: string
+          examples:
+            - 2.4G
+        active:
+          type: boolean
+    bands:
+      type: array
+      description: List of available bands with corresponding activity status
+      items:
+        $ref: '#/components/schemas/band'
+
+    class_name:
+      type: string
+      description: Target class name
+      enum:
+        - UNDEFINED
+        - DRONE
+        - CAR
+        - TRUCK
+        - HUMAN
+        - TREE
+        - PEOPLE_GROUP
+        - MOTORCYCLE
+        - JET_SKI
+        - BOAT
+        - SHIP
+        - REMOTE_CONSOLE
+    device_id_mapping:
+        type: object
+        required:
+        - id
+        - fingerprint
+        - class
+        properties:
+          id:
+            $ref: '#/components/schemas/unit_id'
+          fingerprint:
+            type: string
+          class:
+            type: string
+    device_settings:
+        type: object
+        required:
+        - id
+        - disabled
+        - position_mode
+        - position
+        properties:
+          id:
+            $ref: '#/components/schemas/unit_id'
+          disabled:
+            type: boolean
+          position_mode:
+            $ref: '#/components/schemas/geo_position_mode'
+          position:
+            $ref: '#/components/schemas/geo_position'
+    settings:              
+        type: object
+        required:
+        - devices 
+        properties:
+          device_id_mapping:
+            type: array
+            items:
+              $ref: '#/components/schemas/device_id_mapping'
+          devices:
+            type: array
+            items:
+              $ref: '#/components/schemas/device_settings'
+
+    geo_coordinate:
+      type: object
+      required:
+      - latitude
+      - longitude
+      properties:
+        altitude:
+          description: Altitude in meters above sea level
+          type: number
+          format: double
+        latitude:
+          description: Latitude in decimal degrees
+          type: number
+          format: double
+        longitude:
+          description: Longitude in decimal degrees
+          type: number
+          format: double
+    geo_direction:
+      type: object
+      required:
+        - bearing
+        - distance
+      properties:
+        bearing:
+          description: Bearing on object in angular degrees
+          type: number
+          format: double
+        distance:
+          description: Distance to object in meters
+          type: number
+          format: double
+        elevation:
+          description: Object elevation in angular degrees
+          type: number
+          format: double
+    geo_position:
+      type: object
+      required:
+      - azimuth
+      - coordinate
+      properties:
+        azimuth:
+          type: number
+          format: double
+        coordinate:
+          $ref: '#/components/schemas/geo_coordinate'
+    geo_position_mode:
+      type: string
+      enum: [AUTO, MANUAL, ALWAYS_MANUAL]
+
+    jammer_info:
+      type: object
+      required:
+        - id
+        - model
+        - disabled
+        - state
+        - position
+        - position_mode
+        - workzone
+        - bands
+      properties:
+        id:
+          $ref: '#/components/schemas/unit_id'
+        model:
+          $ref: '#/components/schemas/model'
+        serial:
+          $ref: '#/components/schemas/serial'
+        sw_version:
+          $ref: '#/components/schemas/version'
+        disabled:
+          type: boolean
+        state:
+          $ref: '#/components/schemas/state'
+        position:
+          $ref: '#/components/schemas/geo_position'
+        position_mode:
+          $ref: '#/components/schemas/geo_position_mode'
+        workzone:
+          $ref: '#/components/schemas/workzone'
+        sensor_id:
+          $ref: '#/components/schemas/unit_id'
+        bands:
+          $ref: '#/components/schemas/bands'
+        band_options:
+          description: The field is absent in case of all bands combinations are allowed
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+            description: This is one of sets of frequencies which can be started for jamming
+        hw_info:
+          $ref: '#/components/schemas/hw_info'
+        timeout_status:
+          $ref: '#/components/schemas/jammer_timeout_status'
+        group_id:
+          $ref: '#/components/schemas/jammer_group_id'
+
+    jammer_list:
+      type: object
+      required:
+        - jammers
+      properties:
+        jammers:
+          type: array
+          items:
+            $ref: '#/components/schemas/jammer_info'
+
+    jammer_groups:
+      type: array
+      items:
+        $ref: '#/components/schemas/jammer_group'
+
+    jammer_group:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/jammer_group_id'
+        name:
+          type: string
+          
+    jammer_group_id:
+      type: string
+      description: jammer group id string
+
+    jammer_mode:
+      type: string
+      enum: [AUTO, MANUAL]
+
+    jammer_timeout_status:
+      description: The field is absent when the timer is stopped
+      type: object
+      required:
+        - started
+        - now
+        - duration
+      properties:
+        started:
+          $ref: '#/components/schemas/timestamp'
+        now:
+          $ref: '#/components/schemas/timestamp'
+        duration:
+          type: integer
+
+    hw_info:
+      type: object
+      properties:
+        temperature:
+          type: string
+          examples:
+            - "12 ℃"
+        voltage:
+          type: string
+          examples:
+            - "48 V"
+        current:
+          type: string
+          examples:
+            - "840 mA"
+
+    model:
+      type: string
+      description: model type string
+    sensor_list:
+      type: object
+      required:
+        - sensors
+      properties:
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/sensor_info'
+    sensor_info:
+      type: object
+      required:
+      - id
+      - type
+      - model
+      - disabled
+      - state
+      - position
+      - position_mode
+      - workzone
+      properties:
+        id:
+          $ref: '#/components/schemas/unit_id'
+        type:
+          $ref: '#/components/schemas/sensor_type'
+        model:
+          $ref: '#/components/schemas/model'
+        serial:
+          $ref: '#/components/schemas/serial'
+        sw_version:
+          $ref: '#/components/schemas/version'
+        disabled:
+          type: boolean
+        state:
+          $ref: '#/components/schemas/state'
+        position:
+          $ref: '#/components/schemas/geo_position'
+        position_mode:
+          $ref: '#/components/schemas/geo_position_mode'
+        workzone:
+          $ref: '#/components/schemas/workzone'
+        jammer_ids:
+          type: array
+          description: List of matching jammer IDs
+          items:
+            type: string
+        jammer_mode:
+          $ref: '#/components/schemas/jammer_mode'
+        jammer_auto_timeout:
+          description: Jammer timeout in AUTO mode in seconds
+          type: integer
+        hw_info:
+          $ref: '#/components/schemas/hw_info'
+    sensor_type:
+      enum:
+      - RFD
+      - RADAR
+      - CAMERA
+    serial:
+      type: string
+      description: serial number string
+    state:
+      type: string
+      description: integral state
+      enum:
+        - UNAVAILABLE
+        - OFF
+        - FAILURE
+        - OK
+    target_data:
+      type: object
+      required:
+        - target_id
+        - class_name
+        - alarm_status
+        - last_updated
+      properties:
+        target_id:
+          $ref: '#/components/schemas/unit_id'
+        sensor_id:
+          $ref: '#/components/schemas/unit_id'
+        track_id:
+          $ref: '#/components/schemas/unit_id'
+        camera_track:
+          $ref: '#/components/schemas/camera_track'
+        alarm_ids:
+          type: array
+          description: List of linked alarm event ids
+          items:
+            $ref: '#/components/schemas/unit_id'
+        cls_ids:
+          type: array
+          description: List of linked classification event ids
+          items:
+            $ref: '#/components/schemas/unit_id'
+        class_name:
+          $ref: '#/components/schemas/class_name'
+        attributes:
+          oneOf:
+            - $ref: "#/components/schemas/target_attributes_RFD"
+            - $ref: "#/components/schemas/target_attributes_RADAR"
+            - $ref: "#/components/schemas/target_attributes_CAMERA"
+        alarm_status:
+          $ref: '#/components/schemas/alarm_status'
+        position:
+          type: object
+          properties:
+            coordinate:
+              $ref: '#/components/schemas/geo_coordinate'
+            source_id:
+              $ref: '#/components/schemas/unit_id'
+            direction:
+              type: object
+              properties:
+                bearing:
+                  type: number
+                  description: Bearing on target in decimal degrees
+                  format: double
+                  minimum: 0
+                  exclusiveMaximum: 360
+                distance:
+                  type: number
+                  description: Distance to target in meters
+                  format: double
+                  minimum: 0
+                elevation:
+                  type: number
+                  description: Target elevation in decimal degrees
+                  format: double
+                  minimum: 0
+                  exclusiveMaximum: 90
+        last_updated:
+          $ref: '#/components/schemas/timestamp'
+    target_attributes_RFD:
+      type: object
+      required:
+        - digital
+        - frequencies
+        - geolocation
+      properties:
+        digital:
+          type: boolean
+        frequencies:
+          type: array
+          items:
+            type: integer
+        description:
+          type: string
+        geolocation:
+          type: boolean
+    target_attributes_RADAR:
+      type: object
+    target_attributes_CAMERA:
+      type: object
+
+    target_list:
+      type: object
+      required:
+        - targets
+      properties:
+        targets:
+          type: array
+          items:
+            $ref: '#/components/schemas/target_data'
+    track_data:
+      type: object
+      required:
+        - track_id
+        - target_id
+        - source_id
+        - points
+      properties:
+        track_id:
+          $ref: '#/components/schemas/unit_id'
+        target_id:
+          $ref: '#/components/schemas/unit_id'
+        source_id:
+          $ref: '#/components/schemas/unit_id'
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/track_point'
+    track_list:
+      type: object
+      required:
+        - tracks
+      properties:
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/track_data'
+    track_point:
+      type: object
+      required:
+        - timestamp
+      properties:
+        coordinate:
+          $ref: '#/components/schemas/geo_coordinate'
+        direction:
+          $ref: '#/components/schemas/geo_direction'
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+    timestamp:
+      type: string
+      format: date-time
+      description: date and time in ISO 8601 format with milliseconds
+      examples:
+        - "2017-07-21T17:32:28.123Z"
+    unit_id:
+      type: string
+      format: uuid
+      description: Matching sensor ID identification string based on UUID
+    version:
+      type: string
+      description: Version string
+      examples:
+        - "1.12.7"
+    workzone:
+      type: array
+      items:
+        $ref: '#/components/schemas/workzone_sector'
+    workzone_sector:
+      type: object
+      required:
+      - number
+      - distance
+      - min_angle
+      - max_angle
+      properties:
+        number:
+          type: integer
+        distance:
+          type: number
+          format: double
+        min_angle:
+          type: number
+          format: double
+        max_angle:
+          type: number
+          format: double
+    ws_reply_id:
+        description: Generated by client and WS reply will be matched by this value
+        type: string
+        default: ""
+    ws_reply:
+        description: Used in WS connection to provide results of async API requests
+        required:
+        - id
+        - http_code
+        - reply_text
+        properties:
+          id:
+            type: 
+              $ref: '#/components/schemas/ws_reply_id'
+          http_code:
+            type: integer
+            description: HTTP status line status code
+            minimum: 100
+            maximum: 599
+          reply_text:
+            type: string
+    error:
+      type: object
+      required:
+        - code
+        - description
+      properties:
+        code:
+          type: integer
+        description:
+          type: string
+
+    camera_track:
+      allOf:
+        - $ref: '#/components/schemas/camera_id'
+        - required:
+            - target_id
+          properties:
+            target_id:
+              type: string
+
+    camera_id:
+      required:
+        - camera_id
+      properties:
+        camera_id:
+          type: string
+
+    license_status:
+      required:
+        - valid
+        - description
+        - expiry_date
+        - signature
+      properties:
+        valid:
+          type: boolean
+        description:
+          type: string
+        expiry_date:
+          type: string
+        signature:
+          type: string
+
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
