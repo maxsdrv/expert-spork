@@ -485,7 +485,7 @@ paths:
     get:
       tags:
       - target
-      - beta
+#      - beta
       summary: Get targets list
       description: Get summary of all active targets
       operationId: get_targets
@@ -504,7 +504,7 @@ paths:
     get:
       tags:
       - target
-      - beta
+#      - beta
       summary: Find target by ID
       description: Returns a single target
       operationId: get_target
@@ -530,7 +530,7 @@ paths:
     post:
       tags:
       - target
-      - alpha
+#      - alpha
       summary: Enable subscription on target changes
       description: Subscribe for receiveing notifications for following events - target_detected, target_data_updated, target_lost
       operationId: target_subscribe
@@ -551,7 +551,7 @@ paths:
     post:
       tags:
       - target
-      - alpha
+#      - alpha
       summary: Disable subscription on target changes
       description: Unsubscribe from receiveing all target notifications
       operationId: target_unsubscribe
@@ -568,7 +568,7 @@ paths:
     get:
       tags:
       - track
-      - alpha
+#      - alpha
       summary: Get tracks list
       description: Get summary of all active tracks
       operationId: get_tracks
@@ -587,7 +587,7 @@ paths:
     get:
       tags:
       - track
-      - alpha
+#      - alpha
       summary: Find target by ID
       description: Returns a single target
       operationId: get_track
@@ -613,7 +613,7 @@ paths:
     post:
       tags:
       - track
-      - alpha
+#      - alpha
       summary: Enable subscription on track changes
       description: Subscribe for receiveing notifications for following events - track_started, track_updated, track_finished
       operationId: track_subscribe
@@ -634,7 +634,7 @@ paths:
     post:
       tags:
       - track
-      - alpha
+#      - alpha
       summary: Disable subscription on track changes
       description: Unsubscribe from receiveing all track notifications
       operationId: track_unsubscribe
@@ -653,7 +653,7 @@ paths:
     get:
       tags:
         - camera
-        - beta
+#        - beta
       summary: Get ID for the camera in camera service
       operationId: get_id
       parameters:

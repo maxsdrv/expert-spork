@@ -1,7 +1,7 @@
 version: v2
 lint:
   use:
-    - STANDARD 
+    - STANDARD #MINIMAL
   ignore:
     - api/proto/../modules
 breaking:
@@ -11,3 +11,5 @@ modules:
   - path: api/proto
   - path: api/proto/../modules
     name: buf.build/bufbuild/protovalidate
+# deps:
+#   - buf.build/bufbuild/protovalidate

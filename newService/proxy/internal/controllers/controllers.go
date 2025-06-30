@@ -1,15 +1,15 @@
 package controllers
 
 import (
-	"dds-provider/proxy/internal/services/radariq"
+	"dds-provider/proxy/internal/services/target_provider"
 )
 
 type Controllers struct {
-	svcRadarIq *radariq.Service
+	svcTargetProvider *target_provider.Service
 }
 
-func New(svcRadarIq *radariq.Service) *Controllers {
+func New(svcTargetProvider *target_provider.Service) *Controllers {
 	return &Controllers{
-		svcRadarIq: svcRadarIq,
+		svcTargetProvider: svcTargetProvider,
 	}
 }
