@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "buf/validate/validate.proto";
+
+enum GeoPositionMode {
+  GEO_POSITION_MODE_AUTO = 0;
+  GEO_POSITION_MODE_MANUAL = 1;
+  GEO_POSITION_MODE_ALWAYS_MANUAL = 2;
+}
+
+message GeoPosition {
+  optional double azimuth = 1 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 360}];
+  optional GeoCoordinate coordinate = 2 [(buf.validate.field).required = true];
+}
+
+message GeoCoordinate {
+  // Latitude in decimal degrees
+  optional double latitude = 1 [(buf.validate.field).required = true, (buf.validate.field).double.gte = -90.0, (buf.validate.field).double.lt = 90.0];
+  // Longitude in decimal degrees
+  optional double longitude = 2 [(buf.validate.field).required = true, (buf.validate.field).double.gte = -180.0, (buf.validate.field).double.lt = 180.0];
+  // Altitude in meters above sea level
+  optional double altitude = 3;
+}
+
+message WorkzoneSector {
+  optional int32 number = 1 [(buf.validate.field).required = true];
+  optional double distance = 2 [(buf.validate.field).required = true];
+  optional double min_angle = 3 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 360}];
+  optional double max_angle = 4 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 360}];
+}
+
+message HwInfo {
+  optional string temperature = 1;
+  optional string voltage = 2;
+  optional string current = 3;
+}
