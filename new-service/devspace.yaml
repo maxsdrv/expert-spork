@@ -1,0 +1,67 @@
+version: v2beta1
+name: dds-provider
+
+imports:
+- path: devspace.local-env.yaml
+- path: configs/env.yaml
+
+images:
+  app:
+    image: ${CI_REGISTRY_IMAGE}
+    buildArgs:
+      APP_ID: dds-provider
+      VERSION: ${VERSION}
+      GO_VER: ${GO_VER}
+      GOMOD_HOST: ${CI_SERVER_HOST}
+    buildKit:
+      args: [
+        "--secret=id=gomod_token,env=GOMOD_TOKEN",
+        "--platform=${PLATFORMS}",
+        "--cache-from=type=registry,ref=${CI_REGISTRY_IMAGE}/buildcache:${BUILDER_TAG}",
+        "--cache-from=type=registry,ref=${CI_REGISTRY_IMAGE}/buildcache:${IMAGE_TAG}",
+      ]
+
+pipelines:
+  build: |-
+    build_images ${@:---all} -t $IMAGE_TAG
+
+  deploy: |-
+    export "$@"
+    docker compose --env-file $DEVSPACE_ENV_FILE up -d
+
+
+commands:
+  dev: |-
+    export "$@"
+    go run main.go -debug
+
+  validate: |-
+    export CI_SERVER_HOST=
+    devspace --silent run run-tools-cmd lint_proto api/proto
+
+  gen: |-
+    export CI_SERVER_HOST=
+    devspace --silent run run-tools-cmd gen_go_connectrpc_server api/proto internal/generated dds-provider
+    devspace --silent run gen_go_openapi_client \
+      api/external/dss-target-service-schema.yaml \
+      internal/generated/radariq-client/dss_target_service \
+      dss_target_service 
+
+  buf: |-
+    export PATH="$(go env GOPATH)/bin:$PATH"
+    which buf > /dev/null || CI_SERVER_HOST= devspace --silent run run-tools-cmd install_go_tools
+    buf "$@"
+
+  clean: |-
+    docker builder prune --filter type=exec.cachemount -f
+
+profiles:
+  - name: ci
+    activation:
+      - env:
+          CI_JOB_ID: "\\d+"
+    patches:
+      - op: add
+        path: images.app.buildKit.args
+        value: "--cache-to=type=registry,ref=${CI_REGISTRY_IMAGE}/buildcache:${IMAGE_TAG},mode=max,compression=zstd"
+

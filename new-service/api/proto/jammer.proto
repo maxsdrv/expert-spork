@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+import "components.proto";
+
+service JammerService {
+  rpc Jammers(google.protobuf.Empty) returns (JammersResponse) {}
+
+  //Get jammer ID list with SensorInfo first
+  rpc JammerInfo(JammerInfoRequest) returns (JammerInfoResponse) {}
+
+  //Get the initial jammer state with the first stream message
+  rpc JammerInfoDynamic(JammerInfoRequest) returns (stream JammerInfoDynamicResponse) {}
+  
+  rpc Groups(google.protobuf.Empty) returns (GroupsResponse) {}
+  
+  // (Sets jammer's per-band activity for manual mode)
+  // - empty bands array stops all bands immediately
+  // - after duration seconds jamming stops
+  // - if requested while already started the new request will start instead of existing one
+  // - on device error no action but 200 response before
+  // - timer_status presense in jammer_info indicates timer is run
+  rpc SetJammerBands(SetJammerBandsRequest) returns (google.protobuf.Empty) {}
+}
+
+message JammersResponse {
+  repeated string jammer_id_list = 1 [(buf.validate.field).required = true, (buf.validate.field).repeated.items.string.uuid = true];
+}
+
+message JammerInfoRequest {
+  optional string jammer_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+}
+
+message JammerInfoResponse {
+  optional string model = 2 [(buf.validate.field).required = true];
+  optional string serial = 3;
+  optional string sw_version = 4;
+  optional string sensor_id = 10 [(buf.validate.field).string.uuid = true];
+  optional string group_id = 15;
+}
+
+message JammerInfoDynamicRequest {
+  optional string jammer_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+}
+
+message JammerInfoDynamicResponse {
+  optional bool disabled = 5 [(buf.validate.field).required = true];
+  optional string state = 6 [(buf.validate.field).required = true];
+  optional GeoPosition position = 7 [(buf.validate.field).required = true];
+  optional GeoPositionMode position_mode = 8 [(buf.validate.field).required = true];
+  repeated WorkzoneSector workzone = 9 [(buf.validate.field).required = true];
+  repeated Band bands = 11 [(buf.validate.field).required = true];
+  repeated BandOptions band_options = 12;
+  optional HwInfo hw_info = 13;
+  optional JammerTimeoutStatus timeout_status = 14;
+}
+
+
+message GroupsResponse {
+  repeated JammerGroup jammer_groups = 1 [(buf.validate.field).required = true];
+}
+
+message JammerGroup {
+  optional string group_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional string name = 2 [(buf.validate.field).required = true];
+}
+
+message SetJammerBandsRequest {
+  optional string jammer_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  // List of active bands. Skycope backend requires the right order of labels.
+  // Bands not listed will be switched Off.
+  // Example: ["2.4GHz", "5.8GHz"]
+  repeated string bands_active = 2 [(buf.validate.field).required = true];
+  // Jammer will be stopped after the 'duration' seconds
+  optional int32 duration = 3 [(buf.validate.field).required = true];
+}
+
+message Band {
+  optional string label = 1 [(buf.validate.field).required = true];
+  optional bool active = 2 [(buf.validate.field).required = true];
+}
+
+message BandOptions {
+  repeated string bands = 1 [(buf.validate.field).required = true];
+}
+
+message JammerTimeoutStatus {
+  optional google.protobuf.Timestamp started = 1 [(buf.validate.field).required = true];
+  optional google.protobuf.Timestamp now = 2 [(buf.validate.field).required = true];
+  optional int32 duration = 3 [(buf.validate.field).required = true];
+}

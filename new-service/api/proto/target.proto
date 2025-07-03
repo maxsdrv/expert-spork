@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+import "components.proto";
+
+service TargetService {
+  rpc Targets(google.protobuf.Empty) returns (stream TargetsResponse) {}
+}
+
+message TargetsResponse {
+  optional string target_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional TargetClass class_name = 2 [(buf.validate.field).required = true];
+  optional AlarmStatus alarm_status = 3 [(buf.validate.field).required = true];
+  optional google.protobuf.Timestamp last_updated = 4 [(buf.validate.field).required = true];
+  
+  optional string sensor_id = 5 [(buf.validate.field).string.uuid = true];
+  optional string track_id = 6 [(buf.validate.field).string.uuid = true];
+  optional CameraTrack camera_track = 7;
+  repeated string alarm_ids = 8 [(buf.validate.field).repeated.items.string.uuid = true];
+  repeated string cls_ids = 9 [(buf.validate.field).repeated.items.string.uuid = true];
+  
+  oneof attributes {
+    TargetAttributesRFD rfd_attributes = 10;
+    TargetAttributesRADAR radar_attributes = 11;
+    TargetAttributesCAMERA camera_attributes = 12;
+  }
+  
+  optional TargetPosition position = 13;
+  optional int64 detect_count = 14;
+}
+
+message TargetPosition {
+  optional GeoCoordinate coordinate = 1 [(buf.validate.field).required = true];
+  optional string source_id = 2 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional TargetDirection direction = 3 [(buf.validate.field).required = true];
+}
+
+message CameraTrack {
+  optional string camera_id = 1 [(buf.validate.field).required = true];
+  optional string target_id = 2 [(buf.validate.field).required = true];
+}
+
+enum TargetClass {
+  TARGET_UNDEFINED = 0;
+  TARGET_DRONE = 1;
+  TARGET_CAR = 2;
+  TARGET_TRUCK = 3;
+  TARGET_HUMAN = 4;
+  TARGET_TREE = 5;
+  TARGET_PEOPLE_GROUP = 6;
+  TARGET_MOTORCYCLE = 7;
+  TARGET_JET_SKI = 8;
+  TARGET_BOAT = 9;
+  TARGET_SHIP = 10;
+  TARGET_REMOTE_CONSOLE = 11;
+}
+
+enum AlarmLevel {
+  ALARM_LEVEL_NONE = 0;
+  ALARM_LEVEL_MEDIUM = 1;
+  ALARM_LEVEL_HIGH = 2;
+  ALARM_LEVEL_CRITICAL = 3;
+}
+
+message AlarmStatus {
+  optional AlarmLevel level = 1 [(buf.validate.field).required = true];
+  optional double score = 2;
+}
+
+message TargetAttributesRFD {
+  optional bool digital = 1 [(buf.validate.field).required = true];
+  repeated int32 frequencies = 2 [(buf.validate.field).required = true];
+  optional bool geolocation = 3 [(buf.validate.field).required = true];
+  optional string description = 4;
+}
+
+message TargetAttributesRADAR {
+}
+
+message TargetAttributesCAMERA {
+}
+
+message TargetDirection {
+  optional double bearing = 1 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 360}];
+  optional double distance = 2 [(buf.validate.field).required = true, (buf.validate.field).double.gte = 0.0];
+  optional double elevation = 3 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 90}];
+}
+
+

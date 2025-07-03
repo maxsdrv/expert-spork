@@ -1,0 +1,13 @@
+# Ignore DevSpace cache and log folder
+.devspace/
+
+# Generated stuff
+go.work.sum
+
+# IDE profiles
+.idea
+.vscode
+
+# Vim
+*.swp
+*.swo

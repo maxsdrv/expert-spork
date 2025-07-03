@@ -1,0 +1,16 @@
+.git/
+.gitignore
+
+README.md
+
+go.work*
+
+#*/chart/
+.gitlab-ci.yml
+
+# Ignore DevSpace cache and log folder
+.devspace/
+devspace*.yaml
+
+*Dockerfile
+.dockerignore
