@@ -11,7 +11,7 @@ type ProxyError struct {
 }
 
 func (e *ProxyError) Error() string {
-	return fmt.Sprintf("proxy: %s: %v", e.Op, e.Err)
+	return fmt.Sprintf("target_provider: %s: %v", e.Op, e.Err)
 }
 
 var (

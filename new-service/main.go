@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"dds-provider/internal/services/target_provider"
 	"flag"
 	"net/http"
 
@@ -23,6 +22,7 @@ import (
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/common"
 	"dds-provider/internal/services/notifier"
+	"dds-provider/internal/services/target_provider"
 )
 
 func main() {
@@ -43,16 +43,17 @@ func main() {
 
 	svcCommon := common.New(ctx)
 	svcBackend := backend.New(ctx)
-	svcNotifier := notifier.New[*core.JammerInfoDynamic](ctx)
-	svcTargetProvider := target_provider.New(ctx, config.TargetProviderConnections)
+	svcJammerNotifier := notifier.New[*core.JammerInfoDynamic](ctx)
+	svcSensorNotifier := notifier.New[*core.SensorInfoDynamic](ctx)
+	svcTargetProvider := target_provider.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier)
 
-	if id, err := core.NewId("550e8400-e29b-41d4-a716-446655440000"); err == nil {
-		svcNotifier.Notify(ctx, notifier.TestJammerInfoDynamic(id))
-	} else {
-		panic(err)
-	}
+	//if id, err := core.NewId("550e8400-e29b-41d4-a716-446655440000"); err == nil {
+	//	svcNotifier.Notify(ctx, notifier.TestJammerInfoDynamic(id))
+	//} else {
+	//	panic(err)
+	//}
 
-	controllers := controllers.New(svcCommon, &svcBackend, svcNotifier, svcTargetProvider)
+	controllers := controllers.New(svcCommon, &svcBackend, svcJammerNotifier, svcSensorNotifier, svcTargetProvider)
 	handlers := handlers.New(controllers)
 	interceptors := connect.WithInterceptors(
 		middleware.NewLoggingInterceptor(),

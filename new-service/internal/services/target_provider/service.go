@@ -3,16 +3,17 @@ package target_provider
 import (
 	"bytes"
 	"context"
+	"dds-provider/internal/core"
+	"dds-provider/internal/services/notifier"
 	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/coder/websocket"
-	"github.com/opticoder/ctx-log/go/ctx_log"
-	"github.com/teivah/broadcast"
-
 	"dds-provider/internal/enums"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
+
+	"github.com/coder/websocket"
+	"github.com/opticoder/ctx-log/go/ctx_log"
 )
 
 var logging = ctx_log.GetLogger(nil)
@@ -34,20 +35,25 @@ const (
 )
 
 type Device struct {
-	device          *dss_target_service.DeviceAPIService
-	common          *dss_target_service.CommonAPIService
-	target          *dss_target_service.TargetAPIService
-	host            string
-	urlWs           string
-	sensorInfoRelay *broadcast.Relay[*dss_target_service.SensorInfo]
-	targetRelay     *broadcast.Relay[*dss_target_service.TargetData]
+	device         *dss_target_service.DeviceAPIService
+	common         *dss_target_service.CommonAPIService
+	target         *dss_target_service.TargetAPIService
+	host           string
+	urlWs          string
+	jammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic]
+	sensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic]
+	sensorMapper   *SensorDataMapper
 }
 
 type Service struct {
 	devices map[string]*Device
 }
 
-func New(ctx context.Context, connections []Connection) *Service {
+func New(ctx context.Context,
+	connections []Connection,
+	jammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic],
+	sensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic],
+) *Service {
 	devices := make(map[string]*Device)
 
 	for _, connection := range connections {
@@ -60,12 +66,13 @@ func New(ctx context.Context, connections []Connection) *Service {
 		}
 		apiClient := dss_target_service.NewAPIClient(deviceConfiguration)
 		devices[connection.Host] = &Device{
-			device:          apiClient.DeviceAPI,
-			common:          apiClient.CommonAPI,
-			target:          apiClient.TargetAPI,
-			host:            connection.Host,
-			sensorInfoRelay: broadcast.NewRelay[*dss_target_service.SensorInfo](),
-			targetRelay:     broadcast.NewRelay[*dss_target_service.TargetData](),
+			device:         apiClient.DeviceAPI,
+			common:         apiClient.CommonAPI,
+			target:         apiClient.TargetAPI,
+			host:           connection.Host,
+			jammerNotifier: jammerNotifier,
+			sensorNotifier: sensorNotifier,
+			sensorMapper:   NewSensorDataMapper(),
 		}
 
 		go devices[connection.Host].connect(ctx, connection.PortWs)
@@ -209,16 +216,25 @@ func (s *Device) processMessage(ctx context.Context, msgType string, dataRaw jso
 func (s *Device) processSensorInfo(ctx context.Context, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
-	var sensorInfo dss_target_service.SensorInfo
-
-	if err := json.Unmarshal(dataRaw, &sensorInfo); err != nil {
+	var sensor dss_target_service.SensorInfo
+	if err := json.Unmarshal(dataRaw, &sensor); err != nil {
 		logger.WithError(err).Error("Unmarshalling message failed")
 		return err
 	}
 
-	logger.Debugf("Sensor info: %+v", sensorInfo)
+	deviceId, err := core.NewId(sensor.Id)
+	if err != nil {
+		logger.WithError(err).Error("Failed to create device id")
+		return err
+	}
 
-	s.sensorInfoRelay.Broadcast(&sensorInfo)
+	sensorInfoDynamic, err := s.sensorMapper.ConvertToSensorInfoDynamic(ctx, dataRaw, deviceId)
+	if err != nil {
+		logger.WithError(err).Error("Sensor info dynamic response failed")
+		return err
+	}
+
+	s.sensorNotifier.Notify(ctx, sensorInfoDynamic)
 
 	return nil
 }
@@ -236,4 +252,12 @@ func (s *Device) processLicenseStatus(ctx context.Context, dataRaw json.RawMessa
 	logger.Debugf("License status is: %v %s", licenseStatus.Valid, licenseStatus.Description)
 
 	return nil
+}
+
+func (s *Service) GetSensorIds() []string {
+	hosts := make([]string, 0, len(s.devices))
+	for host := range s.devices {
+		hosts = append(hosts, host)
+	}
+	return hosts
 }

@@ -12,6 +12,7 @@ type Controllers struct {
 	svcCommon         *common.CommonService
 	svcBackend        *backend.BackendService
 	svcJammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic]
+	svcSensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic]
 	svcTargetProvider *target_provider.Service
 }
 
@@ -19,12 +20,14 @@ func New(
 	svcCommon *common.CommonService,
 	svcBackend *backend.BackendService,
 	svcNotifier *notifier.NotifierService[*core.JammerInfoDynamic],
+	svcSensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic],
 	svcTargetProvider *target_provider.Service,
 ) *Controllers {
 	return &Controllers{
 		svcCommon:         svcCommon,
 		svcBackend:        svcBackend,
 		svcJammerNotifier: svcNotifier,
+		svcSensorNotifier: svcSensorNotifier,
 		svcTargetProvider: svcTargetProvider,
 	}
 }
