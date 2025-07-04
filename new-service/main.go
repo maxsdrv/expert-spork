@@ -47,12 +47,6 @@ func main() {
 	svcSensorNotifier := notifier.New[*core.SensorInfoDynamic](ctx)
 	svcTargetProvider := target_provider.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier)
 
-	//if id, err := core.NewId("550e8400-e29b-41d4-a716-446655440000"); err == nil {
-	//	svcNotifier.Notify(ctx, notifier.TestJammerInfoDynamic(id))
-	//} else {
-	//	panic(err)
-	//}
-
 	controllers := controllers.New(svcCommon, &svcBackend, svcJammerNotifier, svcSensorNotifier, svcTargetProvider)
 	handlers := handlers.New(controllers)
 	interceptors := connect.WithInterceptors(

@@ -51,3 +51,18 @@ func (s *SensorInfoDynamic) ToAPI() *apiv1.SensorInfoDynamicResponse {
 		HwInfo:       s.HwInfo,
 	}
 }
+
+func ConvertSensorType(typeStr string) *apiv1.SensorType {
+	var sensorType apiv1.SensorType
+
+	switch typeStr {
+	case "RADAR":
+		sensorType = apiv1.SensorType_SENSOR_TYPE_RADAR
+	case "RFD":
+		sensorType = apiv1.SensorType_SENSOR_TYPE_RFD
+	case "CAMERA":
+		sensorType = apiv1.SensorType_SENSOR_TYPE_CAMERA
+	}
+
+	return &sensorType
+}

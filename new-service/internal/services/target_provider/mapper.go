@@ -17,27 +17,34 @@ func NewSensorDataMapper() *SensorDataMapper {
 func (m *SensorDataMapper) ConvertToSensorInfoDynamic(ctx context.Context, data json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
 	logger := logging.WithCtxFields(ctx)
 
-	logger.Debug("SensorInfoDynamicResponse")
-
-	var sensorData apiv1.SensorInfoDynamicResponse
+	var sensorData core.SensorInfoDynamic
 	if err := json.Unmarshal(data, &sensorData); err != nil {
-		logger.WithError(err).Error("SensorInfoDynamicResponse")
+		logger.WithError(err).Error("Convert to SensorInfoDynamicResponse")
 		return nil, err
 	}
 
 	sensorInfo := &core.SensorInfoDynamic{
 		DeviceId: deviceId,
+		Disabled: sensorData.Disabled,
+		State:    sensorData.State,
 	}
 
-	if position := m.convertPosition(); position != nil {
+	if position := m.convertPosition(sensorData.Position); position != nil {
 		sensorInfo.Position = position
 	}
 
 	return sensorInfo, nil
 }
 
-func (m *SensorDataMapper) convertPosition() *apiv1.GeoPosition {
-	//coordinate := &apiv1.GeoCoordinate{}
+func (m *SensorDataMapper) convertPosition(pos *apiv1.GeoPosition) *apiv1.GeoPosition {
+	coordinate := &apiv1.GeoCoordinate{
+		Latitude:  pos.Coordinate.Latitude,
+		Longitude: pos.Coordinate.Longitude,
+		Altitude:  pos.Coordinate.Altitude,
+	}
 
-	return &apiv1.GeoPosition{}
+	return &apiv1.GeoPosition{
+		Azimuth:    pos.Azimuth,
+		Coordinate: coordinate,
+	}
 }

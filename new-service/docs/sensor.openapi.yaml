@@ -1,0 +1,535 @@
+openapi: 3.1.0
+info:
+  title: api.v1
+paths:
+  /api.v1.SensorService/Sensors:
+    post:
+      tags:
+        - api.v1.SensorService
+      summary: Sensors
+      operationId: api.v1.SensorService.Sensors
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/google.protobuf.Empty'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorsResponse'
+  /api.v1.SensorService/SensorInfo:
+    post:
+      tags:
+        - api.v1.SensorService
+      summary: SensorInfo
+      operationId: api.v1.SensorService.SensorInfo
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.v1.SensorInfoRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorInfoResponse'
+  /api.v1.SensorService/SensorInfoDynamic:
+    post:
+      tags:
+        - api.v1.SensorService
+      summary: SensorInfoDynamic
+      operationId: api.v1.SensorService.SensorInfoDynamic
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/connect+json:
+            schema:
+              $ref: '#/components/schemas/api.v1.SensorInfoDynamicRequest'
+          application/connect+proto:
+            schema:
+              $ref: '#/components/schemas/api.v1.SensorInfoDynamicRequest'
+          application/grpc:
+            schema:
+              $ref: '#/components/schemas/api.v1.SensorInfoDynamicRequest'
+          application/grpc+proto:
+            schema:
+              $ref: '#/components/schemas/api.v1.SensorInfoDynamicRequest'
+          application/grpc+json:
+            schema:
+              $ref: '#/components/schemas/api.v1.SensorInfoDynamicRequest'
+          application/grpc-web:
+            schema:
+              $ref: '#/components/schemas/api.v1.SensorInfoDynamicRequest'
+          application/grpc-web+proto:
+            schema:
+              $ref: '#/components/schemas/api.v1.SensorInfoDynamicRequest'
+          application/grpc-web+json:
+            schema:
+              $ref: '#/components/schemas/api.v1.SensorInfoDynamicRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/connect+json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+            application/connect+proto:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+            application/grpc:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+            application/grpc+proto:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+            application/grpc+json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+            application/grpc-web:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+            application/grpc-web+proto:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+            application/grpc-web+json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/connect+json:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorInfoDynamicResponse'
+            application/connect+proto:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorInfoDynamicResponse'
+            application/grpc:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorInfoDynamicResponse'
+            application/grpc+proto:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorInfoDynamicResponse'
+            application/grpc+json:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorInfoDynamicResponse'
+            application/grpc-web:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorInfoDynamicResponse'
+            application/grpc-web+proto:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorInfoDynamicResponse'
+            application/grpc-web+json:
+              schema:
+                $ref: '#/components/schemas/api.v1.SensorInfoDynamicResponse'
+  /api.v1.SensorService/SetJammerMode:
+    post:
+      tags:
+        - api.v1.SensorService
+      summary: SetJammerMode
+      description: "Sets current jammer mode - automatic or manual\n MANUAL:\n - accepts requests via set_jammer_bands \n AUTO:\n - starts jamming of any DRONE object \n - jamming runs for \"timeout\" duration then stops and runs again if detection event is present\n - manual requests via set_jammer_bands take preference above automatic jamming (except for empty bands request which does not stop jamming in AUTO mode currently)\n Switching:\n - switching of modes is allowed at any moment\n - if mode changed while jamming runs it will run until timeout, then may run again according to the new mode"
+      operationId: api.v1.SensorService.SetJammerMode
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.v1.SetJammerModeRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/google.protobuf.Empty'
+components:
+  schemas:
+    api.v1.GeoPositionMode:
+      type: string
+      title: GeoPositionMode
+      enum:
+        - GEO_POSITION_MODE_AUTO
+        - GEO_POSITION_MODE_MANUAL
+        - GEO_POSITION_MODE_ALWAYS_MANUAL
+    api.v1.JammerMode:
+      type: string
+      title: JammerMode
+      enum:
+        - JAMMER_MODE_AUTO
+        - JAMMER_MODE_MANUAL
+    api.v1.SensorType:
+      type: string
+      title: SensorType
+      enum:
+        - SENSOR_TYPE_RFD
+        - SENSOR_TYPE_RADAR
+        - SENSOR_TYPE_CAMERA
+    api.v1.GeoCoordinate:
+      type: object
+      properties:
+        latitude:
+          exclusiveMaximum: 90
+          type: number
+          title: latitude
+          minimum: -90
+          format: double
+          description: Latitude in decimal degrees
+          nullable: true
+        longitude:
+          exclusiveMaximum: 180
+          type: number
+          title: longitude
+          minimum: -180
+          format: double
+          description: Longitude in decimal degrees
+          nullable: true
+        altitude:
+          type: number
+          title: altitude
+          format: double
+          description: Altitude in meters above sea level
+          nullable: true
+      title: GeoCoordinate
+      required:
+        - latitude
+        - longitude
+      additionalProperties: false
+    api.v1.GeoPosition:
+      type: object
+      properties:
+        azimuth:
+          exclusiveMaximum: 360
+          type: number
+          title: azimuth
+          format: double
+          nullable: true
+        coordinate:
+          title: coordinate
+          nullable: true
+          $ref: '#/components/schemas/api.v1.GeoCoordinate'
+      title: GeoPosition
+      required:
+        - azimuth
+        - coordinate
+      additionalProperties: false
+    api.v1.HwInfo:
+      type: object
+      properties:
+        temperature:
+          type: string
+          title: temperature
+          nullable: true
+        voltage:
+          type: string
+          title: voltage
+          nullable: true
+        current:
+          type: string
+          title: current
+          nullable: true
+      title: HwInfo
+      additionalProperties: false
+    api.v1.SensorInfoDynamicRequest:
+      type: object
+      properties:
+        sensorId:
+          type: string
+          title: sensor_id
+          format: uuid
+          nullable: true
+      title: SensorInfoDynamicRequest
+      required:
+        - sensorId
+      additionalProperties: false
+    api.v1.SensorInfoDynamicResponse:
+      type: object
+      properties:
+        disabled:
+          type: boolean
+          title: disabled
+          nullable: true
+        state:
+          type: string
+          title: state
+          nullable: true
+        position:
+          title: position
+          nullable: true
+          $ref: '#/components/schemas/api.v1.GeoPosition'
+        positionMode:
+          title: position_mode
+          nullable: true
+          $ref: '#/components/schemas/api.v1.GeoPositionMode'
+        workzone:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.v1.WorkzoneSector'
+          title: workzone
+        jammerMode:
+          title: jammer_mode
+          nullable: true
+          $ref: '#/components/schemas/api.v1.JammerMode'
+        jammerAutoTimeout:
+          type: integer
+          title: jammer_auto_timeout
+          format: int32
+          description: Jammer timeout in AUTO mode in seconds
+          nullable: true
+        hwInfo:
+          title: hw_info
+          nullable: true
+          $ref: '#/components/schemas/api.v1.HwInfo'
+      title: SensorInfoDynamicResponse
+      required:
+        - disabled
+        - state
+        - position
+        - positionMode
+        - workzone
+      additionalProperties: false
+    api.v1.SensorInfoRequest:
+      type: object
+      properties:
+        sensorId:
+          type: string
+          title: sensor_id
+          format: uuid
+          nullable: true
+      title: SensorInfoRequest
+      required:
+        - sensorId
+      additionalProperties: false
+    api.v1.SensorInfoResponse:
+      type: object
+      properties:
+        jammerIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          title: jammer_ids
+          description: List of connected jammer IDs
+        type:
+          title: type
+          nullable: true
+          $ref: '#/components/schemas/api.v1.SensorType'
+        model:
+          type: string
+          title: model
+          nullable: true
+        serial:
+          type: string
+          title: serial
+          nullable: true
+        swVersion:
+          type: string
+          title: sw_version
+          nullable: true
+      title: SensorInfoResponse
+      required:
+        - type
+        - model
+      additionalProperties: false
+    api.v1.SensorsResponse:
+      type: object
+      properties:
+        sensorIdList:
+          type: array
+          items:
+            type: string
+            format: uuid
+          title: sensor_id_list
+      title: SensorsResponse
+      required:
+        - sensorIdList
+      additionalProperties: false
+    api.v1.SetJammerModeRequest:
+      type: object
+      properties:
+        sensorId:
+          type: string
+          title: sensor_id
+          format: uuid
+          nullable: true
+        jammerMode:
+          title: jammer_mode
+          nullable: true
+          $ref: '#/components/schemas/api.v1.JammerMode'
+        timeout:
+          type: integer
+          title: timeout
+          format: int32
+          description: Timeout for AUTO mode in seconds, ignored for MANUAL
+          nullable: true
+      title: SetJammerModeRequest
+      required:
+        - sensorId
+        - jammerMode
+        - timeout
+      additionalProperties: false
+    api.v1.WorkzoneSector:
+      type: object
+      properties:
+        number:
+          type: integer
+          title: number
+          format: int32
+          nullable: true
+        distance:
+          type: number
+          title: distance
+          format: double
+          nullable: true
+        minAngle:
+          exclusiveMaximum: 360
+          type: number
+          title: min_angle
+          format: double
+          nullable: true
+        maxAngle:
+          exclusiveMaximum: 360
+          type: number
+          title: max_angle
+          format: double
+          nullable: true
+      title: WorkzoneSector
+      required:
+        - number
+        - distance
+        - minAngle
+        - maxAngle
+      additionalProperties: false
+    google.protobuf.Empty:
+      type: object
+      description: |-
+        A generic empty message that you can re-use to avoid defining duplicated
+         empty messages in your APIs. A typical example is to use it as the request
+         or the response type of an API method. For instance:
+
+             service Foo {
+               rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);
+             }
+    connect-protocol-version:
+      type: number
+      title: Connect-Protocol-Version
+      enum:
+        - 1
+      description: Define the version of the Connect protocol
+      const: 1
+    connect-timeout-header:
+      type: number
+      title: Connect-Timeout-Ms
+      description: Define the timeout, in ms
+    connect.error:
+      type: object
+      properties:
+        code:
+          type: string
+          examples:
+            - not_found
+          enum:
+            - canceled
+            - unknown
+            - invalid_argument
+            - deadline_exceeded
+            - not_found
+            - already_exists
+            - permission_denied
+            - resource_exhausted
+            - failed_precondition
+            - aborted
+            - out_of_range
+            - unimplemented
+            - internal
+            - unavailable
+            - data_loss
+            - unauthenticated
+          description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+        message:
+          type: string
+          description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+        detail:
+          $ref: '#/components/schemas/google.protobuf.Any'
+      title: Connect Error
+      additionalProperties: true
+      description: 'Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation'
+    google.protobuf.Any:
+      type: object
+      properties:
+        type:
+          type: string
+        value:
+          type: string
+          format: binary
+        debug:
+          type: object
+          additionalProperties: true
+      additionalProperties: true
+      description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+security: []
+tags:
+  - name: api.v1.SensorService

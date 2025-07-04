@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -17,14 +18,7 @@ func (s *Handlers) Sensors(
 
 	logger.Debugf("Request data: %s", req.Msg)
 
-	sensorIds, err := s.controllers.GetSensors(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return connect.NewResponse(&apiv1.SensorsResponse{
-		SensorIdList: sensorIds,
-	}), nil
+	return s.controllers.GetSensors(ctx)
 }
 
 func (s *Handlers) SensorInfo(
@@ -35,7 +29,12 @@ func (s *Handlers) SensorInfo(
 
 	logger.Debug("Request data: ", req.Msg)
 
-	return connect.NewResponse(&apiv1.SensorInfoResponse{}), nil
+	sensorId := req.Msg.GetSensorId()
+	if sensorId == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("sensor id is required"))
+	}
+
+	return s.controllers.GetSensorInfo(ctx, sensorId)
 }
 
 func (s *Handlers) SensorInfoDynamic(
@@ -47,7 +46,11 @@ func (s *Handlers) SensorInfoDynamic(
 
 	logger.Debug("Request data: ", req.Msg)
 
-	return nil
+	return s.controllers.SensorInfoDynamic(ctx, *req.Msg.SensorId,
+		func(sensor *apiv1.SensorInfoDynamicResponse) error {
+			return rep.Send(sensor)
+		},
+	)
 }
 
 func (s *Handlers) SetJammerMode(

@@ -1,0 +1,396 @@
+openapi: 3.1.0
+info:
+  title: api.v1
+paths:
+  /api.v1.CommonService/Settings:
+    post:
+      tags:
+        - api.v1.CommonService
+      summary: Settings
+      operationId: api.v1.CommonService.Settings
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/google.protobuf.Empty'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.v1.SettingsResponse'
+  /api.v1.CommonService/SetSettings:
+    post:
+      tags:
+        - api.v1.CommonService
+      summary: SetSettings
+      operationId: api.v1.CommonService.SetSettings
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.v1.SetSettingsRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/google.protobuf.Empty'
+  /api.v1.CommonService/LicenseStatus:
+    post:
+      tags:
+        - api.v1.CommonService
+      summary: LicenseStatus
+      operationId: api.v1.CommonService.LicenseStatus
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/google.protobuf.Empty'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.v1.LicenseStatusResponse'
+  /api.v1.CommonService/UploadLicense:
+    post:
+      tags:
+        - api.v1.CommonService
+      summary: UploadLicense
+      operationId: api.v1.CommonService.UploadLicense
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/api.v1.UploadLicenseRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/google.protobuf.Empty'
+components:
+  schemas:
+    api.v1.GeoPositionMode:
+      type: string
+      title: GeoPositionMode
+      enum:
+        - GEO_POSITION_MODE_AUTO
+        - GEO_POSITION_MODE_MANUAL
+        - GEO_POSITION_MODE_ALWAYS_MANUAL
+    api.v1.DeviceIdMapping:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          title: device_id
+          format: uuid
+          nullable: true
+        fingerprint:
+          type: string
+          title: fingerprint
+          nullable: true
+        class:
+          type: string
+          title: class
+          nullable: true
+      title: DeviceIdMapping
+      required:
+        - deviceId
+        - fingerprint
+        - class
+      additionalProperties: false
+    api.v1.DeviceSettings:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          title: device_id
+          format: uuid
+          nullable: true
+        disabled:
+          type: boolean
+          title: disabled
+          nullable: true
+        positionMode:
+          title: position_mode
+          nullable: true
+          $ref: '#/components/schemas/api.v1.GeoPositionMode'
+        position:
+          title: position
+          nullable: true
+          $ref: '#/components/schemas/api.v1.GeoPosition'
+      title: DeviceSettings
+      required:
+        - deviceId
+        - disabled
+        - positionMode
+        - position
+      additionalProperties: false
+    api.v1.GeoCoordinate:
+      type: object
+      properties:
+        latitude:
+          exclusiveMaximum: 90
+          type: number
+          title: latitude
+          minimum: -90
+          format: double
+          description: Latitude in decimal degrees
+          nullable: true
+        longitude:
+          exclusiveMaximum: 180
+          type: number
+          title: longitude
+          minimum: -180
+          format: double
+          description: Longitude in decimal degrees
+          nullable: true
+        altitude:
+          type: number
+          title: altitude
+          format: double
+          description: Altitude in meters above sea level
+          nullable: true
+      title: GeoCoordinate
+      required:
+        - latitude
+        - longitude
+      additionalProperties: false
+    api.v1.GeoPosition:
+      type: object
+      properties:
+        azimuth:
+          exclusiveMaximum: 360
+          type: number
+          title: azimuth
+          format: double
+          nullable: true
+        coordinate:
+          title: coordinate
+          nullable: true
+          $ref: '#/components/schemas/api.v1.GeoCoordinate'
+      title: GeoPosition
+      required:
+        - azimuth
+        - coordinate
+      additionalProperties: false
+    api.v1.LicenseStatusResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+          title: valid
+          nullable: true
+        description:
+          type: string
+          title: description
+          nullable: true
+        expiryDate:
+          type: string
+          title: expiry_date
+          nullable: true
+        signature:
+          type: string
+          title: signature
+          nullable: true
+      title: LicenseStatusResponse
+      required:
+        - valid
+        - description
+        - expiryDate
+        - signature
+      additionalProperties: false
+    api.v1.SetSettingsRequest:
+      type: object
+      properties:
+        settings:
+          title: settings
+          nullable: true
+          $ref: '#/components/schemas/api.v1.Settings'
+      title: SetSettingsRequest
+      required:
+        - settings
+      additionalProperties: false
+    api.v1.Settings:
+      type: object
+      properties:
+        deviceIdMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.v1.DeviceIdMapping'
+          title: device_id_mapping
+        devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.v1.DeviceSettings'
+          title: devices
+      title: Settings
+      required:
+        - devices
+      additionalProperties: false
+    api.v1.SettingsResponse:
+      type: object
+      properties:
+        settings:
+          title: settings
+          nullable: true
+          $ref: '#/components/schemas/api.v1.Settings'
+      title: SettingsResponse
+      required:
+        - settings
+      additionalProperties: false
+    api.v1.UploadLicenseRequest:
+      type: object
+      properties:
+        licenseData:
+          type: string
+          title: license_data
+          nullable: true
+      title: UploadLicenseRequest
+      required:
+        - licenseData
+      additionalProperties: false
+    google.protobuf.Empty:
+      type: object
+      description: |-
+        A generic empty message that you can re-use to avoid defining duplicated
+         empty messages in your APIs. A typical example is to use it as the request
+         or the response type of an API method. For instance:
+
+             service Foo {
+               rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);
+             }
+    connect-protocol-version:
+      type: number
+      title: Connect-Protocol-Version
+      enum:
+        - 1
+      description: Define the version of the Connect protocol
+      const: 1
+    connect-timeout-header:
+      type: number
+      title: Connect-Timeout-Ms
+      description: Define the timeout, in ms
+    connect.error:
+      type: object
+      properties:
+        code:
+          type: string
+          examples:
+            - not_found
+          enum:
+            - canceled
+            - unknown
+            - invalid_argument
+            - deadline_exceeded
+            - not_found
+            - already_exists
+            - permission_denied
+            - resource_exhausted
+            - failed_precondition
+            - aborted
+            - out_of_range
+            - unimplemented
+            - internal
+            - unavailable
+            - data_loss
+            - unauthenticated
+          description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+        message:
+          type: string
+          description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+        detail:
+          $ref: '#/components/schemas/google.protobuf.Any'
+      title: Connect Error
+      additionalProperties: true
+      description: 'Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation'
+    google.protobuf.Any:
+      type: object
+      properties:
+        type:
+          type: string
+        value:
+          type: string
+          format: binary
+        debug:
+          type: object
+          additionalProperties: true
+      additionalProperties: true
+      description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+security: []
+tags:
+  - name: api.v1.CommonService

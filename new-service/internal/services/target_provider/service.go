@@ -1,7 +1,6 @@
 package target_provider
 
 import (
-	"bytes"
 	"context"
 	"dds-provider/internal/core"
 	"dds-provider/internal/services/notifier"
@@ -35,14 +34,13 @@ const (
 )
 
 type Device struct {
-	device         *dss_target_service.DeviceAPIService
 	common         *dss_target_service.CommonAPIService
-	target         *dss_target_service.TargetAPIService
 	host           string
 	urlWs          string
 	jammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic]
 	sensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic]
 	sensorMapper   *SensorDataMapper
+	sensorInfoMap  map[string]*core.SensorInfo
 }
 
 type Service struct {
@@ -66,13 +64,12 @@ func New(ctx context.Context,
 		}
 		apiClient := dss_target_service.NewAPIClient(deviceConfiguration)
 		devices[connection.Host] = &Device{
-			device:         apiClient.DeviceAPI,
 			common:         apiClient.CommonAPI,
-			target:         apiClient.TargetAPI,
 			host:           connection.Host,
 			jammerNotifier: jammerNotifier,
 			sensorNotifier: sensorNotifier,
 			sensorMapper:   NewSensorDataMapper(),
+			sensorInfoMap:  make(map[string]*core.SensorInfo),
 		}
 
 		go devices[connection.Host].connect(ctx, connection.PortWs)
@@ -141,11 +138,6 @@ func (s *Device) connect(ctx context.Context, portWs int) {
 		break
 	}
 
-	_, err := s.GetSettings(ctx)
-	if err != nil {
-		logger.WithError(err).Error("Failed to get settings")
-	}
-
 	s.urlWs = fmt.Sprintf("ws://%s:%d", s.host, portWs)
 	s.startConnection(ctx)
 }
@@ -159,12 +151,6 @@ func (s *Device) updateLoop(ctx context.Context, conn *websocket.Conn) {
 			logger.WithError(err).Warn("Failed to read data from DDS target service")
 			break
 		}
-
-		data = bytes.ReplaceAll(
-			data,
-			[]byte(`"jammer_mode":"UNDEFINED"`),
-			[]byte(`"jammer_mode":"AUTO"`),
-		)
 
 		var fields map[string]json.RawMessage
 		if err = json.Unmarshal(data, &fields); err != nil {
@@ -228,6 +214,15 @@ func (s *Device) processSensorInfo(ctx context.Context, dataRaw json.RawMessage)
 		return err
 	}
 
+	s.sensorInfoMap[sensor.Id] = &core.SensorInfo{
+		DeviceId:  deviceId,
+		Type:      core.ConvertSensorType(string(sensor.Type)),
+		Model:     &sensor.Model,
+		Serial:    sensor.Serial,
+		SwVersion: sensor.SwVersion,
+		JammerIds: sensor.JammerIds,
+	}
+
 	sensorInfoDynamic, err := s.sensorMapper.ConvertToSensorInfoDynamic(ctx, dataRaw, deviceId)
 	if err != nil {
 		logger.WithError(err).Error("Sensor info dynamic response failed")
@@ -254,10 +249,11 @@ func (s *Device) processLicenseStatus(ctx context.Context, dataRaw json.RawMessa
 	return nil
 }
 
-func (s *Service) GetSensorIds() []string {
-	hosts := make([]string, 0, len(s.devices))
-	for host := range s.devices {
-		hosts = append(hosts, host)
+func (s *Service) GetSensorInfo(sensorId string) (*core.SensorInfo, error) {
+	for _, device := range s.devices {
+		if info, ok := device.sensorInfoMap[sensorId]; ok {
+			return info, nil
+		}
 	}
-	return hosts
+	return nil, nil
 }

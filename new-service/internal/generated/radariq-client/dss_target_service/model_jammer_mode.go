@@ -22,12 +22,14 @@ type JammerMode string
 const (
 	JAMMERMODE_AUTO JammerMode = "AUTO"
 	JAMMERMODE_MANUAL JammerMode = "MANUAL"
+	JAMMERMODE_UNDEFINED JammerMode = "UNDEFINED"
 )
 
 // All allowed values of JammerMode enum
 var AllowedJammerModeEnumValues = []JammerMode{
 	"AUTO",
 	"MANUAL",
+	"UNDEFINED",
 }
 
 func (v *JammerMode) UnmarshalJSON(src []byte) error {

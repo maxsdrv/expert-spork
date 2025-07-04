@@ -918,7 +918,7 @@ components:
 
     jammer_mode:
       type: string
-      enum: [AUTO, MANUAL]
+      enum: [AUTO, MANUAL, UNDEFINED]
 
     jammer_timeout_status:
       description: The field is absent when the timer is stopped
