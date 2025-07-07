@@ -1,0 +1,11 @@
+option(WITH_ALIA OFF)
+option(WITH_RADAR_IQ OFF)
+option(WITH_REST OFF)
+option(WITH_SKYCOPE OFF)
+option(WITH_TAMERLAN OFF)
+
+add_item(dss-common dss-common)
+add_item(dss-core dss-core)
+add_item(dss-backend dss-backend)
+add_item(dss-target-service dss-target-service)
+add_item(generated generated)

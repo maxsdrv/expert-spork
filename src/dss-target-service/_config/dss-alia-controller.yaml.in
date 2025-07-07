@@ -1,0 +1,42 @@
+---
+controllers:
+  - moxa:
+    tcp_connection:
+      host: 95.161.169.86
+      port: 502
+    device_id: 1
+    coils:
+      - coil:
+          sign: "GPS"
+          address: 0x0000
+      - coil:
+          sign: "5.8G"
+          address: 0x0100
+      - coil:
+          sign: "5.3G"
+          address: 0x0200
+      - coil:
+          sign: "2.4G"
+          address: 0x0300
+      - coil:
+          sign: "1.4G"
+          address: 0x0400
+      - coil:
+          sign: "1.2G"
+          address: 0x0500
+  - moxa:
+    tcp_connection:
+      host: 95.161.169.87
+      port: 502
+    device_id: 1
+    coils:
+      - coil:
+          sign: "900M"
+          address: 0x0000
+      - coil:
+          sign: "433M"
+          address: 0x0100
+      - coil:
+          sign: "315M"
+          address: 0x0200
+...
