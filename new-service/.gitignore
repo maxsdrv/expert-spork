@@ -11,3 +11,6 @@ go.work.sum
 # Vim
 *.swp
 *.swo
+
+.DS_Store
+internal/.DS_Store

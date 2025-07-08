@@ -1,4 +1,4 @@
-package bridge
+package proxy
 
 import (
 	"context"
@@ -15,12 +15,18 @@ func NewSensorDataMapper() *SensorDataMapper {
 	return &SensorDataMapper{}
 }
 
-func (m *SensorDataMapper) ConvertToSensorInfoDynamic(ctx context.Context, data json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
+func (m *SensorDataMapper) ConvertToSensorInfoDynamic(ctx context.Context, data json.RawMessage) (*core.SensorInfoDynamic, error) {
 	logger := logging.WithCtxFields(ctx)
 
 	var sensorData dss_target_service.SensorInfo
 	if err := json.Unmarshal(data, &sensorData); err != nil {
 		logger.WithError(err).Error("Convert to SensorInfoDynamicResponse")
+		return nil, err
+	}
+
+	deviceId, err := core.NewId(sensorData.Id)
+	if err != nil {
+		logger.WithError(err).Error("Create DeviceId")
 		return nil, err
 	}
 
@@ -40,6 +46,10 @@ func (m *SensorDataMapper) ConvertToSensorInfoDynamic(ctx context.Context, data 
 
 	if workZone := m.convertWorkZone(sensorData.Workzone); workZone != nil {
 		sensorInfo.Workzone = workZone
+	}
+
+	if hwInfo := m.convertHwInfo(sensorData.HwInfo); hwInfo != nil {
+		sensorInfo.HwInfo = hwInfo
 	}
 
 	return sensorInfo, nil
@@ -97,7 +107,7 @@ func (m *SensorDataMapper) convertWorkZone(dssWorkZone []dss_target_service.Work
 	return workZones
 }
 
-func (m *SensorDataMapper) convertHwInfo(dssHwInfo dss_target_service.HwInfo) *apiv1.HwInfo {
+func (m *SensorDataMapper) convertHwInfo(dssHwInfo *dss_target_service.HwInfo) *apiv1.HwInfo {
 	hwInfo := &apiv1.HwInfo{
 		Temperature: dssHwInfo.Temperature,
 		Voltage:     dssHwInfo.Voltage,

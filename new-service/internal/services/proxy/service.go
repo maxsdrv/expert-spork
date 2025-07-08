@@ -1,4 +1,4 @@
-package bridge
+package proxy
 
 import (
 	"context"
@@ -188,69 +188,15 @@ func (s *Device) updateLoop(ctx context.Context, conn *websocket.Conn) {
 func (s *Device) processMessage(ctx context.Context, msgType string, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
-	if err := s.updateSensorInfo(ctx, dataRaw); err != nil {
-		logger.WithError(err).Error("Failed to update Sensor info")
-		return err
-	}
-
 	switch msgType {
 	case msgTypeSensorInfo:
-		return s.sensorDynamicUpdate(ctx, dataRaw)
+		return s.processSensorInfo(ctx, dataRaw)
 	case msgTypeLicenseStatus:
 		return s.licenseStatusUpdate(ctx, dataRaw)
 	default:
 		logger.Tracef("Unknown message type: %s", msgType)
 		return nil
 	}
-}
-
-func (s *Device) updateSensorInfo(ctx context.Context, dataRaw json.RawMessage) error {
-	logger := logging.WithCtxFields(ctx)
-
-	var sensor dss_target_service.SensorInfo
-	if err := json.Unmarshal(dataRaw, &sensor); err != nil {
-		logger.WithError(err).Error("Unmarshalling message failed")
-		return err
-	}
-
-	if _, exists := s.sensorInfoMap[sensor.Id]; !exists {
-		deviceId, err := core.NewId(sensor.Id)
-		if err != nil {
-			logger.WithError(err).Error("Failed to create device id")
-			return err
-		}
-		s.sensorInfoMap[sensor.Id] = &core.SensorInfo{
-			DeviceId:  deviceId,
-			Type:      core.ConvertSensorType(string(sensor.Type)),
-			Model:     &sensor.Model,
-			Serial:    sensor.Serial,
-			SwVersion: sensor.SwVersion,
-			JammerIds: sensor.JammerIds,
-		}
-
-	}
-
-	logger.Debugf("Successfully updated sensor info")
-	return nil
-}
-
-func (s *Device) sensorDynamicUpdate(ctx context.Context, dataRaw json.RawMessage) error {
-	logger := logging.WithCtxFields(ctx)
-
-	deviceId, err := s.extractSensorIdFromSensorInfo(dataRaw)
-	if err != nil {
-		logger.WithError(err).Error("Failed to extract device id")
-		return err
-	}
-	sensorInfoDynamic, err := s.sensorMapper.ConvertToSensorInfoDynamic(ctx, dataRaw, deviceId)
-	if err != nil {
-		logger.WithError(err).Error("Sensor info dynamic response failed")
-		return err
-	}
-
-	s.sensorNotifier.Notify(ctx, sensorInfoDynamic)
-
-	return nil
 }
 
 func (s *Device) licenseStatusUpdate(ctx context.Context, dataRaw json.RawMessage) error {
@@ -291,20 +237,4 @@ func (s *Service) GetSensorIds() []string {
 		}
 	}
 	return ids
-}
-
-func (s *Device) extractSensorIdFromSensorInfo(dataRaw json.RawMessage) (core.DeviceId, error) {
-	var sensorData struct {
-		Id string `json:"id"`
-	}
-
-	if err := json.Unmarshal(dataRaw, &sensorData); err != nil {
-		return nil, err
-	}
-
-	deviceId, err := core.NewId(sensorData.Id)
-	if err != nil {
-		return nil, err
-	}
-	return deviceId, nil
 }

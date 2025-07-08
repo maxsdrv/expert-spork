@@ -13,10 +13,10 @@ func (j *ProxyJammer) SetJammerBands(bands core.JammerBands, duration int32) err
 	if 0 == duration {
 		// suppose local library error happened
 		err := errors.New("local error")
-		return fmt.Errorf("bridge: %v", err)
+		return fmt.Errorf("proxy: %v", err)
 	}
 	if 1 == duration {
-		//suppose bridge operation related network error happened
+		//suppose proxy operation related network error happened
 		return &ProxyError{Op: "websocket reply", Err: errors.New("timed out")}
 	}
 
