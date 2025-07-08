@@ -188,18 +188,23 @@ func (s *Device) updateLoop(ctx context.Context, conn *websocket.Conn) {
 func (s *Device) processMessage(ctx context.Context, msgType string, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
+	if err := s.updateSensorInfo(ctx, dataRaw); err != nil {
+		logger.WithError(err).Error("Failed to update Sensor info")
+		return err
+	}
+
 	switch msgType {
 	case msgTypeSensorInfo:
-		return s.processSensorInfo(ctx, dataRaw)
+		return s.sensorDynamicUpdate(ctx, dataRaw)
 	case msgTypeLicenseStatus:
-		return s.processLicenseStatus(ctx, dataRaw)
+		return s.licenseStatusUpdate(ctx, dataRaw)
 	default:
 		logger.Tracef("Unknown message type: %s", msgType)
 		return nil
 	}
 }
 
-func (s *Device) processSensorInfo(ctx context.Context, dataRaw json.RawMessage) error {
+func (s *Device) updateSensorInfo(ctx context.Context, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
 	var sensor dss_target_service.SensorInfo
@@ -208,21 +213,35 @@ func (s *Device) processSensorInfo(ctx context.Context, dataRaw json.RawMessage)
 		return err
 	}
 
-	deviceId, err := core.NewId(sensor.Id)
+	if _, exists := s.sensorInfoMap[sensor.Id]; !exists {
+		deviceId, err := core.NewId(sensor.Id)
+		if err != nil {
+			logger.WithError(err).Error("Failed to create device id")
+			return err
+		}
+		s.sensorInfoMap[sensor.Id] = &core.SensorInfo{
+			DeviceId:  deviceId,
+			Type:      core.ConvertSensorType(string(sensor.Type)),
+			Model:     &sensor.Model,
+			Serial:    sensor.Serial,
+			SwVersion: sensor.SwVersion,
+			JammerIds: sensor.JammerIds,
+		}
+
+	}
+
+	logger.Debugf("Successfully updated sensor info")
+	return nil
+}
+
+func (s *Device) sensorDynamicUpdate(ctx context.Context, dataRaw json.RawMessage) error {
+	logger := logging.WithCtxFields(ctx)
+
+	deviceId, err := s.extractSensorIdFromSensorInfo(dataRaw)
 	if err != nil {
-		logger.WithError(err).Error("Failed to create device id")
+		logger.WithError(err).Error("Failed to extract device id")
 		return err
 	}
-
-	s.sensorInfoMap[sensor.Id] = &core.SensorInfo{
-		DeviceId:  deviceId,
-		Type:      core.ConvertSensorType(string(sensor.Type)),
-		Model:     &sensor.Model,
-		Serial:    sensor.Serial,
-		SwVersion: sensor.SwVersion,
-		JammerIds: sensor.JammerIds,
-	}
-
 	sensorInfoDynamic, err := s.sensorMapper.ConvertToSensorInfoDynamic(ctx, dataRaw, deviceId)
 	if err != nil {
 		logger.WithError(err).Error("Sensor info dynamic response failed")
@@ -234,7 +253,7 @@ func (s *Device) processSensorInfo(ctx context.Context, dataRaw json.RawMessage)
 	return nil
 }
 
-func (s *Device) processLicenseStatus(ctx context.Context, dataRaw json.RawMessage) error {
+func (s *Device) licenseStatusUpdate(ctx context.Context, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
 	var licenseStatus dss_target_service.LicenseStatus
@@ -246,14 +265,46 @@ func (s *Device) processLicenseStatus(ctx context.Context, dataRaw json.RawMessa
 
 	logger.Debugf("License status is: %v %s", licenseStatus.Valid, licenseStatus.Description)
 
+	// TODO: Implement logic for sending license status
+
 	return nil
 }
 
 func (s *Service) GetSensorInfo(sensorId string) (*core.SensorInfo, error) {
+	if len(s.devices) == 0 {
+		return nil, fmt.Errorf("no devices found")
+	}
+
 	for _, device := range s.devices {
 		if info, ok := device.sensorInfoMap[sensorId]; ok {
 			return info, nil
 		}
 	}
-	return nil, nil
+	return nil, fmt.Errorf("sensor info not found")
+}
+
+func (s *Service) GetSensorIds() []string {
+	var ids []string
+	for _, device := range s.devices {
+		for id := range device.sensorInfoMap {
+			ids = append(ids, id)
+		}
+	}
+	return ids
+}
+
+func (s *Device) extractSensorIdFromSensorInfo(dataRaw json.RawMessage) (core.DeviceId, error) {
+	var sensorData struct {
+		Id string `json:"id"`
+	}
+
+	if err := json.Unmarshal(dataRaw, &sensorData); err != nil {
+		return nil, err
+	}
+
+	deviceId, err := core.NewId(sensorData.Id)
+	if err != nil {
+		return nil, err
+	}
+	return deviceId, nil
 }

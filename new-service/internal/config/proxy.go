@@ -13,16 +13,16 @@ const (
 	DefaultPortWs           = 19081
 )
 
-var targetProvider struct {
-	devices []string `envSeparator:" "`
+var Proxy struct {
+	Devices []string `envSeparator:" "`
 }
 
 var TargetProviderConnections []bridge.Connection
 
 func init() {
-	load(&targetProvider)
+	load(&Proxy)
 
-	for _, device := range targetProvider.devices {
+	for _, device := range Proxy.Devices {
 		connection := parseConnection(device)
 		TargetProviderConnections = append(TargetProviderConnections, connection)
 	}

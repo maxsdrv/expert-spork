@@ -47,7 +47,7 @@ func main() {
 	svcSensorNotifier := notifier.New[*core.SensorInfoDynamic](ctx)
 	svcTargetProvider := bridge.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier)
 
-	controllers := controllers.New(svcCommon, &svcBackend, svcJammerNotifier, svcSensorNotifier, svcTargetProvider)
+	controllers := controllers.New(svcCommon, svcBackend, svcJammerNotifier, svcSensorNotifier, svcTargetProvider)
 	handlers := handlers.New(controllers)
 	interceptors := connect.WithInterceptors(
 		middleware.NewLoggingInterceptor(),

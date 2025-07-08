@@ -34,7 +34,12 @@ func (s *Handlers) SensorInfo(
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("sensor id is required"))
 	}
 
-	return s.controllers.GetSensorInfo(ctx, sensorId)
+	info, err := s.controllers.GetSensorInfo(ctx, sensorId)
+	if err != nil {
+		return nil, err
+	}
+
+	return info, nil
 }
 
 func (s *Handlers) SensorInfoDynamic(

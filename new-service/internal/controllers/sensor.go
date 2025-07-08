@@ -16,10 +16,7 @@ func (s *Controllers) GetSensors(
 
 	logger.Debug("Get sensors request")
 
-	ids := make([]string, 0, len(s.svcSensorNotifier.Messages()))
-	for id := range s.svcSensorNotifier.Messages() {
-		ids = append(ids, id)
-	}
+	ids := s.svcTargetProvider.GetSensorIds()
 
 	return connect.NewResponse(&apiv1.SensorsResponse{
 		SensorIdList: ids,

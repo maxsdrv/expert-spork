@@ -10,7 +10,7 @@ import (
 
 type Controllers struct {
 	svcCommon         *common.CommonService
-	svcBackend        *backend.BackendService
+	svcBackend        backend.BackendService
 	svcJammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic]
 	svcSensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic]
 	svcTargetProvider *bridge.Service
@@ -18,7 +18,7 @@ type Controllers struct {
 
 func New(
 	svcCommon *common.CommonService,
-	svcBackend *backend.BackendService,
+	svcBackend backend.BackendService,
 	svcNotifier *notifier.NotifierService[*core.JammerInfoDynamic],
 	svcSensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic],
 	svcTargetProvider *bridge.Service,

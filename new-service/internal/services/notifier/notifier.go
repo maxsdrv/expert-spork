@@ -124,11 +124,3 @@ func (s *NotifierService[T]) Stream(ctx context.Context, deviceId core.DeviceId)
 
 	return nil, nil, errors.New("device not found")
 }
-
-func (s *NotifierService[T]) Messages() map[string]T {
-	cp := make(map[string]T, len(s.messages))
-	for k, v := range s.messages {
-		cp[k] = v
-	}
-	return cp
-}
