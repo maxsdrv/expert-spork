@@ -66,5 +66,21 @@ func (s *Handlers) SetJammerMode(
 
 	logger.Debug("Request data: ", req.Msg)
 
+	sensorId := req.Msg.GetSensorId()
+	if sensorId == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("sensor id is required"))
+	}
+
+	jammerMode := req.Msg.GetJammerMode()
+	timeout := req.Msg.GetTimeout()
+
+	err := s.controllers.SetJammerMode(ctx, sensorId, jammerMode, timeout)
+	if err != nil {
+		logger.WithError(err).Error("Set jammer mode failed")
+		return nil, err
+	}
+
+	logger.Infof("Successfully set jammer mode for sensor %s to %s", sensorId, jammerMode)
+
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }

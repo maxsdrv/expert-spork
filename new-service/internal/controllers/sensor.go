@@ -73,3 +73,29 @@ func (s *Controllers) SensorInfoDynamic(
 	}
 
 }
+
+func (s *Controllers) SetJammerMode(ctx context.Context,
+	sensorId string,
+	jammerMode apiv1.JammerMode,
+	timeout int32,
+) error {
+	logger := logging.WithCtxFields(ctx)
+
+	logger.Debugf("Set jammer mode for sensor %s to %s", sensorId, jammerMode)
+
+	sensorInfo, err := s.svcTargetProvider.GetSensorInfo(sensorId)
+	if err != nil {
+		logger.WithError(err).Errorf("Get sensor info error: %v", err)
+		return connect.NewError(connect.CodeInternal, err)
+	}
+
+	deviceId := sensorInfo.DeviceId
+
+	err = s.svcTargetProvider.SetJammerMode(ctx, deviceId, jammerMode, timeout)
+	if err != nil {
+		logger.WithError(err).Errorf("Set sensor info error: %v", err)
+		return connect.NewError(connect.CodeInternal, err)
+	}
+
+	return nil
+}

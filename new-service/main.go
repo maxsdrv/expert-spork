@@ -17,12 +17,12 @@ import (
 	"dds-provider/internal/controllers"
 
 	"dds-provider/internal/core"
+	"dds-provider/internal/devices/bulat/proxy"
 	"dds-provider/internal/generated/api/proto/apiv1connect"
 	"dds-provider/internal/handlers"
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/common"
 	"dds-provider/internal/services/notifier"
-	"dds-provider/internal/services/proxy"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"dds-provider/internal/services/proxy"
+	"dds-provider/internal/devices/bulat/proxy"
 )
 
 const (
