@@ -103,25 +103,25 @@ func (TargetClass) EnumDescriptor() ([]byte, []int) {
 type AlarmLevel int32
 
 const (
-	AlarmLevel_ALARM_LEVEL_NONE     AlarmLevel = 0
-	AlarmLevel_ALARM_LEVEL_MEDIUM   AlarmLevel = 1
-	AlarmLevel_ALARM_LEVEL_HIGH     AlarmLevel = 2
-	AlarmLevel_ALARM_LEVEL_CRITICAL AlarmLevel = 3
+	AlarmLevel_ALARM_NONE     AlarmLevel = 0
+	AlarmLevel_ALARM_MEDIUM   AlarmLevel = 1
+	AlarmLevel_ALARM_HIGH     AlarmLevel = 2
+	AlarmLevel_ALARM_CRITICAL AlarmLevel = 3
 )
 
 // Enum value maps for AlarmLevel.
 var (
 	AlarmLevel_name = map[int32]string{
-		0: "ALARM_LEVEL_NONE",
-		1: "ALARM_LEVEL_MEDIUM",
-		2: "ALARM_LEVEL_HIGH",
-		3: "ALARM_LEVEL_CRITICAL",
+		0: "ALARM_NONE",
+		1: "ALARM_MEDIUM",
+		2: "ALARM_HIGH",
+		3: "ALARM_CRITICAL",
 	}
 	AlarmLevel_value = map[string]int32{
-		"ALARM_LEVEL_NONE":     0,
-		"ALARM_LEVEL_MEDIUM":   1,
-		"ALARM_LEVEL_HIGH":     2,
-		"ALARM_LEVEL_CRITICAL": 3,
+		"ALARM_NONE":     0,
+		"ALARM_MEDIUM":   1,
+		"ALARM_HIGH":     2,
+		"ALARM_CRITICAL": 3,
 	}
 )
 
@@ -492,7 +492,7 @@ func (x *AlarmStatus) GetLevel() AlarmLevel {
 	if x != nil && x.Level != nil {
 		return *x.Level
 	}
-	return AlarmLevel_ALARM_LEVEL_NONE
+	return AlarmLevel_ALARM_NONE
 }
 
 func (x *AlarmStatus) GetScore() float64 {
@@ -796,13 +796,15 @@ const file_target_proto_rawDesc = "" +
 	"\vTARGET_BOAT\x10\t\x12\x0f\n" +
 	"\vTARGET_SHIP\x10\n" +
 	"\x12\x19\n" +
-	"\x15TARGET_REMOTE_CONSOLE\x10\v*j\n" +
+	"\x15TARGET_REMOTE_CONSOLE\x10\v*R\n" +
 	"\n" +
-	"AlarmLevel\x12\x14\n" +
-	"\x10ALARM_LEVEL_NONE\x10\x00\x12\x16\n" +
-	"\x12ALARM_LEVEL_MEDIUM\x10\x01\x12\x14\n" +
-	"\x10ALARM_LEVEL_HIGH\x10\x02\x12\x18\n" +
-	"\x14ALARM_LEVEL_CRITICAL\x10\x032O\n" +
+	"AlarmLevel\x12\x0e\n" +
+	"\n" +
+	"ALARM_NONE\x10\x00\x12\x10\n" +
+	"\fALARM_MEDIUM\x10\x01\x12\x0e\n" +
+	"\n" +
+	"ALARM_HIGH\x10\x02\x12\x12\n" +
+	"\x0eALARM_CRITICAL\x10\x032O\n" +
 	"\rTargetService\x12>\n" +
 	"\aTargets\x12\x16.google.protobuf.Empty\x1a\x17.api.v1.TargetsResponse\"\x000\x01B\x83\x01\n" +
 	"\n" +

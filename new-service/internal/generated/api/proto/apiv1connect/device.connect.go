@@ -37,9 +37,6 @@ const (
 	// DeviceServiceSetDisabledProcedure is the fully-qualified name of the DeviceService's SetDisabled
 	// RPC.
 	DeviceServiceSetDisabledProcedure = "/api.v1.DeviceService/SetDisabled"
-	// DeviceServicePositionModeProcedure is the fully-qualified name of the DeviceService's
-	// PositionMode RPC.
-	DeviceServicePositionModeProcedure = "/api.v1.DeviceService/PositionMode"
 	// DeviceServiceSetPositionModeProcedure is the fully-qualified name of the DeviceService's
 	// SetPositionMode RPC.
 	DeviceServiceSetPositionModeProcedure = "/api.v1.DeviceService/SetPositionMode"
@@ -51,7 +48,6 @@ const (
 // DeviceServiceClient is a client for the api.v1.DeviceService service.
 type DeviceServiceClient interface {
 	SetDisabled(context.Context, *connect.Request[proto.SetDisabledRequest]) (*connect.Response[emptypb.Empty], error)
-	PositionMode(context.Context, *connect.Request[proto.PositionModeRequest]) (*connect.Response[proto.PositionModeResponse], error)
 	SetPositionMode(context.Context, *connect.Request[proto.SetPositionModeRequest]) (*connect.Response[emptypb.Empty], error)
 	SetPosition(context.Context, *connect.Request[proto.SetPositionRequest]) (*connect.Response[emptypb.Empty], error)
 }
@@ -73,12 +69,6 @@ func NewDeviceServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(deviceServiceMethods.ByName("SetDisabled")),
 			connect.WithClientOptions(opts...),
 		),
-		positionMode: connect.NewClient[proto.PositionModeRequest, proto.PositionModeResponse](
-			httpClient,
-			baseURL+DeviceServicePositionModeProcedure,
-			connect.WithSchema(deviceServiceMethods.ByName("PositionMode")),
-			connect.WithClientOptions(opts...),
-		),
 		setPositionMode: connect.NewClient[proto.SetPositionModeRequest, emptypb.Empty](
 			httpClient,
 			baseURL+DeviceServiceSetPositionModeProcedure,
@@ -97,7 +87,6 @@ func NewDeviceServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 // deviceServiceClient implements DeviceServiceClient.
 type deviceServiceClient struct {
 	setDisabled     *connect.Client[proto.SetDisabledRequest, emptypb.Empty]
-	positionMode    *connect.Client[proto.PositionModeRequest, proto.PositionModeResponse]
 	setPositionMode *connect.Client[proto.SetPositionModeRequest, emptypb.Empty]
 	setPosition     *connect.Client[proto.SetPositionRequest, emptypb.Empty]
 }
@@ -105,11 +94,6 @@ type deviceServiceClient struct {
 // SetDisabled calls api.v1.DeviceService.SetDisabled.
 func (c *deviceServiceClient) SetDisabled(ctx context.Context, req *connect.Request[proto.SetDisabledRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.setDisabled.CallUnary(ctx, req)
-}
-
-// PositionMode calls api.v1.DeviceService.PositionMode.
-func (c *deviceServiceClient) PositionMode(ctx context.Context, req *connect.Request[proto.PositionModeRequest]) (*connect.Response[proto.PositionModeResponse], error) {
-	return c.positionMode.CallUnary(ctx, req)
 }
 
 // SetPositionMode calls api.v1.DeviceService.SetPositionMode.
@@ -125,7 +109,6 @@ func (c *deviceServiceClient) SetPosition(ctx context.Context, req *connect.Requ
 // DeviceServiceHandler is an implementation of the api.v1.DeviceService service.
 type DeviceServiceHandler interface {
 	SetDisabled(context.Context, *connect.Request[proto.SetDisabledRequest]) (*connect.Response[emptypb.Empty], error)
-	PositionMode(context.Context, *connect.Request[proto.PositionModeRequest]) (*connect.Response[proto.PositionModeResponse], error)
 	SetPositionMode(context.Context, *connect.Request[proto.SetPositionModeRequest]) (*connect.Response[emptypb.Empty], error)
 	SetPosition(context.Context, *connect.Request[proto.SetPositionRequest]) (*connect.Response[emptypb.Empty], error)
 }
@@ -141,12 +124,6 @@ func NewDeviceServiceHandler(svc DeviceServiceHandler, opts ...connect.HandlerOp
 		DeviceServiceSetDisabledProcedure,
 		svc.SetDisabled,
 		connect.WithSchema(deviceServiceMethods.ByName("SetDisabled")),
-		connect.WithHandlerOptions(opts...),
-	)
-	deviceServicePositionModeHandler := connect.NewUnaryHandler(
-		DeviceServicePositionModeProcedure,
-		svc.PositionMode,
-		connect.WithSchema(deviceServiceMethods.ByName("PositionMode")),
 		connect.WithHandlerOptions(opts...),
 	)
 	deviceServiceSetPositionModeHandler := connect.NewUnaryHandler(
@@ -165,8 +142,6 @@ func NewDeviceServiceHandler(svc DeviceServiceHandler, opts ...connect.HandlerOp
 		switch r.URL.Path {
 		case DeviceServiceSetDisabledProcedure:
 			deviceServiceSetDisabledHandler.ServeHTTP(w, r)
-		case DeviceServicePositionModeProcedure:
-			deviceServicePositionModeHandler.ServeHTTP(w, r)
 		case DeviceServiceSetPositionModeProcedure:
 			deviceServiceSetPositionModeHandler.ServeHTTP(w, r)
 		case DeviceServiceSetPositionProcedure:
@@ -182,10 +157,6 @@ type UnimplementedDeviceServiceHandler struct{}
 
 func (UnimplementedDeviceServiceHandler) SetDisabled(context.Context, *connect.Request[proto.SetDisabledRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.DeviceService.SetDisabled is not implemented"))
-}
-
-func (UnimplementedDeviceServiceHandler) PositionMode(context.Context, *connect.Request[proto.PositionModeRequest]) (*connect.Response[proto.PositionModeResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.DeviceService.PositionMode is not implemented"))
 }
 
 func (UnimplementedDeviceServiceHandler) SetPositionMode(context.Context, *connect.Request[proto.SetPositionModeRequest]) (*connect.Response[emptypb.Empty], error) {

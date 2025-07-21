@@ -1,40 +1,21 @@
 package core
 
 import (
-	apiv1 "dds-provider/internal/generated/api/proto"
+	"dds-provider/internal/generated/api/proto"
 )
 
-type SensorInfo struct {
-	DeviceId  DeviceId
-	Type      *apiv1.SensorType
-	Model     *string
-	Serial    *string
-	SwVersion *string
-	JammerIds []string
-}
-
-func (s *SensorInfo) Id() DeviceId {
-	return s.DeviceId
-}
-
-func (s *SensorInfo) ToAPI() *apiv1.SensorInfoResponse {
-	return &apiv1.SensorInfoResponse{
-		Type:      s.Type,
-		Model:     s.Model,
-		Serial:    s.Serial,
-		SwVersion: s.SwVersion,
-		JammerIds: s.JammerIds,
-	}
-}
+type JammerMode apiv1.JammerMode
 
 type SensorInfoDynamic struct {
-	DeviceId     DeviceId
-	Disabled     *bool
-	State        *string
-	Position     *apiv1.GeoPosition
-	PositionMode *apiv1.GeoPositionMode
-	Workzone     []*apiv1.WorkzoneSector
-	HwInfo       *apiv1.HwInfo
+	DeviceId          DeviceId
+	Disabled          bool
+	State             string
+	Position          GeoPosition
+	PositionMode      GeoPositionMode
+	Workzone          DeviceWorkzoneSector
+	JammerMode        JammerMode
+	JammerAutoTimeout int32
+	HwInfo            HwInfo
 }
 
 func (s *SensorInfoDynamic) Id() DeviceId {
@@ -42,27 +23,20 @@ func (s *SensorInfoDynamic) Id() DeviceId {
 }
 
 func (s *SensorInfoDynamic) ToAPI() *apiv1.SensorInfoDynamicResponse {
+	apiPosition := (*apiv1.GeoPosition)(&s.Position)
+	apiPositionMode := (*apiv1.GeoPositionMode)(&s.PositionMode)
+	apiWorkzone := (*apiv1.WorkzoneSector)(&s.Workzone)
+	apiJammerMode := (*apiv1.JammerMode)(&s.JammerMode)
+	apiHwInfo := (*apiv1.HwInfo)(&s.HwInfo)
+
 	return &apiv1.SensorInfoDynamicResponse{
-		Disabled:     s.Disabled,
-		State:        s.State,
-		Position:     s.Position,
-		PositionMode: s.PositionMode,
-		Workzone:     s.Workzone,
-		HwInfo:       s.HwInfo,
+		Disabled:          &s.Disabled,
+		State:             &s.State,
+		Position:          apiPosition,
+		PositionMode:      apiPositionMode,
+		Workzones:         []*apiv1.WorkzoneSector{apiWorkzone},
+		JammerMode:        apiJammerMode,
+		JammerAutoTimeout: &s.JammerAutoTimeout,
+		HwInfo:            apiHwInfo,
 	}
-}
-
-func ConvertSensorType(typeStr string) *apiv1.SensorType {
-	var sensorType apiv1.SensorType
-
-	switch typeStr {
-	case "RADAR":
-		sensorType = apiv1.SensorType_SENSOR_TYPE_RADAR
-	case "RFD":
-		sensorType = apiv1.SensorType_SENSOR_TYPE_RFD
-	case "CAMERA":
-		sensorType = apiv1.SensorType_SENSOR_TYPE_CAMERA
-	}
-
-	return &sensorType
 }

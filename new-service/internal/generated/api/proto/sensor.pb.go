@@ -26,22 +26,22 @@ const (
 type SensorType int32
 
 const (
-	SensorType_SENSOR_TYPE_RFD    SensorType = 0
-	SensorType_SENSOR_TYPE_RADAR  SensorType = 1
-	SensorType_SENSOR_TYPE_CAMERA SensorType = 2
+	SensorType_SENSOR_RFD    SensorType = 0
+	SensorType_SENSOR_RADAR  SensorType = 1
+	SensorType_SENSOR_CAMERA SensorType = 2
 )
 
 // Enum value maps for SensorType.
 var (
 	SensorType_name = map[int32]string{
-		0: "SENSOR_TYPE_RFD",
-		1: "SENSOR_TYPE_RADAR",
-		2: "SENSOR_TYPE_CAMERA",
+		0: "SENSOR_RFD",
+		1: "SENSOR_RADAR",
+		2: "SENSOR_CAMERA",
 	}
 	SensorType_value = map[string]int32{
-		"SENSOR_TYPE_RFD":    0,
-		"SENSOR_TYPE_RADAR":  1,
-		"SENSOR_TYPE_CAMERA": 2,
+		"SENSOR_RFD":    0,
+		"SENSOR_RADAR":  1,
+		"SENSOR_CAMERA": 2,
 	}
 )
 
@@ -75,19 +75,19 @@ func (SensorType) EnumDescriptor() ([]byte, []int) {
 type JammerMode int32
 
 const (
-	JammerMode_JAMMER_MODE_AUTO   JammerMode = 0
-	JammerMode_JAMMER_MODE_MANUAL JammerMode = 1
+	JammerMode_JAMMER_AUTO   JammerMode = 0
+	JammerMode_JAMMER_MANUAL JammerMode = 1
 )
 
 // Enum value maps for JammerMode.
 var (
 	JammerMode_name = map[int32]string{
-		0: "JAMMER_MODE_AUTO",
-		1: "JAMMER_MODE_MANUAL",
+		0: "JAMMER_AUTO",
+		1: "JAMMER_MANUAL",
 	}
 	JammerMode_value = map[string]int32{
-		"JAMMER_MODE_AUTO":   0,
-		"JAMMER_MODE_MANUAL": 1,
+		"JAMMER_AUTO":   0,
+		"JAMMER_MANUAL": 1,
 	}
 )
 
@@ -118,16 +118,101 @@ func (JammerMode) EnumDescriptor() ([]byte, []int) {
 	return file_sensor_proto_rawDescGZIP(), []int{1}
 }
 
+type SensorInfo struct {
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	SensorId *string                `protobuf:"bytes,1,opt,name=sensor_id,json=sensorId,proto3,oneof" json:"sensor_id,omitempty"`
+	// List of connected jammer IDs
+	JammerIds     []string    `protobuf:"bytes,11,rep,name=jammer_ids,json=jammerIds,proto3" json:"jammer_ids,omitempty"`
+	Type          *SensorType `protobuf:"varint,2,opt,name=type,proto3,enum=api.v1.SensorType,oneof" json:"type,omitempty"`
+	Model         *string     `protobuf:"bytes,3,opt,name=model,proto3,oneof" json:"model,omitempty"`
+	Serial        *string     `protobuf:"bytes,4,opt,name=serial,proto3,oneof" json:"serial,omitempty"`
+	SwVersion     *string     `protobuf:"bytes,5,opt,name=sw_version,json=swVersion,proto3,oneof" json:"sw_version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SensorInfo) Reset() {
+	*x = SensorInfo{}
+	mi := &file_sensor_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SensorInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SensorInfo) ProtoMessage() {}
+
+func (x *SensorInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_sensor_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SensorInfo.ProtoReflect.Descriptor instead.
+func (*SensorInfo) Descriptor() ([]byte, []int) {
+	return file_sensor_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *SensorInfo) GetSensorId() string {
+	if x != nil && x.SensorId != nil {
+		return *x.SensorId
+	}
+	return ""
+}
+
+func (x *SensorInfo) GetJammerIds() []string {
+	if x != nil {
+		return x.JammerIds
+	}
+	return nil
+}
+
+func (x *SensorInfo) GetType() SensorType {
+	if x != nil && x.Type != nil {
+		return *x.Type
+	}
+	return SensorType_SENSOR_RFD
+}
+
+func (x *SensorInfo) GetModel() string {
+	if x != nil && x.Model != nil {
+		return *x.Model
+	}
+	return ""
+}
+
+func (x *SensorInfo) GetSerial() string {
+	if x != nil && x.Serial != nil {
+		return *x.Serial
+	}
+	return ""
+}
+
+func (x *SensorInfo) GetSwVersion() string {
+	if x != nil && x.SwVersion != nil {
+		return *x.SwVersion
+	}
+	return ""
+}
+
 type SensorsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SensorIdList  []string               `protobuf:"bytes,1,rep,name=sensor_id_list,json=sensorIdList,proto3" json:"sensor_id_list,omitempty"`
+	SensorInfos   []*SensorInfo          `protobuf:"bytes,1,rep,name=sensor_infos,json=sensorInfos,proto3" json:"sensor_infos,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SensorsResponse) Reset() {
 	*x = SensorsResponse{}
-	mi := &file_sensor_proto_msgTypes[0]
+	mi := &file_sensor_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -139,7 +224,7 @@ func (x *SensorsResponse) String() string {
 func (*SensorsResponse) ProtoMessage() {}
 
 func (x *SensorsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sensor_proto_msgTypes[0]
+	mi := &file_sensor_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -152,135 +237,14 @@ func (x *SensorsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SensorsResponse.ProtoReflect.Descriptor instead.
 func (*SensorsResponse) Descriptor() ([]byte, []int) {
-	return file_sensor_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *SensorsResponse) GetSensorIdList() []string {
-	if x != nil {
-		return x.SensorIdList
-	}
-	return nil
-}
-
-type SensorInfoRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SensorId      *string                `protobuf:"bytes,1,opt,name=sensor_id,json=sensorId,proto3,oneof" json:"sensor_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SensorInfoRequest) Reset() {
-	*x = SensorInfoRequest{}
-	mi := &file_sensor_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SensorInfoRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SensorInfoRequest) ProtoMessage() {}
-
-func (x *SensorInfoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sensor_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SensorInfoRequest.ProtoReflect.Descriptor instead.
-func (*SensorInfoRequest) Descriptor() ([]byte, []int) {
 	return file_sensor_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SensorInfoRequest) GetSensorId() string {
-	if x != nil && x.SensorId != nil {
-		return *x.SensorId
-	}
-	return ""
-}
-
-type SensorInfoResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// List of connected jammer IDs
-	JammerIds     []string    `protobuf:"bytes,11,rep,name=jammer_ids,json=jammerIds,proto3" json:"jammer_ids,omitempty"`
-	Type          *SensorType `protobuf:"varint,2,opt,name=type,proto3,enum=api.v1.SensorType,oneof" json:"type,omitempty"`
-	Model         *string     `protobuf:"bytes,3,opt,name=model,proto3,oneof" json:"model,omitempty"`
-	Serial        *string     `protobuf:"bytes,4,opt,name=serial,proto3,oneof" json:"serial,omitempty"`
-	SwVersion     *string     `protobuf:"bytes,5,opt,name=sw_version,json=swVersion,proto3,oneof" json:"sw_version,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SensorInfoResponse) Reset() {
-	*x = SensorInfoResponse{}
-	mi := &file_sensor_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SensorInfoResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SensorInfoResponse) ProtoMessage() {}
-
-func (x *SensorInfoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sensor_proto_msgTypes[2]
+func (x *SensorsResponse) GetSensorInfos() []*SensorInfo {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SensorInfoResponse.ProtoReflect.Descriptor instead.
-func (*SensorInfoResponse) Descriptor() ([]byte, []int) {
-	return file_sensor_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *SensorInfoResponse) GetJammerIds() []string {
-	if x != nil {
-		return x.JammerIds
+		return x.SensorInfos
 	}
 	return nil
-}
-
-func (x *SensorInfoResponse) GetType() SensorType {
-	if x != nil && x.Type != nil {
-		return *x.Type
-	}
-	return SensorType_SENSOR_TYPE_RFD
-}
-
-func (x *SensorInfoResponse) GetModel() string {
-	if x != nil && x.Model != nil {
-		return *x.Model
-	}
-	return ""
-}
-
-func (x *SensorInfoResponse) GetSerial() string {
-	if x != nil && x.Serial != nil {
-		return *x.Serial
-	}
-	return ""
-}
-
-func (x *SensorInfoResponse) GetSwVersion() string {
-	if x != nil && x.SwVersion != nil {
-		return *x.SwVersion
-	}
-	return ""
 }
 
 type SensorInfoDynamicRequest struct {
@@ -292,7 +256,7 @@ type SensorInfoDynamicRequest struct {
 
 func (x *SensorInfoDynamicRequest) Reset() {
 	*x = SensorInfoDynamicRequest{}
-	mi := &file_sensor_proto_msgTypes[3]
+	mi := &file_sensor_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -304,7 +268,7 @@ func (x *SensorInfoDynamicRequest) String() string {
 func (*SensorInfoDynamicRequest) ProtoMessage() {}
 
 func (x *SensorInfoDynamicRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sensor_proto_msgTypes[3]
+	mi := &file_sensor_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -317,7 +281,7 @@ func (x *SensorInfoDynamicRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SensorInfoDynamicRequest.ProtoReflect.Descriptor instead.
 func (*SensorInfoDynamicRequest) Descriptor() ([]byte, []int) {
-	return file_sensor_proto_rawDescGZIP(), []int{3}
+	return file_sensor_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SensorInfoDynamicRequest) GetSensorId() string {
@@ -333,7 +297,7 @@ type SensorInfoDynamicResponse struct {
 	State        *string                `protobuf:"bytes,7,opt,name=state,proto3,oneof" json:"state,omitempty"`
 	Position     *GeoPosition           `protobuf:"bytes,8,opt,name=position,proto3,oneof" json:"position,omitempty"`
 	PositionMode *GeoPositionMode       `protobuf:"varint,9,opt,name=position_mode,json=positionMode,proto3,enum=api.v1.GeoPositionMode,oneof" json:"position_mode,omitempty"`
-	Workzone     []*WorkzoneSector      `protobuf:"bytes,10,rep,name=workzone,proto3" json:"workzone,omitempty"`
+	Workzones    []*WorkzoneSector      `protobuf:"bytes,10,rep,name=workzones,proto3" json:"workzones,omitempty"`
 	JammerMode   *JammerMode            `protobuf:"varint,12,opt,name=jammer_mode,json=jammerMode,proto3,enum=api.v1.JammerMode,oneof" json:"jammer_mode,omitempty"`
 	// Jammer timeout in AUTO mode in seconds
 	JammerAutoTimeout *int32  `protobuf:"varint,13,opt,name=jammer_auto_timeout,json=jammerAutoTimeout,proto3,oneof" json:"jammer_auto_timeout,omitempty"`
@@ -344,7 +308,7 @@ type SensorInfoDynamicResponse struct {
 
 func (x *SensorInfoDynamicResponse) Reset() {
 	*x = SensorInfoDynamicResponse{}
-	mi := &file_sensor_proto_msgTypes[4]
+	mi := &file_sensor_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -356,7 +320,7 @@ func (x *SensorInfoDynamicResponse) String() string {
 func (*SensorInfoDynamicResponse) ProtoMessage() {}
 
 func (x *SensorInfoDynamicResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sensor_proto_msgTypes[4]
+	mi := &file_sensor_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -369,7 +333,7 @@ func (x *SensorInfoDynamicResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SensorInfoDynamicResponse.ProtoReflect.Descriptor instead.
 func (*SensorInfoDynamicResponse) Descriptor() ([]byte, []int) {
-	return file_sensor_proto_rawDescGZIP(), []int{4}
+	return file_sensor_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *SensorInfoDynamicResponse) GetDisabled() bool {
@@ -397,12 +361,12 @@ func (x *SensorInfoDynamicResponse) GetPositionMode() GeoPositionMode {
 	if x != nil && x.PositionMode != nil {
 		return *x.PositionMode
 	}
-	return GeoPositionMode_GEO_POSITION_MODE_AUTO
+	return GeoPositionMode_GEO_AUTO
 }
 
-func (x *SensorInfoDynamicResponse) GetWorkzone() []*WorkzoneSector {
+func (x *SensorInfoDynamicResponse) GetWorkzones() []*WorkzoneSector {
 	if x != nil {
-		return x.Workzone
+		return x.Workzones
 	}
 	return nil
 }
@@ -411,7 +375,7 @@ func (x *SensorInfoDynamicResponse) GetJammerMode() JammerMode {
 	if x != nil && x.JammerMode != nil {
 		return *x.JammerMode
 	}
-	return JammerMode_JAMMER_MODE_AUTO
+	return JammerMode_JAMMER_AUTO
 }
 
 func (x *SensorInfoDynamicResponse) GetJammerAutoTimeout() int32 {
@@ -440,7 +404,7 @@ type SetJammerModeRequest struct {
 
 func (x *SetJammerModeRequest) Reset() {
 	*x = SetJammerModeRequest{}
-	mi := &file_sensor_proto_msgTypes[5]
+	mi := &file_sensor_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -452,7 +416,7 @@ func (x *SetJammerModeRequest) String() string {
 func (*SetJammerModeRequest) ProtoMessage() {}
 
 func (x *SetJammerModeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sensor_proto_msgTypes[5]
+	mi := &file_sensor_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -465,7 +429,7 @@ func (x *SetJammerModeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetJammerModeRequest.ProtoReflect.Descriptor instead.
 func (*SetJammerModeRequest) Descriptor() ([]byte, []int) {
-	return file_sensor_proto_rawDescGZIP(), []int{5}
+	return file_sensor_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *SetJammerModeRequest) GetSensorId() string {
@@ -479,7 +443,7 @@ func (x *SetJammerModeRequest) GetJammerMode() JammerMode {
 	if x != nil && x.JammerMode != nil {
 		return *x.JammerMode
 	}
-	return JammerMode_JAMMER_MODE_AUTO
+	return JammerMode_JAMMER_AUTO
 }
 
 func (x *SetJammerModeRequest) GetTimeout() int32 {
@@ -493,37 +457,37 @@ var File_sensor_proto protoreflect.FileDescriptor
 
 const file_sensor_proto_rawDesc = "" +
 	"\n" +
-	"\fsensor.proto\x12\x06api.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x10components.proto\"I\n" +
-	"\x0fSensorsResponse\x126\n" +
-	"\x0esensor_id_list\x18\x01 \x03(\tB\x10\xbaH\r\xc8\x01\x01\x92\x01\a\"\x05r\x03\xb0\x01\x01R\fsensorIdList\"P\n" +
-	"\x11SensorInfoRequest\x12-\n" +
-	"\tsensor_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01H\x00R\bsensorId\x88\x01\x01B\f\n" +
+	"\fsensor.proto\x12\x06api.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x10components.proto\"\xbd\x02\n" +
 	"\n" +
-	"_sensor_id\"\x88\x02\n" +
-	"\x12SensorInfoResponse\x12,\n" +
+	"SensorInfo\x12-\n" +
+	"\tsensor_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01H\x00R\bsensorId\x88\x01\x01\x12,\n" +
 	"\n" +
 	"jammer_ids\x18\v \x03(\tB\r\xbaH\n" +
 	"\x92\x01\a\"\x05r\x03\xb0\x01\x01R\tjammerIds\x123\n" +
-	"\x04type\x18\x02 \x01(\x0e2\x12.api.v1.SensorTypeB\x06\xbaH\x03\xc8\x01\x01H\x00R\x04type\x88\x01\x01\x12!\n" +
-	"\x05model\x18\x03 \x01(\tB\x06\xbaH\x03\xc8\x01\x01H\x01R\x05model\x88\x01\x01\x12\x1b\n" +
-	"\x06serial\x18\x04 \x01(\tH\x02R\x06serial\x88\x01\x01\x12\"\n" +
+	"\x04type\x18\x02 \x01(\x0e2\x12.api.v1.SensorTypeB\x06\xbaH\x03\xc8\x01\x01H\x01R\x04type\x88\x01\x01\x12!\n" +
+	"\x05model\x18\x03 \x01(\tB\x06\xbaH\x03\xc8\x01\x01H\x02R\x05model\x88\x01\x01\x12\x1b\n" +
+	"\x06serial\x18\x04 \x01(\tH\x03R\x06serial\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"sw_version\x18\x05 \x01(\tH\x03R\tswVersion\x88\x01\x01B\a\n" +
+	"sw_version\x18\x05 \x01(\tH\x04R\tswVersion\x88\x01\x01B\f\n" +
+	"\n" +
+	"_sensor_idB\a\n" +
 	"\x05_typeB\b\n" +
 	"\x06_modelB\t\n" +
 	"\a_serialB\r\n" +
-	"\v_sw_version\"W\n" +
+	"\v_sw_version\"P\n" +
+	"\x0fSensorsResponse\x12=\n" +
+	"\fsensor_infos\x18\x01 \x03(\v2\x12.api.v1.SensorInfoB\x06\xbaH\x03\xc8\x01\x01R\vsensorInfos\"W\n" +
 	"\x18SensorInfoDynamicRequest\x12-\n" +
 	"\tsensor_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01H\x00R\bsensorId\x88\x01\x01B\f\n" +
 	"\n" +
-	"_sensor_id\"\xb3\x04\n" +
+	"_sensor_id\"\xb5\x04\n" +
 	"\x19SensorInfoDynamicResponse\x12'\n" +
 	"\bdisabled\x18\x06 \x01(\bB\x06\xbaH\x03\xc8\x01\x01H\x00R\bdisabled\x88\x01\x01\x12!\n" +
 	"\x05state\x18\a \x01(\tB\x06\xbaH\x03\xc8\x01\x01H\x01R\x05state\x88\x01\x01\x12<\n" +
 	"\bposition\x18\b \x01(\v2\x13.api.v1.GeoPositionB\x06\xbaH\x03\xc8\x01\x01H\x02R\bposition\x88\x01\x01\x12I\n" +
-	"\rposition_mode\x18\t \x01(\x0e2\x17.api.v1.GeoPositionModeB\x06\xbaH\x03\xc8\x01\x01H\x03R\fpositionMode\x88\x01\x01\x12:\n" +
-	"\bworkzone\x18\n" +
-	" \x03(\v2\x16.api.v1.WorkzoneSectorB\x06\xbaH\x03\xc8\x01\x01R\bworkzone\x128\n" +
+	"\rposition_mode\x18\t \x01(\x0e2\x17.api.v1.GeoPositionModeB\x06\xbaH\x03\xc8\x01\x01H\x03R\fpositionMode\x88\x01\x01\x12<\n" +
+	"\tworkzones\x18\n" +
+	" \x03(\v2\x16.api.v1.WorkzoneSectorB\x06\xbaH\x03\xc8\x01\x01R\tworkzones\x128\n" +
 	"\vjammer_mode\x18\f \x01(\x0e2\x12.api.v1.JammerModeH\x04R\n" +
 	"jammerMode\x88\x01\x01\x123\n" +
 	"\x13jammer_auto_timeout\x18\r \x01(\x05H\x05R\x11jammerAutoTimeout\x88\x01\x01\x12,\n" +
@@ -545,20 +509,19 @@ const file_sensor_proto_rawDesc = "" +
 	"_sensor_idB\x0e\n" +
 	"\f_jammer_modeB\n" +
 	"\n" +
-	"\b_timeout*P\n" +
+	"\b_timeout*A\n" +
 	"\n" +
-	"SensorType\x12\x13\n" +
-	"\x0fSENSOR_TYPE_RFD\x10\x00\x12\x15\n" +
-	"\x11SENSOR_TYPE_RADAR\x10\x01\x12\x16\n" +
-	"\x12SENSOR_TYPE_CAMERA\x10\x02*:\n" +
+	"SensorType\x12\x0e\n" +
 	"\n" +
-	"JammerMode\x12\x14\n" +
-	"\x10JAMMER_MODE_AUTO\x10\x00\x12\x16\n" +
-	"\x12JAMMER_MODE_MANUAL\x10\x012\xbb\x02\n" +
+	"SENSOR_RFD\x10\x00\x12\x10\n" +
+	"\fSENSOR_RADAR\x10\x01\x12\x11\n" +
+	"\rSENSOR_CAMERA\x10\x02*0\n" +
+	"\n" +
+	"JammerMode\x12\x0f\n" +
+	"\vJAMMER_AUTO\x10\x00\x12\x11\n" +
+	"\rJAMMER_MANUAL\x10\x012\xf4\x01\n" +
 	"\rSensorService\x12<\n" +
-	"\aSensors\x12\x16.google.protobuf.Empty\x1a\x17.api.v1.SensorsResponse\"\x00\x12E\n" +
-	"\n" +
-	"SensorInfo\x12\x19.api.v1.SensorInfoRequest\x1a\x1a.api.v1.SensorInfoResponse\"\x00\x12\\\n" +
+	"\aSensors\x12\x16.google.protobuf.Empty\x1a\x17.api.v1.SensorsResponse\"\x00\x12\\\n" +
 	"\x11SensorInfoDynamic\x12 .api.v1.SensorInfoDynamicRequest\x1a!.api.v1.SensorInfoDynamicResponse\"\x000\x01\x12G\n" +
 	"\rSetJammerMode\x12\x1c.api.v1.SetJammerModeRequest\x1a\x16.google.protobuf.Empty\"\x00B\x83\x01\n" +
 	"\n" +
@@ -577,43 +540,41 @@ func file_sensor_proto_rawDescGZIP() []byte {
 }
 
 var file_sensor_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_sensor_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_sensor_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_sensor_proto_goTypes = []any{
 	(SensorType)(0),                   // 0: api.v1.SensorType
 	(JammerMode)(0),                   // 1: api.v1.JammerMode
-	(*SensorsResponse)(nil),           // 2: api.v1.SensorsResponse
-	(*SensorInfoRequest)(nil),         // 3: api.v1.SensorInfoRequest
-	(*SensorInfoResponse)(nil),        // 4: api.v1.SensorInfoResponse
-	(*SensorInfoDynamicRequest)(nil),  // 5: api.v1.SensorInfoDynamicRequest
-	(*SensorInfoDynamicResponse)(nil), // 6: api.v1.SensorInfoDynamicResponse
-	(*SetJammerModeRequest)(nil),      // 7: api.v1.SetJammerModeRequest
-	(*GeoPosition)(nil),               // 8: api.v1.GeoPosition
-	(GeoPositionMode)(0),              // 9: api.v1.GeoPositionMode
-	(*WorkzoneSector)(nil),            // 10: api.v1.WorkzoneSector
-	(*HwInfo)(nil),                    // 11: api.v1.HwInfo
-	(*emptypb.Empty)(nil),             // 12: google.protobuf.Empty
+	(*SensorInfo)(nil),                // 2: api.v1.SensorInfo
+	(*SensorsResponse)(nil),           // 3: api.v1.SensorsResponse
+	(*SensorInfoDynamicRequest)(nil),  // 4: api.v1.SensorInfoDynamicRequest
+	(*SensorInfoDynamicResponse)(nil), // 5: api.v1.SensorInfoDynamicResponse
+	(*SetJammerModeRequest)(nil),      // 6: api.v1.SetJammerModeRequest
+	(*GeoPosition)(nil),               // 7: api.v1.GeoPosition
+	(GeoPositionMode)(0),              // 8: api.v1.GeoPositionMode
+	(*WorkzoneSector)(nil),            // 9: api.v1.WorkzoneSector
+	(*HwInfo)(nil),                    // 10: api.v1.HwInfo
+	(*emptypb.Empty)(nil),             // 11: google.protobuf.Empty
 }
 var file_sensor_proto_depIdxs = []int32{
-	0,  // 0: api.v1.SensorInfoResponse.type:type_name -> api.v1.SensorType
-	8,  // 1: api.v1.SensorInfoDynamicResponse.position:type_name -> api.v1.GeoPosition
-	9,  // 2: api.v1.SensorInfoDynamicResponse.position_mode:type_name -> api.v1.GeoPositionMode
-	10, // 3: api.v1.SensorInfoDynamicResponse.workzone:type_name -> api.v1.WorkzoneSector
-	1,  // 4: api.v1.SensorInfoDynamicResponse.jammer_mode:type_name -> api.v1.JammerMode
-	11, // 5: api.v1.SensorInfoDynamicResponse.hw_info:type_name -> api.v1.HwInfo
-	1,  // 6: api.v1.SetJammerModeRequest.jammer_mode:type_name -> api.v1.JammerMode
-	12, // 7: api.v1.SensorService.Sensors:input_type -> google.protobuf.Empty
-	3,  // 8: api.v1.SensorService.SensorInfo:input_type -> api.v1.SensorInfoRequest
-	5,  // 9: api.v1.SensorService.SensorInfoDynamic:input_type -> api.v1.SensorInfoDynamicRequest
-	7,  // 10: api.v1.SensorService.SetJammerMode:input_type -> api.v1.SetJammerModeRequest
-	2,  // 11: api.v1.SensorService.Sensors:output_type -> api.v1.SensorsResponse
-	4,  // 12: api.v1.SensorService.SensorInfo:output_type -> api.v1.SensorInfoResponse
-	6,  // 13: api.v1.SensorService.SensorInfoDynamic:output_type -> api.v1.SensorInfoDynamicResponse
-	12, // 14: api.v1.SensorService.SetJammerMode:output_type -> google.protobuf.Empty
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	0,  // 0: api.v1.SensorInfo.type:type_name -> api.v1.SensorType
+	2,  // 1: api.v1.SensorsResponse.sensor_infos:type_name -> api.v1.SensorInfo
+	7,  // 2: api.v1.SensorInfoDynamicResponse.position:type_name -> api.v1.GeoPosition
+	8,  // 3: api.v1.SensorInfoDynamicResponse.position_mode:type_name -> api.v1.GeoPositionMode
+	9,  // 4: api.v1.SensorInfoDynamicResponse.workzones:type_name -> api.v1.WorkzoneSector
+	1,  // 5: api.v1.SensorInfoDynamicResponse.jammer_mode:type_name -> api.v1.JammerMode
+	10, // 6: api.v1.SensorInfoDynamicResponse.hw_info:type_name -> api.v1.HwInfo
+	1,  // 7: api.v1.SetJammerModeRequest.jammer_mode:type_name -> api.v1.JammerMode
+	11, // 8: api.v1.SensorService.Sensors:input_type -> google.protobuf.Empty
+	4,  // 9: api.v1.SensorService.SensorInfoDynamic:input_type -> api.v1.SensorInfoDynamicRequest
+	6,  // 10: api.v1.SensorService.SetJammerMode:input_type -> api.v1.SetJammerModeRequest
+	3,  // 11: api.v1.SensorService.Sensors:output_type -> api.v1.SensorsResponse
+	5,  // 12: api.v1.SensorService.SensorInfoDynamic:output_type -> api.v1.SensorInfoDynamicResponse
+	11, // 13: api.v1.SensorService.SetJammerMode:output_type -> google.protobuf.Empty
+	11, // [11:14] is the sub-list for method output_type
+	8,  // [8:11] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_sensor_proto_init() }
@@ -622,18 +583,17 @@ func file_sensor_proto_init() {
 		return
 	}
 	file_components_proto_init()
-	file_sensor_proto_msgTypes[1].OneofWrappers = []any{}
+	file_sensor_proto_msgTypes[0].OneofWrappers = []any{}
 	file_sensor_proto_msgTypes[2].OneofWrappers = []any{}
 	file_sensor_proto_msgTypes[3].OneofWrappers = []any{}
 	file_sensor_proto_msgTypes[4].OneofWrappers = []any{}
-	file_sensor_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sensor_proto_rawDesc), len(file_sensor_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   6,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

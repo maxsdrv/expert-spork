@@ -5,9 +5,9 @@ package api.v1;
 import "buf/validate/validate.proto";
 
 enum GeoPositionMode {
-  GEO_POSITION_MODE_AUTO = 0;
-  GEO_POSITION_MODE_MANUAL = 1;
-  GEO_POSITION_MODE_ALWAYS_MANUAL = 2;
+  GEO_AUTO = 0;
+  GEO_MANUAL = 1;
+  GEO_ALWAYS_MANUAL = 2;
 }
 
 message GeoPosition {

@@ -36,9 +36,6 @@ const (
 const (
 	// SensorServiceSensorsProcedure is the fully-qualified name of the SensorService's Sensors RPC.
 	SensorServiceSensorsProcedure = "/api.v1.SensorService/Sensors"
-	// SensorServiceSensorInfoProcedure is the fully-qualified name of the SensorService's SensorInfo
-	// RPC.
-	SensorServiceSensorInfoProcedure = "/api.v1.SensorService/SensorInfo"
 	// SensorServiceSensorInfoDynamicProcedure is the fully-qualified name of the SensorService's
 	// SensorInfoDynamic RPC.
 	SensorServiceSensorInfoDynamicProcedure = "/api.v1.SensorService/SensorInfoDynamic"
@@ -50,7 +47,6 @@ const (
 // SensorServiceClient is a client for the api.v1.SensorService service.
 type SensorServiceClient interface {
 	Sensors(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.SensorsResponse], error)
-	SensorInfo(context.Context, *connect.Request[proto.SensorInfoRequest]) (*connect.Response[proto.SensorInfoResponse], error)
 	SensorInfoDynamic(context.Context, *connect.Request[proto.SensorInfoDynamicRequest]) (*connect.ServerStreamForClient[proto.SensorInfoDynamicResponse], error)
 	// Sets current jammer mode - automatic or manual
 	// MANUAL:
@@ -82,12 +78,6 @@ func NewSensorServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(sensorServiceMethods.ByName("Sensors")),
 			connect.WithClientOptions(opts...),
 		),
-		sensorInfo: connect.NewClient[proto.SensorInfoRequest, proto.SensorInfoResponse](
-			httpClient,
-			baseURL+SensorServiceSensorInfoProcedure,
-			connect.WithSchema(sensorServiceMethods.ByName("SensorInfo")),
-			connect.WithClientOptions(opts...),
-		),
 		sensorInfoDynamic: connect.NewClient[proto.SensorInfoDynamicRequest, proto.SensorInfoDynamicResponse](
 			httpClient,
 			baseURL+SensorServiceSensorInfoDynamicProcedure,
@@ -106,7 +96,6 @@ func NewSensorServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 // sensorServiceClient implements SensorServiceClient.
 type sensorServiceClient struct {
 	sensors           *connect.Client[emptypb.Empty, proto.SensorsResponse]
-	sensorInfo        *connect.Client[proto.SensorInfoRequest, proto.SensorInfoResponse]
 	sensorInfoDynamic *connect.Client[proto.SensorInfoDynamicRequest, proto.SensorInfoDynamicResponse]
 	setJammerMode     *connect.Client[proto.SetJammerModeRequest, emptypb.Empty]
 }
@@ -114,11 +103,6 @@ type sensorServiceClient struct {
 // Sensors calls api.v1.SensorService.Sensors.
 func (c *sensorServiceClient) Sensors(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[proto.SensorsResponse], error) {
 	return c.sensors.CallUnary(ctx, req)
-}
-
-// SensorInfo calls api.v1.SensorService.SensorInfo.
-func (c *sensorServiceClient) SensorInfo(ctx context.Context, req *connect.Request[proto.SensorInfoRequest]) (*connect.Response[proto.SensorInfoResponse], error) {
-	return c.sensorInfo.CallUnary(ctx, req)
 }
 
 // SensorInfoDynamic calls api.v1.SensorService.SensorInfoDynamic.
@@ -134,7 +118,6 @@ func (c *sensorServiceClient) SetJammerMode(ctx context.Context, req *connect.Re
 // SensorServiceHandler is an implementation of the api.v1.SensorService service.
 type SensorServiceHandler interface {
 	Sensors(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.SensorsResponse], error)
-	SensorInfo(context.Context, *connect.Request[proto.SensorInfoRequest]) (*connect.Response[proto.SensorInfoResponse], error)
 	SensorInfoDynamic(context.Context, *connect.Request[proto.SensorInfoDynamicRequest], *connect.ServerStream[proto.SensorInfoDynamicResponse]) error
 	// Sets current jammer mode - automatic or manual
 	// MANUAL:
@@ -162,12 +145,6 @@ func NewSensorServiceHandler(svc SensorServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(sensorServiceMethods.ByName("Sensors")),
 		connect.WithHandlerOptions(opts...),
 	)
-	sensorServiceSensorInfoHandler := connect.NewUnaryHandler(
-		SensorServiceSensorInfoProcedure,
-		svc.SensorInfo,
-		connect.WithSchema(sensorServiceMethods.ByName("SensorInfo")),
-		connect.WithHandlerOptions(opts...),
-	)
 	sensorServiceSensorInfoDynamicHandler := connect.NewServerStreamHandler(
 		SensorServiceSensorInfoDynamicProcedure,
 		svc.SensorInfoDynamic,
@@ -184,8 +161,6 @@ func NewSensorServiceHandler(svc SensorServiceHandler, opts ...connect.HandlerOp
 		switch r.URL.Path {
 		case SensorServiceSensorsProcedure:
 			sensorServiceSensorsHandler.ServeHTTP(w, r)
-		case SensorServiceSensorInfoProcedure:
-			sensorServiceSensorInfoHandler.ServeHTTP(w, r)
 		case SensorServiceSensorInfoDynamicProcedure:
 			sensorServiceSensorInfoDynamicHandler.ServeHTTP(w, r)
 		case SensorServiceSetJammerModeProcedure:
@@ -201,10 +176,6 @@ type UnimplementedSensorServiceHandler struct{}
 
 func (UnimplementedSensorServiceHandler) Sensors(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.SensorsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.SensorService.Sensors is not implemented"))
-}
-
-func (UnimplementedSensorServiceHandler) SensorInfo(context.Context, *connect.Request[proto.SensorInfoRequest]) (*connect.Response[proto.SensorInfoResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.SensorService.SensorInfo is not implemented"))
 }
 
 func (UnimplementedSensorServiceHandler) SensorInfoDynamic(context.Context, *connect.Request[proto.SensorInfoDynamicRequest], *connect.ServerStream[proto.SensorInfoDynamicResponse]) error {

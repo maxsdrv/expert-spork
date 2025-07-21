@@ -6,8 +6,8 @@ import (
 
 type BandList []string
 
-type Bands interface {
-	Set(bands BandList) (Bands, error)
+type JammerBands interface {
+	Set(bands BandList) (JammerBands, error)
 	GetActive() BandList
 	GetAll() BandList
 }
@@ -17,13 +17,13 @@ type bandsImpl struct {
 	active BandList
 }
 
-func NewBandsEmpty(all BandList) Bands {
+func NewBandsEmpty(all BandList) JammerBands {
 	return &bandsImpl{
 		all: all,
 	}
 }
 
-func NewBands(all BandList, active BandList) (Bands, error) {
+func NewBands(all BandList, active BandList) (JammerBands, error) {
 	for _, band := range active {
 		if !slices.Contains(all, band) {
 			return nil, &BandNotSupportedError{band: band}
@@ -35,7 +35,7 @@ func NewBands(all BandList, active BandList) (Bands, error) {
 	}, nil
 }
 
-func (b *bandsImpl) Set(bands BandList) (Bands, error) {
+func (b *bandsImpl) Set(bands BandList) (JammerBands, error) {
 	return NewBands(b.all, bands)
 }
 

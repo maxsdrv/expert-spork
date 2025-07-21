@@ -32,7 +32,7 @@ func (s *Handlers) Settings(
 			{
 				DeviceId:     proto.String("device-001"),
 				Disabled:     proto.Bool(false),
-				PositionMode: apiv1.GeoPositionMode_GEO_POSITION_MODE_AUTO.Enum(),
+				PositionMode: apiv1.GeoPositionMode_GEO_AUTO.Enum(),
 				Position: &apiv1.GeoPosition{
 					Azimuth: proto.Float64(0.0),
 					Coordinate: &apiv1.GeoCoordinate{

@@ -393,7 +393,7 @@ func (x *DeviceSettings) GetPositionMode() GeoPositionMode {
 	if x != nil && x.PositionMode != nil {
 		return *x.PositionMode
 	}
-	return GeoPositionMode_GEO_POSITION_MODE_AUTO
+	return GeoPositionMode_GEO_AUTO
 }
 
 func (x *DeviceSettings) GetPosition() *GeoPosition {

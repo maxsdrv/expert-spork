@@ -1,6 +1,6 @@
 package core
 
 type BandsOptioned interface {
-	Bands
+	JammerBands
 	GetOptions() *[]BandList
 }

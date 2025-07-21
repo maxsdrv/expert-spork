@@ -75,94 +75,6 @@ func (x *SetDisabledRequest) GetDisabled() bool {
 	return false
 }
 
-type PositionModeRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	DeviceId      *string                `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3,oneof" json:"device_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PositionModeRequest) Reset() {
-	*x = PositionModeRequest{}
-	mi := &file_device_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PositionModeRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PositionModeRequest) ProtoMessage() {}
-
-func (x *PositionModeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_device_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PositionModeRequest.ProtoReflect.Descriptor instead.
-func (*PositionModeRequest) Descriptor() ([]byte, []int) {
-	return file_device_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *PositionModeRequest) GetDeviceId() string {
-	if x != nil && x.DeviceId != nil {
-		return *x.DeviceId
-	}
-	return ""
-}
-
-type PositionModeResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PositionMode  *GeoPositionMode       `protobuf:"varint,1,opt,name=position_mode,json=positionMode,proto3,enum=api.v1.GeoPositionMode,oneof" json:"position_mode,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PositionModeResponse) Reset() {
-	*x = PositionModeResponse{}
-	mi := &file_device_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PositionModeResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PositionModeResponse) ProtoMessage() {}
-
-func (x *PositionModeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_device_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PositionModeResponse.ProtoReflect.Descriptor instead.
-func (*PositionModeResponse) Descriptor() ([]byte, []int) {
-	return file_device_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *PositionModeResponse) GetPositionMode() GeoPositionMode {
-	if x != nil && x.PositionMode != nil {
-		return *x.PositionMode
-	}
-	return GeoPositionMode_GEO_POSITION_MODE_AUTO
-}
-
 type SetPositionModeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DeviceId      *string                `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3,oneof" json:"device_id,omitempty"`
@@ -173,7 +85,7 @@ type SetPositionModeRequest struct {
 
 func (x *SetPositionModeRequest) Reset() {
 	*x = SetPositionModeRequest{}
-	mi := &file_device_proto_msgTypes[3]
+	mi := &file_device_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -185,7 +97,7 @@ func (x *SetPositionModeRequest) String() string {
 func (*SetPositionModeRequest) ProtoMessage() {}
 
 func (x *SetPositionModeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_device_proto_msgTypes[3]
+	mi := &file_device_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -198,7 +110,7 @@ func (x *SetPositionModeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetPositionModeRequest.ProtoReflect.Descriptor instead.
 func (*SetPositionModeRequest) Descriptor() ([]byte, []int) {
-	return file_device_proto_rawDescGZIP(), []int{3}
+	return file_device_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SetPositionModeRequest) GetDeviceId() string {
@@ -212,7 +124,7 @@ func (x *SetPositionModeRequest) GetPositionMode() GeoPositionMode {
 	if x != nil && x.PositionMode != nil {
 		return *x.PositionMode
 	}
-	return GeoPositionMode_GEO_POSITION_MODE_AUTO
+	return GeoPositionMode_GEO_AUTO
 }
 
 type SetPositionRequest struct {
@@ -225,7 +137,7 @@ type SetPositionRequest struct {
 
 func (x *SetPositionRequest) Reset() {
 	*x = SetPositionRequest{}
-	mi := &file_device_proto_msgTypes[4]
+	mi := &file_device_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -237,7 +149,7 @@ func (x *SetPositionRequest) String() string {
 func (*SetPositionRequest) ProtoMessage() {}
 
 func (x *SetPositionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_device_proto_msgTypes[4]
+	mi := &file_device_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -250,7 +162,7 @@ func (x *SetPositionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetPositionRequest.ProtoReflect.Descriptor instead.
 func (*SetPositionRequest) Descriptor() ([]byte, []int) {
-	return file_device_proto_rawDescGZIP(), []int{4}
+	return file_device_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SetPositionRequest) GetDeviceId() string {
@@ -277,14 +189,7 @@ const file_device_proto_rawDesc = "" +
 	"\bdisabled\x18\x02 \x01(\bB\x06\xbaH\x03\xc8\x01\x01H\x01R\bdisabled\x88\x01\x01B\f\n" +
 	"\n" +
 	"_device_idB\v\n" +
-	"\t_disabled\"R\n" +
-	"\x13PositionModeRequest\x12-\n" +
-	"\tdevice_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01H\x00R\bdeviceId\x88\x01\x01B\f\n" +
-	"\n" +
-	"_device_id\"s\n" +
-	"\x14PositionModeResponse\x12I\n" +
-	"\rposition_mode\x18\x01 \x01(\x0e2\x17.api.v1.GeoPositionModeB\x06\xbaH\x03\xc8\x01\x01H\x00R\fpositionMode\x88\x01\x01B\x10\n" +
-	"\x0e_position_mode\"\xb2\x01\n" +
+	"\t_disabled\"\xb2\x01\n" +
 	"\x16SetPositionModeRequest\x12-\n" +
 	"\tdevice_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01H\x00R\bdeviceId\x88\x01\x01\x12I\n" +
 	"\rposition_mode\x18\x02 \x01(\x0e2\x17.api.v1.GeoPositionModeB\x06\xbaH\x03\xc8\x01\x01H\x01R\fpositionMode\x88\x01\x01B\f\n" +
@@ -296,10 +201,9 @@ const file_device_proto_rawDesc = "" +
 	"\bposition\x18\x02 \x01(\v2\x13.api.v1.GeoPositionB\x06\xbaH\x03\xc8\x01\x01H\x01R\bposition\x88\x01\x01B\f\n" +
 	"\n" +
 	"_device_idB\v\n" +
-	"\t_position2\xb3\x02\n" +
+	"\t_position2\xe6\x01\n" +
 	"\rDeviceService\x12C\n" +
 	"\vSetDisabled\x12\x1a.api.v1.SetDisabledRequest\x1a\x16.google.protobuf.Empty\"\x00\x12K\n" +
-	"\fPositionMode\x12\x1b.api.v1.PositionModeRequest\x1a\x1c.api.v1.PositionModeResponse\"\x00\x12K\n" +
 	"\x0fSetPositionMode\x12\x1e.api.v1.SetPositionModeRequest\x1a\x16.google.protobuf.Empty\"\x00\x12C\n" +
 	"\vSetPosition\x12\x1a.api.v1.SetPositionRequest\x1a\x16.google.protobuf.Empty\"\x00B\x83\x01\n" +
 	"\n" +
@@ -317,34 +221,29 @@ func file_device_proto_rawDescGZIP() []byte {
 	return file_device_proto_rawDescData
 }
 
-var file_device_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_device_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_device_proto_goTypes = []any{
 	(*SetDisabledRequest)(nil),     // 0: api.v1.SetDisabledRequest
-	(*PositionModeRequest)(nil),    // 1: api.v1.PositionModeRequest
-	(*PositionModeResponse)(nil),   // 2: api.v1.PositionModeResponse
-	(*SetPositionModeRequest)(nil), // 3: api.v1.SetPositionModeRequest
-	(*SetPositionRequest)(nil),     // 4: api.v1.SetPositionRequest
-	(GeoPositionMode)(0),           // 5: api.v1.GeoPositionMode
-	(*GeoPosition)(nil),            // 6: api.v1.GeoPosition
-	(*emptypb.Empty)(nil),          // 7: google.protobuf.Empty
+	(*SetPositionModeRequest)(nil), // 1: api.v1.SetPositionModeRequest
+	(*SetPositionRequest)(nil),     // 2: api.v1.SetPositionRequest
+	(GeoPositionMode)(0),           // 3: api.v1.GeoPositionMode
+	(*GeoPosition)(nil),            // 4: api.v1.GeoPosition
+	(*emptypb.Empty)(nil),          // 5: google.protobuf.Empty
 }
 var file_device_proto_depIdxs = []int32{
-	5, // 0: api.v1.PositionModeResponse.position_mode:type_name -> api.v1.GeoPositionMode
-	5, // 1: api.v1.SetPositionModeRequest.position_mode:type_name -> api.v1.GeoPositionMode
-	6, // 2: api.v1.SetPositionRequest.position:type_name -> api.v1.GeoPosition
-	0, // 3: api.v1.DeviceService.SetDisabled:input_type -> api.v1.SetDisabledRequest
-	1, // 4: api.v1.DeviceService.PositionMode:input_type -> api.v1.PositionModeRequest
-	3, // 5: api.v1.DeviceService.SetPositionMode:input_type -> api.v1.SetPositionModeRequest
-	4, // 6: api.v1.DeviceService.SetPosition:input_type -> api.v1.SetPositionRequest
-	7, // 7: api.v1.DeviceService.SetDisabled:output_type -> google.protobuf.Empty
-	2, // 8: api.v1.DeviceService.PositionMode:output_type -> api.v1.PositionModeResponse
-	7, // 9: api.v1.DeviceService.SetPositionMode:output_type -> google.protobuf.Empty
-	7, // 10: api.v1.DeviceService.SetPosition:output_type -> google.protobuf.Empty
-	7, // [7:11] is the sub-list for method output_type
-	3, // [3:7] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	3, // 0: api.v1.SetPositionModeRequest.position_mode:type_name -> api.v1.GeoPositionMode
+	4, // 1: api.v1.SetPositionRequest.position:type_name -> api.v1.GeoPosition
+	0, // 2: api.v1.DeviceService.SetDisabled:input_type -> api.v1.SetDisabledRequest
+	1, // 3: api.v1.DeviceService.SetPositionMode:input_type -> api.v1.SetPositionModeRequest
+	2, // 4: api.v1.DeviceService.SetPosition:input_type -> api.v1.SetPositionRequest
+	5, // 5: api.v1.DeviceService.SetDisabled:output_type -> google.protobuf.Empty
+	5, // 6: api.v1.DeviceService.SetPositionMode:output_type -> google.protobuf.Empty
+	5, // 7: api.v1.DeviceService.SetPosition:output_type -> google.protobuf.Empty
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_device_proto_init() }
@@ -356,15 +255,13 @@ func file_device_proto_init() {
 	file_device_proto_msgTypes[0].OneofWrappers = []any{}
 	file_device_proto_msgTypes[1].OneofWrappers = []any{}
 	file_device_proto_msgTypes[2].OneofWrappers = []any{}
-	file_device_proto_msgTypes[3].OneofWrappers = []any{}
-	file_device_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_device_proto_rawDesc), len(file_device_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

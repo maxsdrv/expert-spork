@@ -61,10 +61,10 @@ enum TargetClass {
 }
 
 enum AlarmLevel {
-  ALARM_LEVEL_NONE = 0;
-  ALARM_LEVEL_MEDIUM = 1;
-  ALARM_LEVEL_HIGH = 2;
-  ALARM_LEVEL_CRITICAL = 3;
+  ALARM_NONE = 0;
+  ALARM_MEDIUM = 1;
+  ALARM_HIGH = 2;
+  ALARM_CRITICAL = 3;
 }
 
 message AlarmStatus {

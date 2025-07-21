@@ -7,49 +7,31 @@ import (
 	"github.com/google/uuid"
 )
 
-type EntityId interface {
-	String() string
-	Equal(other EntityId) bool
+type DeviceId = EntityId
+type TargetId = EntityId
+type AlarmId = EntityId
 
-	isEntityId()
+type EntityId struct {
+	id string
 }
 
-type DeviceId EntityId
-type TargetId EntityId
-type AlarmId EntityId
-
-type entityId struct {
-	value string
-}
-
-func NewId(value string) (EntityId, error) {
-	trimmed := strings.TrimSpace(value)
+func NewId(uuid_arg string) (EntityId, error) {
+	trimmed := strings.TrimSpace(uuid_arg)
 	if err := uuid.Validate(trimmed); err != nil {
-		return nil, fmt.Errorf("new entity id: %w: %s", err, trimmed)
+		return EntityId{}, fmt.Errorf("new entity id: %w: %s", err, trimmed)
 	}
-	return &entityId{value: trimmed}, nil
+	return EntityId{id: trimmed}, nil
 }
 
 func GenerateId() EntityId {
 	id := uuid.New()
-	return &entityId{value: id.String()}
+	return EntityId{id: id.String()}
 }
 
-func (d *entityId) String() string {
-	if d == nil {
-		return ""
-	}
-	return d.value
+func (d EntityId) String() string {
+	return d.id
 }
 
-func (d *entityId) Equal(other EntityId) bool {
-	if d == nil && other == nil {
-		return true
-	}
-	if d == nil || other == nil {
-		return false
-	}
-	return d.value == other.String()
+func (d EntityId) Equal(other EntityId) bool {
+	return d.id == other.String()
 }
-
-func (d *entityId) isEntityId() {}

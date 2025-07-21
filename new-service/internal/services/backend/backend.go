@@ -2,10 +2,11 @@ package backend
 
 import (
 	"context"
-	"dds-provider/internal/core"
 	"fmt"
 
 	"github.com/opticoder/ctx-log/go/ctx_log"
+
+	"dds-provider/internal/core"
 )
 
 var logging = ctx_log.GetLogger(nil)
@@ -17,7 +18,7 @@ type BackendService interface {
 	Jammer(id core.DeviceId) (*core.JammerBase, error)
 	Sensor(id core.DeviceId) (*core.SensorBase, error)
 	Device(id core.DeviceId) (*core.DeviceBase, error)
-	AppendDevice(device core.DeviceBase) error
+	AppendDevice(id core.DeviceId, device core.DeviceBase)
 }
 
 type backendService struct {
@@ -34,42 +35,36 @@ func New(ctx context.Context) BackendService {
 	}
 }
 
-func (s *backendService) AppendDevice(device core.DeviceBase) error {
+func (s *backendService) AppendDevice(id core.DeviceId, device core.DeviceBase) {
 	if jammer, ok := device.(core.JammerBase); ok {
-		s.jammers[device.Id()] = &jammer
-		s.devices[device.Id()] = &device
-		return nil
+		s.jammers[id] = &jammer
+		s.devices[id] = &device
 	} else if sensor, ok := device.(core.SensorBase); ok {
-		s.sensors[device.Id()] = &sensor
-		s.devices[device.Id()] = &device
-		return nil
+		s.sensors[id] = &sensor
+		s.devices[id] = &device
 	} else {
-		return fmt.Errorf("incorrect device type, %s", device.Id())
+		logging.Errorf("backend: Incorrect device type, %s", id)
 	}
+}
+
+func getKeys[T any](m map[core.DeviceId]*T) []core.DeviceId {
+	ids := make([]core.DeviceId, 0, len(m))
+	for id := range m {
+		ids = append(ids, id)
+	}
+	return ids
 }
 
 func (s *backendService) ListJammers() []core.DeviceId {
-	ids := make([]core.DeviceId, 0, len(s.jammers))
-	for id := range s.jammers {
-		ids = append(ids, id)
-	}
-	return ids
+	return getKeys(s.jammers)
 }
 
 func (s *backendService) ListSensors() []core.DeviceId {
-	ids := make([]core.DeviceId, 0, len(s.sensors))
-	for id := range s.sensors {
-		ids = append(ids, id)
-	}
-	return ids
+	return getKeys(s.sensors)
 }
 
 func (s *backendService) ListDevices() []core.DeviceId {
-	ids := make([]core.DeviceId, 0, len(s.devices))
-	for id := range s.devices {
-		ids = append(ids, id)
-	}
-	return ids
+	return getKeys(s.devices)
 }
 
 func (s *backendService) Jammer(id core.DeviceId) (*core.JammerBase, error) {

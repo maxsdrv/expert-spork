@@ -2,16 +2,9 @@ package core
 
 import apiv1 "dds-provider/internal/generated/api/proto"
 
-type DeviceIdentifier interface {
-	Id() DeviceId
-}
-
-type DeviceSerial string
-type DeviceFingerprint string
-
-type DeviceData interface {
-	Serial() DeviceSerial
-	Fingerprint() DeviceFingerprint
+type DeviceDataReader interface {
+	Serial() string
+	Fingerprint() string
 }
 
 type DevicePositionReader interface {
@@ -21,7 +14,7 @@ type DevicePositionReader interface {
 
 type DevicePositionWriter interface {
 	SetPosition(position GeoPosition) error
-	SetPositionMode(mode apiv1.GeoPositionMode) error
+	SetPositionMode(mode GeoPositionMode) error
 }
 
 type DeviceDisabledReader interface {
@@ -32,8 +25,14 @@ type DeviceDisabledWriter interface {
 	SetDisabled(disabled bool)
 }
 
-type SensorJammerModeWriter interface {
-	SetJammerMode(mode apiv1.JammerMode) error
+type SensorJammerReader interface {
+	JammerIds() []DeviceId
+	JammerMode() JammerMode
+	JammerAutoTimeout() int32 //?seconds
+}
+
+type SensorJammerWriter interface {
+	SetJammerMode(mode JammerMode) error
 }
 
 type JammerBandsWriter interface {
@@ -41,7 +40,7 @@ type JammerBandsWriter interface {
 }
 
 type DeviceReader interface {
-	DeviceData
+	DeviceDataReader
 	DeviceDisabledReader
 	DevicePositionReader
 }
@@ -52,17 +51,22 @@ type DeviceWriter interface {
 }
 
 type DeviceBase interface {
-	DeviceIdentifier
 	DeviceWriter
 }
 type SensorBase interface {
 	DeviceBase
-	SensorJammerModeWriter
+	SensorJammerWriter
 }
 
 type Sensor interface {
 	SensorBase
 	DeviceReader
+	SensorJammerReader
+	SensorJammerWriter
+
+	SensorInfo() apiv1.SensorInfo
+	// SensorInfoDynamic should be composed inside Sensor on every parameter
+	// update using some private/global function
 }
 
 type SensorProxy SensorBase
@@ -75,6 +79,8 @@ type JammerBase interface {
 type Jammer interface {
 	JammerBase
 	DeviceReader
+
+	JammerInfo() apiv1.JammerInfo
 }
 
 type JammerProxy JammerBase

@@ -19,16 +19,6 @@ func (s *Handlers) SetDisabled(
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
-func (s *Handlers) PositionMode(
-	ctx context.Context,
-	req *connect.Request[apiv1.PositionModeRequest],
-) (*connect.Response[apiv1.PositionModeResponse], error) {
-	logger := logging.WithCtxFields(ctx)
-	logger.Debug("Request data: ", req.Msg)
-
-	return connect.NewResponse(&apiv1.PositionModeResponse{PositionMode: apiv1.GeoPositionMode_GEO_POSITION_MODE_AUTO.Enum()}), nil
-}
-
 func (s *Handlers) SetPositionMode(
 	ctx context.Context,
 	req *connect.Request[apiv1.SetPositionModeRequest],

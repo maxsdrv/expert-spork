@@ -1,9 +1,14 @@
 package core
 
-type AngleType float32
-type CoordinateType float64
+import (
+	"dds-provider/internal/generated/api/proto"
+)
 
-type GeoCoordinate struct {
-	lon CoordinateType
-	lat CoordinateType
+type GeoCoordinate apiv1.GeoCoordinate
+
+func NewGeoCoordinate(longitude float64, latitude float64) GeoCoordinate {
+	return (GeoCoordinate)(apiv1.GeoCoordinate{
+		Longitude: &longitude,
+		Latitude:  &latitude,
+	})
 }

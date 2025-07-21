@@ -25,22 +25,22 @@ const (
 type GeoPositionMode int32
 
 const (
-	GeoPositionMode_GEO_POSITION_MODE_AUTO          GeoPositionMode = 0
-	GeoPositionMode_GEO_POSITION_MODE_MANUAL        GeoPositionMode = 1
-	GeoPositionMode_GEO_POSITION_MODE_ALWAYS_MANUAL GeoPositionMode = 2
+	GeoPositionMode_GEO_AUTO          GeoPositionMode = 0
+	GeoPositionMode_GEO_MANUAL        GeoPositionMode = 1
+	GeoPositionMode_GEO_ALWAYS_MANUAL GeoPositionMode = 2
 )
 
 // Enum value maps for GeoPositionMode.
 var (
 	GeoPositionMode_name = map[int32]string{
-		0: "GEO_POSITION_MODE_AUTO",
-		1: "GEO_POSITION_MODE_MANUAL",
-		2: "GEO_POSITION_MODE_ALWAYS_MANUAL",
+		0: "GEO_AUTO",
+		1: "GEO_MANUAL",
+		2: "GEO_ALWAYS_MANUAL",
 	}
 	GeoPositionMode_value = map[string]int32{
-		"GEO_POSITION_MODE_AUTO":          0,
-		"GEO_POSITION_MODE_MANUAL":        1,
-		"GEO_POSITION_MODE_ALWAYS_MANUAL": 2,
+		"GEO_AUTO":          0,
+		"GEO_MANUAL":        1,
+		"GEO_ALWAYS_MANUAL": 2,
 	}
 )
 
@@ -354,11 +354,12 @@ const file_components_proto_rawDesc = "" +
 	"\n" +
 	"\b_voltageB\n" +
 	"\n" +
-	"\b_current*p\n" +
-	"\x0fGeoPositionMode\x12\x1a\n" +
-	"\x16GEO_POSITION_MODE_AUTO\x10\x00\x12\x1c\n" +
-	"\x18GEO_POSITION_MODE_MANUAL\x10\x01\x12#\n" +
-	"\x1fGEO_POSITION_MODE_ALWAYS_MANUAL\x10\x02B\x87\x01\n" +
+	"\b_current*F\n" +
+	"\x0fGeoPositionMode\x12\f\n" +
+	"\bGEO_AUTO\x10\x00\x12\x0e\n" +
+	"\n" +
+	"GEO_MANUAL\x10\x01\x12\x15\n" +
+	"\x11GEO_ALWAYS_MANUAL\x10\x02B\x87\x01\n" +
 	"\n" +
 	"com.api.v1B\x0fComponentsProtoP\x01Z/dds-provider/internal/generated/api/proto;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 

@@ -11,9 +11,6 @@ import "components.proto";
 service JammerService {
   rpc Jammers(google.protobuf.Empty) returns (JammersResponse) {}
 
-  //Get jammer ID list with SensorInfo first
-  rpc JammerInfo(JammerInfoRequest) returns (JammerInfoResponse) {}
-
   //Get the initial jammer state with the first stream message
   rpc JammerInfoDynamic(JammerInfoRequest) returns (stream JammerInfoDynamicResponse) {}
   
@@ -28,20 +25,21 @@ service JammerService {
   rpc SetJammerBands(SetJammerBandsRequest) returns (google.protobuf.Empty) {}
 }
 
-message JammersResponse {
-  repeated string jammer_id_list = 1 [(buf.validate.field).required = true, (buf.validate.field).repeated.items.string.uuid = true];
-}
-
-message JammerInfoRequest {
+message JammerInfo {
   optional string jammer_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
-}
-
-message JammerInfoResponse {
   optional string model = 2 [(buf.validate.field).required = true];
   optional string serial = 3;
   optional string sw_version = 4;
   optional string sensor_id = 10 [(buf.validate.field).string.uuid = true];
   optional string group_id = 15;
+}
+
+message JammersResponse {
+  repeated JammerInfo jammer_infos = 1 [(buf.validate.field).required = true];
+}
+
+message JammerInfoRequest {
+  optional string jammer_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
 }
 
 message JammerInfoDynamicRequest {
@@ -55,7 +53,7 @@ message JammerInfoDynamicResponse {
   optional GeoPositionMode position_mode = 8 [(buf.validate.field).required = true];
   repeated WorkzoneSector workzone = 9 [(buf.validate.field).required = true];
   repeated Band bands = 11 [(buf.validate.field).required = true];
-  repeated BandOptions band_options = 12;
+  repeated BandOption band_options = 12;
   optional HwInfo hw_info = 13;
   optional JammerTimeoutStatus timeout_status = 14;
 }
@@ -70,6 +68,7 @@ message JammerGroup {
   optional string name = 2 [(buf.validate.field).required = true];
 }
 
+//MOVE ws_reply_id inside implementation: provider can wait for ws result then hand it over to UI 
 message SetJammerBandsRequest {
   optional string jammer_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   // List of active bands. Skycope backend requires the right order of labels.
@@ -85,7 +84,7 @@ message Band {
   optional bool active = 2 [(buf.validate.field).required = true];
 }
 
-message BandOptions {
+message BandOption {
   repeated string bands = 1 [(buf.validate.field).required = true];
 }
 

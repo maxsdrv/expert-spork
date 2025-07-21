@@ -10,8 +10,6 @@ import "components.proto";
 service DeviceService {
   rpc SetDisabled(SetDisabledRequest) returns (google.protobuf.Empty) {}
 
-  rpc PositionMode(PositionModeRequest) returns (PositionModeResponse) {}
-
   rpc SetPositionMode(SetPositionModeRequest) returns (google.protobuf.Empty) {}
 
   rpc SetPosition(SetPositionRequest) returns (google.protobuf.Empty) {}
@@ -20,14 +18,6 @@ service DeviceService {
 message SetDisabledRequest {
   optional string device_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
   optional bool disabled = 2 [(buf.validate.field).required = true];
-}
-
-message PositionModeRequest {
-  optional string device_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
-}
-
-message PositionModeResponse {
-  optional GeoPositionMode position_mode = 1 [(buf.validate.field).required = true];
 }
 
 message SetPositionModeRequest {

@@ -36,9 +36,6 @@ const (
 const (
 	// JammerServiceJammersProcedure is the fully-qualified name of the JammerService's Jammers RPC.
 	JammerServiceJammersProcedure = "/api.v1.JammerService/Jammers"
-	// JammerServiceJammerInfoProcedure is the fully-qualified name of the JammerService's JammerInfo
-	// RPC.
-	JammerServiceJammerInfoProcedure = "/api.v1.JammerService/JammerInfo"
 	// JammerServiceJammerInfoDynamicProcedure is the fully-qualified name of the JammerService's
 	// JammerInfoDynamic RPC.
 	JammerServiceJammerInfoDynamicProcedure = "/api.v1.JammerService/JammerInfoDynamic"
@@ -52,8 +49,6 @@ const (
 // JammerServiceClient is a client for the api.v1.JammerService service.
 type JammerServiceClient interface {
 	Jammers(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.JammersResponse], error)
-	// Get jammer ID list with SensorInfo first
-	JammerInfo(context.Context, *connect.Request[proto.JammerInfoRequest]) (*connect.Response[proto.JammerInfoResponse], error)
 	// Get the initial jammer state with the first stream message
 	JammerInfoDynamic(context.Context, *connect.Request[proto.JammerInfoRequest]) (*connect.ServerStreamForClient[proto.JammerInfoDynamicResponse], error)
 	Groups(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.GroupsResponse], error)
@@ -83,12 +78,6 @@ func NewJammerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(jammerServiceMethods.ByName("Jammers")),
 			connect.WithClientOptions(opts...),
 		),
-		jammerInfo: connect.NewClient[proto.JammerInfoRequest, proto.JammerInfoResponse](
-			httpClient,
-			baseURL+JammerServiceJammerInfoProcedure,
-			connect.WithSchema(jammerServiceMethods.ByName("JammerInfo")),
-			connect.WithClientOptions(opts...),
-		),
 		jammerInfoDynamic: connect.NewClient[proto.JammerInfoRequest, proto.JammerInfoDynamicResponse](
 			httpClient,
 			baseURL+JammerServiceJammerInfoDynamicProcedure,
@@ -113,7 +102,6 @@ func NewJammerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 // jammerServiceClient implements JammerServiceClient.
 type jammerServiceClient struct {
 	jammers           *connect.Client[emptypb.Empty, proto.JammersResponse]
-	jammerInfo        *connect.Client[proto.JammerInfoRequest, proto.JammerInfoResponse]
 	jammerInfoDynamic *connect.Client[proto.JammerInfoRequest, proto.JammerInfoDynamicResponse]
 	groups            *connect.Client[emptypb.Empty, proto.GroupsResponse]
 	setJammerBands    *connect.Client[proto.SetJammerBandsRequest, emptypb.Empty]
@@ -122,11 +110,6 @@ type jammerServiceClient struct {
 // Jammers calls api.v1.JammerService.Jammers.
 func (c *jammerServiceClient) Jammers(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[proto.JammersResponse], error) {
 	return c.jammers.CallUnary(ctx, req)
-}
-
-// JammerInfo calls api.v1.JammerService.JammerInfo.
-func (c *jammerServiceClient) JammerInfo(ctx context.Context, req *connect.Request[proto.JammerInfoRequest]) (*connect.Response[proto.JammerInfoResponse], error) {
-	return c.jammerInfo.CallUnary(ctx, req)
 }
 
 // JammerInfoDynamic calls api.v1.JammerService.JammerInfoDynamic.
@@ -147,8 +130,6 @@ func (c *jammerServiceClient) SetJammerBands(ctx context.Context, req *connect.R
 // JammerServiceHandler is an implementation of the api.v1.JammerService service.
 type JammerServiceHandler interface {
 	Jammers(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.JammersResponse], error)
-	// Get jammer ID list with SensorInfo first
-	JammerInfo(context.Context, *connect.Request[proto.JammerInfoRequest]) (*connect.Response[proto.JammerInfoResponse], error)
 	// Get the initial jammer state with the first stream message
 	JammerInfoDynamic(context.Context, *connect.Request[proto.JammerInfoRequest], *connect.ServerStream[proto.JammerInfoDynamicResponse]) error
 	Groups(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.GroupsResponse], error)
@@ -174,12 +155,6 @@ func NewJammerServiceHandler(svc JammerServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(jammerServiceMethods.ByName("Jammers")),
 		connect.WithHandlerOptions(opts...),
 	)
-	jammerServiceJammerInfoHandler := connect.NewUnaryHandler(
-		JammerServiceJammerInfoProcedure,
-		svc.JammerInfo,
-		connect.WithSchema(jammerServiceMethods.ByName("JammerInfo")),
-		connect.WithHandlerOptions(opts...),
-	)
 	jammerServiceJammerInfoDynamicHandler := connect.NewServerStreamHandler(
 		JammerServiceJammerInfoDynamicProcedure,
 		svc.JammerInfoDynamic,
@@ -202,8 +177,6 @@ func NewJammerServiceHandler(svc JammerServiceHandler, opts ...connect.HandlerOp
 		switch r.URL.Path {
 		case JammerServiceJammersProcedure:
 			jammerServiceJammersHandler.ServeHTTP(w, r)
-		case JammerServiceJammerInfoProcedure:
-			jammerServiceJammerInfoHandler.ServeHTTP(w, r)
 		case JammerServiceJammerInfoDynamicProcedure:
 			jammerServiceJammerInfoDynamicHandler.ServeHTTP(w, r)
 		case JammerServiceGroupsProcedure:
@@ -221,10 +194,6 @@ type UnimplementedJammerServiceHandler struct{}
 
 func (UnimplementedJammerServiceHandler) Jammers(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.JammersResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.JammerService.Jammers is not implemented"))
-}
-
-func (UnimplementedJammerServiceHandler) JammerInfo(context.Context, *connect.Request[proto.JammerInfoRequest]) (*connect.Response[proto.JammerInfoResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.JammerService.JammerInfo is not implemented"))
 }
 
 func (UnimplementedJammerServiceHandler) JammerInfoDynamic(context.Context, *connect.Request[proto.JammerInfoRequest], *connect.ServerStream[proto.JammerInfoDynamicResponse]) error {

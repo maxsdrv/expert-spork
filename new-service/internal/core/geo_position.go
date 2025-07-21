@@ -1,13 +1,18 @@
 package core
 
-type GeoPosition interface {
-	Azimuth() AngleType
-	GeoCoordinate() GeoCoordinate
-}
+import (
+	apiv1 "dds-provider/internal/generated/api/proto"
+)
 
-type geoPosition struct {
-	azimuth    AngleType
-	coordinate GeoCoordinate
-}
+type GeoPositionMode apiv1.GeoPositionMode
+type GeoPosition apiv1.GeoPosition
 
-//func NewDevicePosition(jsonStr string) DevicePosition {}
+func NewGeoPosition(longitude float64, latitude float64, azimuth float64) GeoPosition {
+	return (GeoPosition)(apiv1.GeoPosition{
+		Coordinate: &apiv1.GeoCoordinate{
+			Longitude: &longitude,
+			Latitude:  &latitude,
+		},
+		Azimuth: &azimuth,
+	})
+}
