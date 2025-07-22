@@ -15,15 +15,15 @@ const (
 	maxBackoff   = 10 * time.Second
 )
 
-func (s *Device) startConnection(ctx context.Context) {
+func (d *Device) startConnection(ctx context.Context) {
 	logger := logging.WithCtxFields(ctx)
 
 	logger.Debugf("Starting connection")
 
 	delay := minBackoff
 	for !errors.Is(ctx.Err(), context.Canceled) {
-		logger.Infof("Connecting to websocket %s", s.urlWs)
-		conn, _, err := websocket.Dial(ctx, s.urlWs, nil)
+		logger.Infof("Connecting to websocket %s", d.urlWs)
+		conn, _, err := websocket.Dial(ctx, d.urlWs, nil)
 		if err != nil {
 			logger.WithError(err).Errorf("Dial failed, retrying in %v", delay)
 			time.Sleep(delay)
@@ -36,8 +36,8 @@ func (s *Device) startConnection(ctx context.Context) {
 		conn.SetReadLimit(1024 * 1024 * 10) // 10MB
 		pingCtx, pingCancel := context.WithCancel(ctx)
 
-		go s.monitorPingPong(pingCtx, conn, pingCancel)
-		s.updateLoop(pingCtx, conn)
+		go d.monitorPingPong(pingCtx, conn, pingCancel)
+		d.updateLoop(pingCtx, conn)
 
 		pingCancel()
 		conn.CloseNow()
@@ -45,10 +45,10 @@ func (s *Device) startConnection(ctx context.Context) {
 	}
 }
 
-func (s *Device) monitorPingPong(ctx context.Context, conn *websocket.Conn, cancel context.CancelFunc) {
+func (d *Device) monitorPingPong(ctx context.Context, conn *websocket.Conn, cancel context.CancelFunc) {
 	logger := logging.WithCtxFields(ctx)
 
-	logger.Debugf("Pinging WebSocket %s", s.urlWs)
+	logger.Debugf("Pinging WebSocket %s", d.urlWs)
 
 	pingTicker := time.NewTicker(pingInterval)
 	defer pingTicker.Stop()

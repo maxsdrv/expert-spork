@@ -2,7 +2,7 @@ package proxy
 
 import (
 	"context"
-	apiv1 "dds-provider/internal/generated/api/proto"
+	"dds-provider/internal/services/backend"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -42,17 +42,18 @@ type Device struct {
 	jammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic]
 	sensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic]
 	sensorMapper   *SensorDataMapper
-	sensorInfoMap  map[string]*core.SensorInfo
 }
 
 type Service struct {
-	devices map[string]*Device
+	devices        map[string]*Device
+	backendService backend.BackendService
 }
 
 func New(ctx context.Context,
 	connections []Connection,
 	jammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic],
 	sensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic],
+	backendService backend.BackendService,
 ) *Service {
 	devices := make(map[string]*Device)
 
@@ -72,18 +73,24 @@ func New(ctx context.Context,
 			jammerNotifier: jammerNotifier,
 			sensorNotifier: sensorNotifier,
 			sensorMapper:   NewSensorDataMapper(),
-			sensorInfoMap:  make(map[string]*core.SensorInfo),
 		}
 
 		go devices[connection.Host].connect(ctx, connection.PortWs)
 	}
 
-	return &Service{devices: devices}
+	service := &Service{
+		devices:        devices,
+		backendService: backendService,
+	}
+
+	service.discoverAndRegisterSensors(ctx)
+
+	return service
 }
 
-func (s *Device) connect(ctx context.Context, portWs int) {
+func (d *Device) connect(ctx context.Context, portWs int) {
 	logger := logging.WithCtxFields(ctx)
-	ctx = logger.SetCtxField(ctx, enums.LogFieldHost, s.host)
+	ctx = logger.SetCtxField(ctx, enums.LogFieldHost, d.host)
 
 	retryDelay := time.Second
 	maxRetryDelay := 30 * time.Second
@@ -91,7 +98,7 @@ func (s *Device) connect(ctx context.Context, portWs int) {
 	for {
 		logger.Debug("Connection started")
 
-		_, _, err := s.common.GetApiVersion(ctx).Execute()
+		_, _, err := d.common.GetApiVersion(ctx).Execute()
 		if err != nil {
 			logger.WithError(err).Error("failed to connect to DDS target service")
 
@@ -118,7 +125,7 @@ func (s *Device) connect(ctx context.Context, portWs int) {
 				timer := time.NewTimer(healthCheckInterval)
 				select {
 				case <-timer.C:
-					_, _, err := s.common.GetApiVersion(ctx).Execute()
+					_, _, err := d.common.GetApiVersion(ctx).Execute()
 					logger.Tracef("Health check started")
 					if err != nil {
 						logger.WithError(err).Errorf("failed to health check, retrying in %v ", healthRetryDelay)
@@ -141,11 +148,11 @@ func (s *Device) connect(ctx context.Context, portWs int) {
 		break
 	}
 
-	s.urlWs = fmt.Sprintf("ws://%s:%d", s.host, portWs)
-	s.startConnection(ctx)
+	d.urlWs = fmt.Sprintf("ws://%s:%d", d.host, portWs)
+	d.startConnection(ctx)
 }
 
-func (s *Device) updateLoop(ctx context.Context, conn *websocket.Conn) {
+func (d *Device) updateLoop(ctx context.Context, conn *websocket.Conn) {
 	logger := logging.WithCtxFields(ctx)
 
 	for {
@@ -178,7 +185,7 @@ func (s *Device) updateLoop(ctx context.Context, conn *websocket.Conn) {
 			continue
 		}
 
-		if err = s.processMessage(ctx, msgType, dataRaw); err != nil {
+		if err = d.processMessage(ctx, msgType, dataRaw); err != nil {
 			logger.WithError(err).Errorf("Failed to process message type: %s", msgType)
 			continue
 		}
@@ -188,21 +195,21 @@ func (s *Device) updateLoop(ctx context.Context, conn *websocket.Conn) {
 	logger.Warn("UpdateLoop ended")
 }
 
-func (s *Device) processMessage(ctx context.Context, msgType string, dataRaw json.RawMessage) error {
+func (d *Device) processMessage(ctx context.Context, msgType string, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
 	switch msgType {
 	case msgTypeSensorInfo:
-		return s.processSensorInfo(ctx, dataRaw)
+		return d.processSensorInfo(ctx, dataRaw)
 	case msgTypeLicenseStatus:
-		return s.licenseStatusUpdate(ctx, dataRaw)
+		return d.licenseStatusUpdate(ctx, dataRaw)
 	default:
 		logger.Tracef("Unknown message type: %s", msgType)
 		return nil
 	}
 }
 
-func (s *Device) licenseStatusUpdate(ctx context.Context, dataRaw json.RawMessage) error {
+func (d *Device) licenseStatusUpdate(ctx context.Context, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
 	var licenseStatus dss_target_service.LicenseStatus
@@ -219,67 +226,40 @@ func (s *Device) licenseStatusUpdate(ctx context.Context, dataRaw json.RawMessag
 	return nil
 }
 
-func (s *Service) GetSensorInfo(sensorId string) (*core.SensorInfo, error) {
-	if len(s.devices) == 0 {
-		return nil, fmt.Errorf("no devices found")
-	}
-
-	for _, device := range s.devices {
-		if info, ok := device.sensorInfoMap[sensorId]; ok {
-			return info, nil
-		}
-	}
-	return nil, fmt.Errorf("sensor info not found")
-}
-
-func (s *Service) GetSensorIds() []string {
-	var ids []string
-	for _, device := range s.devices {
-		for id := range device.sensorInfoMap {
-			ids = append(ids, id)
-		}
-	}
-	return ids
-}
-
-func (s *Service) SetJammerMode(ctx context.Context, deviceId core.DeviceId, jammerMode apiv1.JammerMode, timeout int32) error {
+func (s *Service) discoverAndRegisterSensors(ctx context.Context) {
 	logger := logging.WithCtxFields(ctx)
 
-	var targetDevice *Device
 	for _, device := range s.devices {
-		for sensorId, sensorInfo := range device.sensorInfoMap {
-			if sensorInfo.DeviceId.Equal(deviceId) {
-				targetDevice = device
-				logger.Debugf("Found sensor %s in device %s", sensorId, device.host)
-				break
+		sensors, err := device.discoverSensors(ctx)
+		if err != nil {
+			logger.WithError(err).Errorf("Failed to discover sensors from device %s", device.host)
+			continue
+		}
+
+		for _, sensorInfo := range sensors {
+			deviceId, err := core.NewId(sensorInfo.Id)
+			if err != nil {
+				logger.WithError(err).Errorf("Failed to create device ID for sensor %s", sensorInfo.Id)
+				continue
 			}
+
+			proxySensor := NewSensor(sensorInfo.Id, device.sensor)
+			s.backendService.AppendDevice(deviceId, proxySensor)
+
+			logger.Infof("Registered sensor %s from device %s", sensorInfo.Id, device.host)
 		}
-		if targetDevice != nil {
-			break
-		}
 	}
-	if targetDevice == nil {
-		return fmt.Errorf("device %s not found", deviceId)
-	}
+}
 
-	mode, err := targetDevice.sensorMapper.ConvertJammerMode(jammerMode)
+func (d *Device) discoverSensors(ctx context.Context) ([]dss_target_service.SensorInfo, error) {
+	logger := logging.WithCtxFields(ctx)
+
+	sensorList, resp, err := d.sensor.GetSensors(ctx).Execute()
 	if err != nil {
-		logger.WithError(err).Error("Failed to convert jammer mode")
-		return err
+		logger.WithError(err).Error("Failed to get sensors from device")
+		return nil, err
 	}
+	defer resp.Body.Close()
 
-	setJammerModeReq := dss_target_service.SetJammerModeRequest{
-		Id:         deviceId.String(),
-		JammerMode: mode,
-		Timeout:    timeout,
-	}
-
-	_, err = targetDevice.sensor.SetJammerMode(ctx).SetJammerModeRequest(setJammerModeReq).Execute()
-	if err != nil {
-		logger.WithError(err).Error("Failed to set jammer mode")
-		return err
-	}
-	logger.Infof("Successfully set jammer mode %s", mode)
-
-	return nil
+	return sensorList.Sensors, nil
 }

@@ -8,7 +8,7 @@ import (
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 )
 
-func (s *Device) processSensorInfo(ctx context.Context, dataRaw json.RawMessage) error {
+func (d *Device) processSensorInfo(ctx context.Context, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
 	var sensor dss_target_service.SensorInfo
@@ -23,32 +23,23 @@ func (s *Device) processSensorInfo(ctx context.Context, dataRaw json.RawMessage)
 		return err
 	}
 
-	s.sensorInfoMap[sensor.Id] = &core.SensorInfo{
-		DeviceId:  deviceId,
-		Type:      core.ConvertSensorType(string(sensor.Type)),
-		Model:     &sensor.Model,
-		Serial:    sensor.Serial,
-		SwVersion: sensor.SwVersion,
-		JammerIds: sensor.JammerIds,
-	}
-
-	dynamicInfo, err := s.dynamicSensorInfo(ctx, dataRaw, deviceId)
+	dynamicInfo, err := d.dynamicSensorInfo(ctx, dataRaw, deviceId)
 	if err != nil {
 		logger.WithError(err).Error("Failed to update sensor info")
 		return err
 	}
 
-	s.sensorNotifier.Notify(ctx, dynamicInfo)
+	d.sensorNotifier.Notify(ctx, dynamicInfo)
 
 	logger.Tracef("Successfully updated sensor info")
 
 	return nil
 }
 
-func (s *Device) dynamicSensorInfo(ctx context.Context, dataRaw json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
+func (d *Device) dynamicSensorInfo(ctx context.Context, dataRaw json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
 	logger := logging.WithCtxFields(ctx)
 
-	sensorInfoDynamic, err := s.sensorMapper.ConvertToSensorInfoDynamic(ctx, dataRaw, deviceId)
+	sensorInfoDynamic, err := d.sensorMapper.ConvertToSensorInfoDynamic(ctx, dataRaw, deviceId)
 	if err != nil {
 		logger.WithError(err).Error("Sensor info dynamic response failed")
 		return nil, err

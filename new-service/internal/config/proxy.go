@@ -1,11 +1,10 @@
 package config
 
 import (
+	"dds-provider/internal/devices/proxy"
 	"log"
 	"strconv"
 	"strings"
-
-	"dds-provider/internal/devices/bulat/proxy"
 )
 
 const (

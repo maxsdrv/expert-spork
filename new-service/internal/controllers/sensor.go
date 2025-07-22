@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"context"
+	"dds-provider/internal/devices/proxy"
+	"fmt"
 
 	"connectrpc.com/connect"
 
@@ -16,25 +18,30 @@ func (s *Controllers) GetSensors(
 
 	logger.Debug("Get sensors request")
 
-	ids := s.svcTargetProvider.GetSensorIds()
+	ids := s.svcBackend.ListSensors()
 
-	return connect.NewResponse(&apiv1.SensorsResponse{
-		SensorIdList: ids,
-	}), nil
-}
+	var sensorInfos []*apiv1.SensorInfo
 
-func (s *Controllers) GetSensorInfo(ctx context.Context, sensorId string) (*connect.Response[apiv1.SensorInfoResponse], error) {
-	logger := logging.WithCtxFields(ctx)
+	for _, sensorId := range ids {
+		sensorBase, err := s.svcBackend.Sensor(sensorId)
+		if err != nil {
+			logger.WithError(err).Errorf("Failed to get sensor %s", sensorId)
+			continue
+		}
 
-	logger.Debug("Get sensor info")
-
-	sensorInfo, err := s.svcTargetProvider.GetSensorInfo(sensorId)
-	if err != nil {
-		logger.Errorf("Get sensor info error: %v", err)
-		return nil, err
+		if proxySensor, ok := (*sensorBase).(*proxy.Sensor); ok {
+			sensorInfo, err := proxySensor.GetSensorInfo(ctx)
+			if err != nil {
+				logger.WithError(err).Errorf("Failed to get sensor info for sensor %s", sensorId)
+				continue
+			}
+			sensorInfos = append(sensorInfos, sensorInfo)
+		}
 	}
 
-	return connect.NewResponse(sensorInfo.ToAPI()), nil
+	return connect.NewResponse(&apiv1.SensorsResponse{
+		SensorInfos: sensorInfos,
+	}), nil
 }
 
 func (s *Controllers) SensorInfoDynamic(
@@ -83,19 +90,27 @@ func (s *Controllers) SetJammerMode(ctx context.Context,
 
 	logger.Debugf("Set jammer mode for sensor %s to %s", sensorId, jammerMode)
 
-	sensorInfo, err := s.svcTargetProvider.GetSensorInfo(sensorId)
+	deviceId, err := core.NewId(sensorId)
 	if err != nil {
-		logger.WithError(err).Errorf("Get sensor info error: %v", err)
-		return connect.NewError(connect.CodeInternal, err)
+		return connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	deviceId := sensorInfo.DeviceId
-
-	err = s.svcTargetProvider.SetJammerMode(ctx, deviceId, jammerMode, timeout)
+	sensorBase, err := s.svcBackend.Sensor(deviceId)
 	if err != nil {
-		logger.WithError(err).Errorf("Set sensor info error: %v", err)
-		return connect.NewError(connect.CodeInternal, err)
+		logger.WithError(err).Errorf("Sensor not found %s", sensorId)
+		return connect.NewError(connect.CodeNotFound, err)
 	}
 
-	return nil
+	if jammerWriter, ok := (*sensorBase).(core.SensorJammerWriter); ok {
+		err = jammerWriter.SetJammerMode(core.JammerMode(jammerMode), timeout)
+		if err != nil {
+			logger.WithError(err).Errorf("Failed to set jammer mode for sensor %s", sensorId)
+			return connect.NewError(connect.CodeInternal, err)
+		}
+
+		logger.Infof("Successfully set jammer mode for sensor %s to %s", sensorId, jammerMode)
+		return nil
+	}
+
+	return connect.NewError(connect.CodeInternal, fmt.Errorf("sensor doesnot support jammer mode"))
 }

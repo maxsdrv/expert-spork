@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"dds-provider/internal/core"
-	"dds-provider/internal/devices/bulat/proxy"
+	"dds-provider/internal/devices/proxy"
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/common"
 	"dds-provider/internal/services/notifier"

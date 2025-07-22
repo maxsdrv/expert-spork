@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"connectrpc.com/connect"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"dds-provider/internal/generated/api/proto"
@@ -18,27 +17,7 @@ func (s *Handlers) Sensors(
 	logger := logging.WithCtxFields(ctx)
 	logger.Debug("Request data: ", req.Msg)
 
-	sensorInfos := []*apiv1.SensorInfo{
-		{
-			SensorId: proto.String("550e8400-e29b-41d4-a716-446655440001"),
-			Type:     apiv1.SensorType_SENSOR_RFD.Enum(),
-			Model:    proto.String("RF Detector 1"),
-		},
-		{
-			SensorId: proto.String("550e8400-e29b-41d4-a716-446655440002"),
-			Type:     apiv1.SensorType_SENSOR_RADAR.Enum(),
-			Model:    proto.String("Radar Sensor 1"),
-		},
-		{
-			SensorId: proto.String("550e8400-e29b-41d4-a716-446655440003"),
-			Type:     apiv1.SensorType_SENSOR_CAMERA.Enum(),
-			Model:    proto.String("Camera Sensor 1"),
-		},
-	}
-
-	return connect.NewResponse(&apiv1.SensorsResponse{
-		SensorInfos: sensorInfos,
-	}), nil
+	return s.controllers.GetSensors(ctx)
 }
 
 func (s *Handlers) SensorInfoDynamic(
@@ -49,7 +28,14 @@ func (s *Handlers) SensorInfoDynamic(
 	logger := logging.WithCtxFields(ctx)
 	logger.Debug("Request data: ", req.Msg)
 
-	return nil
+	sensorId := req.Msg.GetSensorId()
+	if sensorId == "" {
+		return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("sensor id is required"))
+	}
+
+	return s.controllers.SensorInfoDynamic(ctx, sensorId, func(response *apiv1.SensorInfoDynamicResponse) error {
+		return rep.Send(response)
+	})
 }
 
 func (s *Handlers) SetJammerMode(

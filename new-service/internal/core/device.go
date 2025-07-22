@@ -13,7 +13,7 @@ type DevicePositionReader interface {
 }
 
 type DevicePositionWriter interface {
-	SetPosition(position GeoPosition) error
+	SetPosition(position *GeoPosition) error
 	SetPositionMode(mode GeoPositionMode) error
 }
 
@@ -32,7 +32,7 @@ type SensorJammerReader interface {
 }
 
 type SensorJammerWriter interface {
-	SetJammerMode(mode JammerMode) error
+	SetJammerMode(mode JammerMode, timeout int32) error
 }
 
 type JammerBandsWriter interface {
