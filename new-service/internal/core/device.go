@@ -62,7 +62,6 @@ type Sensor interface {
 	SensorBase
 	DeviceReader
 	SensorJammerReader
-	SensorJammerWriter
 
 	SensorInfo() apiv1.SensorInfo
 	// SensorInfoDynamic should be composed inside Sensor on every parameter

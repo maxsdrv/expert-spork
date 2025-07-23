@@ -15,14 +15,13 @@ import (
 
 	"dds-provider/internal/config"
 	"dds-provider/internal/controllers"
-	"dds-provider/internal/devices/proxy"
-
 	"dds-provider/internal/core"
 	"dds-provider/internal/generated/api/proto/apiv1connect"
 	"dds-provider/internal/handlers"
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/common"
 	"dds-provider/internal/services/notifier"
+	"dds-provider/internal/services/wsclient"
 )
 
 func main() {
@@ -47,7 +46,7 @@ func main() {
 	svcJammerNotifier := notifier.New[*core.JammerInfoDynamic](ctx)
 	svcSensorNotifier := notifier.New[*core.SensorInfoDynamic](ctx)
 
-	bulatService := proxy.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier, svcBackend)
+	proxyService := wsclient.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier, svcBackend)
 
 	//if id, err := core.NewId("550e8400-e29b-41d4-a716-446655440000"); err == nil {
 	//	svcNotifier.Notify(ctx, core.TestJammerInfoDynamic(id))
@@ -56,7 +55,7 @@ func main() {
 	//	panic(err)
 	//}
 
-	controllers := controllers.New(svcCommon, svcBackend, svcJammerNotifier, svcSensorNotifier, bulatService)
+	controllers := controllers.New(svcCommon, svcBackend, svcJammerNotifier, svcSensorNotifier, proxyService)
 	handlers := handlers.New(controllers)
 	interceptors := connect.WithInterceptors(
 		middleware.NewLoggingInterceptor(),

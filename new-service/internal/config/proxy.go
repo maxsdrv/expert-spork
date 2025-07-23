@@ -1,7 +1,7 @@
 package config
 
 import (
-	"dds-provider/internal/devices/proxy"
+	"dds-provider/internal/services/wsclient"
 	"log"
 	"strconv"
 	"strings"
@@ -16,7 +16,7 @@ var Proxy struct {
 	Devices []string `envSeparator:" "`
 }
 
-var TargetProviderConnections []proxy.Connection
+var TargetProviderConnections []wsclient.Connection
 
 func init() {
 	load(&Proxy)
@@ -27,8 +27,8 @@ func init() {
 	}
 }
 
-func parseConnection(device string) proxy.Connection {
-	var connection proxy.Connection
+func parseConnection(device string) wsclient.Connection {
+	var connection wsclient.Connection
 
 	entry := strings.SplitN(device, "#", 2)[0]
 	hostParts := strings.Split(entry, ":")

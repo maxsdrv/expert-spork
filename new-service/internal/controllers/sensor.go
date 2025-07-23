@@ -2,12 +2,13 @@ package controllers
 
 import (
 	"context"
-	"dds-provider/internal/devices/proxy"
 	"fmt"
 
 	"connectrpc.com/connect"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"dds-provider/internal/core"
+	"dds-provider/internal/devices/proxy"
 	apiv1 "dds-provider/internal/generated/api/proto"
 )
 
@@ -113,4 +114,26 @@ func (s *Controllers) SetJammerMode(ctx context.Context,
 	}
 
 	return connect.NewError(connect.CodeInternal, fmt.Errorf("sensor doesnot support jammer mode"))
+}
+
+func (s *Controllers) SetPositionMode(
+	ctx context.Context,
+	req *connect.Request[apiv1.SetPositionModeRequest],
+) (*connect.Response[emptypb.Empty], error) {
+	logger := logging.WithCtxFields(ctx)
+	logger.Debug("Request data: ", req.Msg)
+	logger.Debug("Position mode: ", req.Msg.PositionMode)
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
+func (s *Controllers) SetPosition(
+	ctx context.Context,
+	req *connect.Request[apiv1.SetPositionRequest],
+) (*connect.Response[emptypb.Empty], error) {
+	logger := logging.WithCtxFields(ctx)
+	logger.Debug("Request data: ", req.Msg)
+	logger.Debug("Position: ", req.Msg.Position)
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
 }
