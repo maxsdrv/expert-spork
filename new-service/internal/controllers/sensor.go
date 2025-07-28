@@ -8,7 +8,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"dds-provider/internal/core"
-	"dds-provider/internal/devices/proxy"
 	apiv1 "dds-provider/internal/generated/api/proto"
 )
 
@@ -30,14 +29,8 @@ func (s *Controllers) GetSensors(
 			continue
 		}
 
-		if proxySensor, ok := (*sensorBase).(*proxy.Sensor); ok {
-			sensorInfo, err := proxySensor.GetSensorInfo(ctx)
-			if err != nil {
-				logger.WithError(err).Errorf("Failed to get sensor info for sensor %s", sensorId)
-				continue
-			}
-			sensorInfos = append(sensorInfos, sensorInfo)
-		}
+		sensorInfo := (*sensorBase).SensorInfo()
+		sensorInfos = append(sensorInfos, &sensorInfo)
 	}
 
 	return connect.NewResponse(&apiv1.SensorsResponse{
