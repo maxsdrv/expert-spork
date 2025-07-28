@@ -61,7 +61,7 @@ func (m *SensorDataMapper) ConvertToSensorInfoDynamic(ctx context.Context, data 
 	return sensorInfo, nil
 }
 
-func (m *SensorDataMapper) convertJammerMode(jammerMode core.JammerMode) (dss_target_service.JammerMode, error) {
+func (m *SensorDataMapper) ConvertJammerMode(jammerMode core.JammerMode) (dss_target_service.JammerMode, error) {
 	switch jammerMode {
 	case core.JammerMode(apiv1.JammerMode_JAMMER_AUTO):
 		return dss_target_service.JAMMERMODE_AUTO, nil
@@ -72,7 +72,7 @@ func (m *SensorDataMapper) convertJammerMode(jammerMode core.JammerMode) (dss_ta
 	}
 }
 
-func (m *SensorDataMapper) convertToAPISensorInfo(sensorInfo dss_target_service.SensorInfo) *apiv1.SensorInfo {
+func (m *SensorDataMapper) ConvertToAPISensorInfo(sensorInfo dss_target_service.SensorInfo) *apiv1.SensorInfo {
 	var sensorType *apiv1.SensorType
 
 	switch sensorInfo.Type {

@@ -35,8 +35,16 @@ type SensorJammerWriter interface {
 	SetJammerMode(mode JammerMode, timeout int32) error
 }
 
+type SensorInfoReader interface {
+	SensorInfo() apiv1.SensorInfo
+}
+
 type JammerBandsWriter interface {
 	SetJammerBands(bands JammerBands, duration int32) error
+}
+
+type JammerInfoReader interface {
+	JammerInfo() apiv1.JammerInfo
 }
 
 type DeviceReader interface {
@@ -56,6 +64,7 @@ type DeviceBase interface {
 type SensorBase interface {
 	DeviceBase
 	SensorJammerWriter
+	SensorInfoReader
 }
 
 type Sensor interface {
@@ -63,7 +72,8 @@ type Sensor interface {
 	DeviceReader
 	SensorJammerReader
 
-	SensorInfo() apiv1.SensorInfo
+	//	SensorInfo() apiv1.SensorInfo
+	//
 	// SensorInfoDynamic should be composed inside Sensor on every parameter
 	// update using some private/global function
 }
@@ -73,13 +83,12 @@ type SensorProxy SensorBase
 type JammerBase interface {
 	DeviceBase
 	JammerBandsWriter
+	JammerInfoReader
 }
 
 type Jammer interface {
 	JammerBase
 	DeviceReader
-
-	JammerInfo() apiv1.JammerInfo
 }
 
 type JammerProxy JammerBase

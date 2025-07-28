@@ -2,12 +2,16 @@ package proxy
 
 import (
 	"context"
-	"dds-provider/internal/services/wsclient"
+
+	"github.com/opticoder/ctx-log/go/ctx_log"
 
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
+	"dds-provider/internal/services/wsclient"
 )
+
+var logging = ctx_log.GetLogger(nil)
 
 type Sensor struct {
 	sensorId     string
@@ -24,7 +28,7 @@ func NewSensor(sensorId string, api *dss_target_service.SensorAPIService) *Senso
 }
 
 func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
-	dssMode, err := s.sensorMapper.convertJammerMode(mode)
+	dssMode, err := s.sensorMapper.ConvertJammerMode(mode)
 	if err != nil {
 		return err
 	}
@@ -54,7 +58,7 @@ func (s *Sensor) GetSensorInfo(ctx context.Context) (*apiv1.SensorInfo, error) {
 
 	info := sensorInfo.GetSensorInfo()
 
-	return s.sensorMapper.convertToAPISensorInfo(info), nil
+	return s.sensorMapper.ConvertToAPISensorInfo(info), nil
 }
 
 func (s *Sensor) GetSensorId() string {

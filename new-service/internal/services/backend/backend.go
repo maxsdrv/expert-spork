@@ -75,6 +75,8 @@ func (s *backendService) Jammer(id core.DeviceId) (*core.JammerBase, error) {
 }
 
 func (s *backendService) Sensor(id core.DeviceId) (*core.SensorBase, error) {
+	logging.Debugf("Sensor(): %v", id)
+	logging.Debugf("Sensor(): %v", s.sensors)
 	if sensor, ok := s.sensors[id]; ok {
 		return sensor, nil
 	}
