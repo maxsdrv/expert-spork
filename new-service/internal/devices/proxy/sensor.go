@@ -3,26 +3,25 @@ package proxy
 import (
 	"context"
 
-	"github.com/opticoder/ctx-log/go/ctx_log"
-
 	"dds-provider/internal/core"
+	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 	"dds-provider/internal/services/wsclient"
 )
-
-var logging = ctx_log.GetLogger(nil)
 
 type Sensor struct {
 	sensorId     string
 	serviceAPI   *dss_target_service.SensorAPIService
 	sensorMapper *wsclient.SensorDataMapper
+	info         *dss_target_service.SensorInfo
 }
 
-func NewSensor(sensorId string, api *dss_target_service.SensorAPIService) *Sensor {
+func NewSensor(sensorId string, api *dss_target_service.SensorAPIService, info *dss_target_service.SensorInfo) *Sensor {
 	return &Sensor{
 		sensorId:     sensorId,
 		serviceAPI:   api,
 		sensorMapper: wsclient.NewSensorDataMapper(),
+		info:         info,
 	}
 }
 
@@ -45,20 +44,9 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 	return err
 }
 
-//func (s *Sensor) GetSensorInfo(ctx context.Context) (*apiv1.SensorInfo, error) {
-//	logger := logging.WithCtxFields(ctx)
-//
-//	sensorInfo, resp, err := s.serviceAPI.GetSensorInfo(ctx).Id(s.sensorId).Execute()
-//	if err != nil {
-//		logger.WithError(err).Error("Get sensor info failed")
-//		return nil, err
-//	}
-//	defer resp.Body.Close()
-//
-//	info := sensorInfo.GetSensorInfo()
-//
-//	return s.sensorMapper.ConvertToAPISensorInfo(info), nil
-//}
+func (s *Sensor) SensorInfo() apiv1.SensorInfo {
+	return *s.sensorMapper.ConvertToAPISensorInfo(*s.info)
+}
 
 func (s *Sensor) GetSensorId() string {
 	return s.sensorId
@@ -69,9 +57,5 @@ func (s *Sensor) SetDisabled(disabled bool) {
 }
 
 func (s *Sensor) SetPosition(position *core.GeoPosition) error {
-	return nil
-}
-
-func (s *Sensor) SetPositionMode(mode core.GeoPositionMode) error {
 	return nil
 }

@@ -61,7 +61,7 @@ func (n *NotificationProcessor) processSensorInfo(ctx context.Context, dataRaw j
 		return err
 	}
 
-	n.service.registerSensors(ctx, sensor.Id, deviceId)
+	n.service.registerSensors(ctx, sensor.Id, deviceId, sensor)
 
 	dynamicInfo, err := n.dynamicSensorInfo(ctx, dataRaw, deviceId)
 	if err != nil {

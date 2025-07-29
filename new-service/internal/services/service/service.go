@@ -145,14 +145,14 @@ func (s *Service) connect(ctx context.Context, connection Connection) {
 	}
 }
 
-func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId core.DeviceId) {
+func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId core.DeviceId, sensorInfo *dss_target_service.SensorInfo) {
 	logger := logging.WithCtxFields(ctx)
 
 	if _, err := s.backendService.Sensor(deviceId); err == nil {
 		return
 	}
 
-	proxySensor := proxy.NewSensor(sensorId, nil)
+	proxySensor := proxy.NewSensor(sensorId, nil, sensorInfo)
 	s.backendService.AppendDevice(deviceId, proxySensor)
 
 	logger.Infof("Registered sensor %s from WebSocket notification", sensorId)
