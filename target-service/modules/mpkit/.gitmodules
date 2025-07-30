@@ -1,0 +1,18 @@
+[submodule "cmake"]
+	path = cmake
+	url = ../../mpk/cmake
+[submodule "modules/googletest"]
+	path = modules/googletest
+	url = ../../mpk/googletest.git
+[submodule "modules/gqtest"]
+	path = modules/gqtest
+	url = ../../mpk/gqtest.git
+[submodule "modules/gsl"]
+	path = modules/gsl
+	url = ../../mpk/gsl.git
+[submodule "ci"]
+	path = ci
+	url = ../ci
+[submodule "modules/cpp-httplib"]
+	path = modules/cpp-httplib
+	url = ../cpp-httplib

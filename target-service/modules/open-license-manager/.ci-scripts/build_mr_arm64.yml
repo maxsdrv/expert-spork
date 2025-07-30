@@ -1,0 +1,17 @@
+gcc-release-ubuntu/arm64/mr:
+  stage: build
+  image: $UBUNTU_ARM64_IMAGE
+  script:
+    - mkdir -p .build
+    - pushd .build
+    - >
+      cmake -DCMAKE_BUILD_TYPE=Release \
+            $BUILD_ARM_CMAKE_OPTIONS \
+            ../
+    - make -j $JOBS_NUMBER
+    - make package
+  artifacts:
+    paths:
+    - .build/dist/*.deb
+  only:
+    - merge_requests

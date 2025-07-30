@@ -1,0 +1,6 @@
+#./*
+#!src/**
+src/generated/**
+**/CMakeLists.txt
+**/*.in
+**/*.ts

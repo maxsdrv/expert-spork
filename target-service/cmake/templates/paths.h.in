@@ -1,0 +1,41 @@
+/**
+ * Pathes definitions
+ * Auto-generated file. Do not modify it
+ */
+
+#pragma once
+
+#include <string>
+
+namespace appkit
+{
+
+#define DECLARE_PATH_ACCESSOR(_val, _func)                                     \
+    inline std::string _func##File(const std::string& name)                    \
+    {                                                                          \
+        std::string result(_val);                                              \
+        result.append("/" + name);                                             \
+        return result;                                                         \
+    }                                                                          \
+    inline std::string _func##Path()                                           \
+    {                                                                          \
+        return std::string(_val);                                              \
+    }
+
+DECLARE_PATH_ACCESSOR("@RUNTIME_INSTALL_PREFIX@", prefix)
+DECLARE_PATH_ACCESSOR("@RUNTIME_CONFIG_PATH@", config)
+DECLARE_PATH_ACCESSOR("@RUNTIME_LIBRARY_PATH@", library)
+DECLARE_PATH_ACCESSOR("@RUNTIME_SHARED_PATH@", shared)
+DECLARE_PATH_ACCESSOR("@RUNTIME_RUN_PATH@", run)
+DECLARE_PATH_ACCESSOR("@RUNTIME_CACHE_PATH@", cache)
+DECLARE_PATH_ACCESSOR("@RUNTIME_TRANSLATION_PATH@", translation)
+DECLARE_PATH_ACCESSOR("@RUNTIME_PLUGIN_PATH@", plugin)
+DECLARE_PATH_ACCESSOR("@RUNTIME_HELP_PATH@", help)
+DECLARE_PATH_ACCESSOR("@RUNTIME_DUMPS_PATH@", dumps)
+DECLARE_PATH_ACCESSOR("@RUNTIME_LOG_PATH@", log)
+DECLARE_PATH_ACCESSOR("@RUNTIME_ICONS_PATH@", icon)
+DECLARE_PATH_ACCESSOR("@RUNTIME_SOUND_PATH@", sound)
+DECLARE_PATH_ACCESSOR("@RUNTIME_TMP_PATH@", tmp)
+#undef DECLARE_PATH_ACCESSOR
+
+} // namespace appkit

@@ -1,0 +1,1 @@
+#include "qttypes/QStringConverters.h"

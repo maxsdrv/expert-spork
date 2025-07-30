@@ -1,0 +1,86 @@
+language: cpp
+sudo: false
+notifications:
+  email: false
+
+# Use Linux unless specified otherwise
+os: linux
+dist: xenial
+
+cache:
+  directories:
+    - ${TRAVIS_BUILD_DIR}/deps
+
+before_install:
+  ############################################################################
+  # Install qt and boost
+  ############################################################################
+  - sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-xenial -y
+  - sudo apt-get update  
+  - sudo apt-get install qt512base
+
+matrix:
+  include:
+    ##########################################################################
+    # Clang on Linux
+    ##########################################################################
+    # Clang 7.0
+    - env: COMPILER=clang++-7 BUILD_TYPE=Debug USE_CXX_STANDARD=17
+      addons: &clang70
+        apt:
+          packages:
+            - clang-7
+            - g++-7
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-7
+
+
+    ##########################################################################
+    # GCC on Linux
+    ##########################################################################
+    # GCC 7
+    - env: COMPILER=g++-7 BUILD_TYPE=Debug USE_CXX_STANDARD=17
+      addons: &gcc7
+        apt:
+          packages: 
+            - g++-7
+          sources:
+            - ubuntu-toolchain-r-test
+
+install:
+  # Set the ${CXX} variable properly
+  - export CXX=${COMPILER}
+  - ${CXX} --version
+
+  # Dependencies required by the CI are installed in ${TRAVIS_BUILD_DIR}/deps/
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p "${DEPS_DIR}"
+  - cd "${DEPS_DIR}"
+
+  # Travis machines have 2 cores
+  - JOBS=2
+
+  ############################################################################
+  # Install a recent CMake 
+  ############################################################################
+  - CMAKE_VERSION=3.9.6
+  - |
+      CMAKE_URL="https://cmake.org/files/v${CMAKE_VERSION%.[0-9]}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+  - cmake --version
+
+before_script:
+  # Set correct qt env vars
+  - source /opt/qt512/bin/qt512-env.sh
+  # have CMake to generate build files
+  - cd "${TRAVIS_BUILD_DIR}"
+  - mkdir build && cd build
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_STANDARD=$USE_CXX_STANDARD -DSANITIZE=ON
+  
+script:
+  # build and run tests
+  - cmake --build . -- -j${JOBS}
+  - ctest --output-on-failure -j${JOBS}
+    

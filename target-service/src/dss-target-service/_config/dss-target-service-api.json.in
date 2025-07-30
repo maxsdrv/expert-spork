@@ -1,0 +1,152 @@
+{
+    "common/get_api_version": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "common/get_license_status": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "common/upload_license": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "common/set_settings": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "common/get_settings": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "target/subscribe": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "target/unsubscribe": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "target/get_targets": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "target/get_target_data": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "device/set_disabled": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "device/get_position_mode": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "device/set_position_mode": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "device/set_position": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "sensor/get_sensors": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "sensor/get_sensor_info": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "jammer/get_jammers": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "jammer/get_jammer_info": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "jammer/get_groups": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "sensor/get_jammer_mode": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "sensor/set_jammer_mode": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "jammer/set_jammer_bands": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "camera/get_orientation": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "camera/set_geo_direction": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "camera/set_follow_track": {
+        "method": "POST",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    },
+    "camera/get_id": {
+        "method": "GET",
+        "permissions": {
+            "groups": [ "UNAUTHORIZED" ]
+        }
+    }
+}

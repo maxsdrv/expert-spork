@@ -1,0 +1,24 @@
+[submodule "cmake"]
+	path = cmake
+	url = ../../../mpk/cmake
+[submodule "modules/ci"]
+	path = modules/ci
+	url = ../../../mpk/ci
+[submodule "modules/mpkit"]
+	path = modules/mpkit
+	url = ../../../mpk/mpkit
+[submodule "modules/googletest"]
+	path = modules/googletest
+	url = ../../../mpk/googletest
+[submodule "modules/gqtest"]
+	path = modules/gqtest
+	url = ../../../mpk/gqtest
+[submodule "modules/gsl"]
+	path = modules/gsl
+	url = ../../../mpk/gsl
+[submodule "modules/cpp-httplib"]
+	path = modules/cpp-httplib
+	url = ../../../mpk/cpp-httplib
+[submodule "modules/open-license-manager"]
+	path = modules/open-license-manager
+	url = ../../../mpk/3rdparty/license/open-license-manager

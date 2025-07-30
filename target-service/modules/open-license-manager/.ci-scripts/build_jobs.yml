@@ -1,0 +1,6 @@
+include:
+  - local: '.ci-scripts/build_mr.yml'
+  - local: '.ci-scripts/build_mr_arm64.yml'
+  
+  - local: '.ci-scripts/build_develop.yml'
+  - local: '.ci-scripts/build_develop_arm64.yml'

@@ -1,0 +1,117 @@
+LICENSE AGREEMENT
+
+to the Radar-IQ Manager client Software
+and firmware of the CORE-IQ controller.
+
+
+This license agreement (hereinafter the Agreement) is a
+legal document concluded between you (an individual or legal
+entity, hereinafter the User) and LLC "Diagnostika-M"
+(hereinafter the Author) regarding the above Software
+product (hereinafter the Software or "Software"), which
+includes Software, recorded on the appropriate media or on
+the website of the Author, any printed materials and any
+"embedded" or electronic documentation. By installing,
+copying or otherwise using the Software, you thereby accept
+the terms of this agreement. If you do not accept the terms
+of this agreement, then you have no right to use this
+Software and it should be immediately returned back to the
+seller and the money paid back should be returned.
+
+
+LICENSE FOR THE SOFTWARE
+
+The Software is protected by copyright laws and
+international treaties, as well as other copyright laws and
+treaties. The Software is licensed, not sold.
+
+
+1. SCOPE OF THE LICENSE.
+
+This agreement gives you the following rights:
+
+1.1. Using the Software. It is allowed to install the
+Software or any previous version at the same time on one
+computer. The primary user of the computer on which this
+copy is installed is also permitted to create another copy
+solely for his or her work on the laptop.
+1.2. Storage and use on the network. It is allowed to store,
+install and run a copy of the Software from a public storage
+device (for example, a network server). In this case, for
+each computer on which this Software is installed or
+launched from a network server, a separate license must be
+purchased. The license for the Software does not allow joint
+or simultaneous use of the Software on different computers
+in the amount more than specified in clause 1.1.
+
+2. DESCRIPTION OF OTHER RIGHTS AND RESTRICTIONS.
+
+2.1. Restrictions on technology stripping, decompilation and
+disassembly. It is not allowed to open technology, decompile
+and disassemble the Software, except and only to the extent
+that such actions are explicitly permitted by applicable
+law, despite the presence of this limitation in the
+agreement.
+2.2. Splitting the Software. The Software is licensed as a
+whole. It cannot be split into its component parts for use
+on multiple computers.
+2.3. Rental. It is not allowed to provide the Software for
+rent or for temporary use.
+2.4. Technical support services. The author provides
+technical support services for Software products
+(hereinafter "technical support services"). Contacting the
+Author for technical support is carried out by e-mail:
+info@radar-iq.com, by phone: +7 (495) 228-18-28 . Any
+additional Software and source code transferred to you as a
+result of the provision of technical support services should
+be considered as an integral part of the Software and,
+therefore, are subject to the limitations and conditions of
+this agreement. The technical data provided to the technical
+support service during the call can be used by the Author
+for internal purposes, including technical support of
+Software products and Software development. The author will
+not use this information in a form that discloses your
+personal information.
+2.5. Software transfer. You are allowed to permanently
+assign all your rights under this agreement only together
+with the sale or transfer of the computer, provided that you
+do not save any copies, transfer the entire Software
+(including all components, media and printed materials, any
+updates, this agreement and certificates of authenticity, if
+there are), and the recipient agrees to the terms of this
+agreement. If the Software is an "upgrade", then any
+transfer must include all previous versions of the Software.
+2.6. Termination of the Agreement. Without prejudice to any
+of his other rights, the Author may terminate this agreement
+if the conditions and limitations of this agreement are not
+met, which will oblige you to destroy all existing copies
+and components of the Software.
+
+3. COPYRIGHT.
+
+3.1. All property rights and copyrights to the Software
+(including any included control Softwares, photographs,
+animations, video and sound recordings, music and text),
+components accompanying its printed materials and any copies
+of the Software belong to the Author. All rights of the
+Author to the Software are protected by the laws and
+international agreements on copyright, as well as by other
+laws and treaties that govern the relationship of copyright.
+Therefore, the Software must be treated like any other
+copyright object, with the only exception that the Software
+may be installed on one computer and retained the original,
+provided that it will only be used as an archive or backup
+copy. Copying of printed materials accompanying the Software
+is prohibited.
+
+4. DIFFERENT MEDIA OF THE SOFTWARE.
+
+4.1. The Software can be delivered on several types of
+media, as well as over the Internet exclusively from the
+Author's website. Regardless of their type and capacity, it
+is allowed to use only one type of media, which corresponds
+exactly to your computer or network server. It is not
+permitted to install from other media onto other computers,
+rent or lease the media, or cede them for other purposes,
+except in the case of the complete transfer of the Software
+described above.

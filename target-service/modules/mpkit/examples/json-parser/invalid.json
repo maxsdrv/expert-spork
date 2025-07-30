@@ -1,0 +1,6 @@
+ {
+   "id": 100,
+   "active": true,
+   "objectsArray": [{"value": 100}, {"value": 200}, {"value": 300}],
+   "intArray": [0, 1, 2, 3]
+ }

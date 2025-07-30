@@ -1,0 +1,40 @@
+variables:
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: none
+  
+stages:
+  - build
+
+.build_image: &build_image
+  stage: build
+  image: registry.dev.mpksoft.ru/mpk/internal/docker-builder:current
+  services:
+    - docker:20.10.17-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - tag="${IMAGE_TAG:-$CI_COMMIT_REF_SLUG}"
+    - >
+        dir="./docker/$docker_image" &&
+        docker build \
+          --pull \
+          --cache-from=${CI_REGISTRY_IMAGE}/${docker_image}:current \
+          --tag ${CI_REGISTRY_IMAGE}/${docker_image}:${tag} \
+          --tag ${CI_REGISTRY_IMAGE}/${docker_image}:latest \
+          -f $dir/Dockerfile \
+          . || exit $? &&
+        docker push ${CI_REGISTRY_IMAGE}/${docker_image}:${tag} &&
+        docker push ${CI_REGISTRY_IMAGE}/${docker_image}:latest
+  when: manual
+  tags:
+    - docker
+  
+  
+build-checks-image:
+  variables:
+    docker_image: static-check-image
+  extends: .build_image
+
+build-analysis-image:
+  variables:
+    docker_image: static-analysis-image
+  extends: .build_image

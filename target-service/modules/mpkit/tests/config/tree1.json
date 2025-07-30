@@ -1,0 +1,24 @@
+{
+    "test_node1": 
+    {
+        "host": "local",
+        "port": "7777"
+    },
+    "test_node2":
+    {
+        "token": "eprst",
+        "nekot": "nedog"
+    },
+    "test_node3":
+    {
+        "0":
+        {
+            "chrome": "brom",
+            "kron": "dron"
+        },
+        "1":
+        {
+            "chrome": "from"
+        }
+    }
+}

@@ -1,0 +1,25 @@
+variables:
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: normal
+  JOBS_NUMBER: 8
+  DOCKER_DIND_IMAGE: docker:20.10.19-dind
+  DEBIAN_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}/intel/license-debian-builder:${CI_COMMIT_REF_SLUG}
+  UBUNTU_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}/intel/license-ubuntu-builder:${CI_COMMIT_REF_SLUG}
+  UBUNTU_ARM64_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}/arm64/license-ubuntu-builder:${CI_COMMIT_REF_SLUG}
+
+  BUILD_ARM_CMAKE_OPTIONS: |
+    -DCMAKE_TOOLCHAIN_FILE=../cmake/make/cross-toolchain.cmake
+    -DQT_QMAKE_EXECUTABLE=qmake
+stages:
+  - docker-build
+  - docker-retag
+  - build
+
+default:
+  interruptible: true
+
+include:
+  - local: 'docker/gitlab-ci.yml'
+  - local: 'docker/build_builders.yml'
+  - local: '.ci-scripts/build_jobs.yml'
+  

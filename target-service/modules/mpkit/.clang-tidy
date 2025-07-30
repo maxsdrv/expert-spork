@@ -1,0 +1,48 @@
+---
+Checks: "-*,\
+clang-diagnostic-*,\
+boost-*,\
+bugprone-*,\
+-bugprone-exception-escape,\
+-bugprone-easily-swappable-parameters,\
+clang-analyzer-*,\
+cppcoreguidelines-*,\
+-cppcoreguidelines-macro-usage,\
+-cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
+-cppcoreguidelines-pro-bounds-pointer-arithmetic,\
+-cppcoreguidelines-pro-bounds-constant-array-index,\
+-cppcoreguidelines-owning-memory,\
+-cppcoreguidelines-pro-type-reinterpret-cast,\
+-cppcoreguidelines-special-member-functions,\
+-cppcoreguidelines-virtual-class-destructor,\
+google-readability-casting,\
+hicpp-*,\
+-hicpp-no-array-decay,\
+-hicpp-special-member-functions,\
+llvm-*,\
+-llvm-namespace-comment,\
+-llvm-header-guard,\
+misc-*,\
+-misc-const-correctness,\
+-misc-include-cleaner,\
+-misc-non-private-member-variables-in-classes,\
+-misc-no-recursion,\
+-misc-static-assert,\
+modernize-*,\
+-modernize-concat-nested-namespaces,\
+-modernize-use-trailing-return-type,\
+-modernize-use-nodiscard,\
+-modernize-return-braced-init-list,\
+-modernize-use-default-member-init,\
+performance-*,\
+portability-*,\
+readability-*,\
+-readability-redundant-access-specifiers,\
+-readability-identifier-length
+"
+CheckOptions:
+  - { key: readability-identifier-naming.NamespaceCase,       value: lower_case }
+  - { key: readability-identifier-naming.ClassCase,           value: CamelCase  }
+  - { key: readability-identifier-naming.StructCase,          value: CamelCase  }
+  - { key: readability-identifier-naming.FunctionCase,        value: camelBack  }
+...

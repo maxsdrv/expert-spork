@@ -1,0 +1,18 @@
+include:
+  - project: 'mpk/internal'
+    file: '/templates/docker-images-template.yml'
+
+docker-retag-images:
+  stage: docker-retag
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+  extends: .retag_images_template
+  only:
+    refs:
+      - merge_requests
+      - master
+      - develop
+      - stable
+      - tags
+  tags:
+    - docker

@@ -1,0 +1,6 @@
+src/types/_includes/types/strong_typedef/Hash.hpp
+src/types/_includes/types/strong_typedef/json/JsonComposer.hpp
+src/types/_includes/types/strong_typedef/json/JsonParser.hpp
+src/types/_includes/types/strong_typedef/json/TemplateString.hpp
+src/types/_includes/types/strong_typedef/json/Traits.hpp
+tests/qttypes/MetaEnumTests.cpp

@@ -1,0 +1,14 @@
+{
+    "get_something": {
+        "method": "GET",
+        "permissions": {
+            "groups": ["UNAUTHORIZED", "ADMIN"]
+        }
+    },
+    "set_something": {
+        "method": "POST",
+        "permissions": {
+            "groups": ["ADMIN"]
+        }
+    }
+}

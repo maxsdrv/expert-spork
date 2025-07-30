@@ -1,0 +1,13 @@
+bugprone
+clazy
+coef
+docscan
+hicpp
+manufactor
+minimizable
+mpkit
+mpksoft
+nolintnextline
+noncopyable
+servicemode
+workmode

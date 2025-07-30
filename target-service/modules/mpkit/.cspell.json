@@ -1,0 +1,29 @@
+{
+    "version": "0.1",
+    "language": "en",
+    "ignorePaths": [
+        "**/CMakeLists.txt",
+        "**/CMakeLists.txt.user",
+        "*src/cmake/**",
+        "**/*_ru.ts",
+        "**/*.proto",
+        "**/*.yaml",
+        "**/*.in",
+        "**/*.svg",
+        "**/*.sql"
+    ],
+    "dictionaries": ["qt", "mpk", "mpkit"],
+    "dictionaryDefinitions": [
+        { "name": "qt", "path": "ci/configs/qt.cspell.dict"},
+        { "name": "mpk", "path": "ci/configs/mpk.cspell.dict"},
+        { "name": "mpkit", "path": "./mpkit.cspell.dict"}
+    ],
+    "languageSettings": [
+        {
+            "languageId": "c,cpp",
+            "locale": "*",
+            "dictionaries": ["cpp"],
+            "dictionaryDefinitions": []
+        }
+    ]
+}

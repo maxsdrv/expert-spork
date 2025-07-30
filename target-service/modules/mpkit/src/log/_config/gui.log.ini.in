@@ -1,0 +1,36 @@
+# Comments are allowed. Comment line begins with the '#' character
+# and spans until the end of the line.
+
+# Logging core settings section. May be omitted if no parameters specified within it.
+[Core]
+
+# Disable logging at all
+DisableLogging=false
+
+
+# Conslole sink settings section
+[Sinks.AllLoggersConsole]
+
+# Severity
+Filter="%Severity% >= @LOG_VERBOSITY@"
+
+# Sink destination type
+Destination=Console
+
+# Formatter string. Optional, by default only log record message text is written.
+Format="<%Severity%> [%TimeStamp(format=\"%a %b %d %H:%M:%S %Y\")%]: %Message%"
+
+
+# File sink settings sections
+[Sinks.AllLoggersFile]
+
+# Severity
+Filter="%Severity% >= @LOG_VERBOSITY@"
+
+# Sink destination type and params
+Destination=TextFile
+FileName="@RUNTIME_LOG_PATH@/@PROJECT_NAME@.log"
+AutoFlush=true
+
+# Formatter string. Optional, by default only log record message text is written.
+Format="<%Severity%> [%TimeStamp(format=\"%a %b %d %H:%M:%S %Y\")%]: %Message%"

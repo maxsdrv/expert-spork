@@ -1,0 +1,27 @@
+/**
+ * Auto-generated file. Do not modify it manually.
+ * Platform definitions.
+ */
+
+#pragma once
+
+namespace appkit
+{
+
+// Main OS
+#cmakedefine PLATFORM_WINDOWS
+#cmakedefine PLATFORM_UNIX
+
+// Unix variations
+#cmakedefine PLATFORM_LINUX
+
+// Linux variation
+#cmakedefine PLATFORM_ASTRA
+#cmakedefine PLATFORM_ALTLINUX
+#cmakedefine PLATFORM_GENTOO
+#cmakedefine PLATFORM_DEBIAN
+#cmakedefine PLATFORM_REDHAT
+#cmakedefine PLATFORM_MSVS
+#cmakedefine PLATFORM_UBUNTU
+
+} // appkit

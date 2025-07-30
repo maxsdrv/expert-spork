@@ -1,0 +1,42 @@
+variables:
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: normal
+  GIT_SSL_NO_VERIFY: "true"
+
+stages:
+  - build
+
+before_script:
+  - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.mpksoft.ru/mpk/googletest.git
+
+gcc-debug:
+  stage: build
+  image: registry.dev.mpksoft.ru/mpk/internal/arch-builder:current
+  script:
+    - cmake -B.build -DGMOCK_SOURCE=${CI_BUILDS_DIR}/mpk/gqtest/googletest  -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_STANDARD=17 -DCMAKE_BUILD_TYPE=Debug -DQT_QMAKE_EXECUTABLE=qmake
+    - cmake --build .build -j 8
+    - pushd .build && ctest --output-on-failure -j 8
+
+clang-release:
+  stage: build
+  image: registry.dev.mpksoft.ru/mpk/internal/arch-builder:current
+  script:
+    - cmake -B.build -DGMOCK_SOURCE=${CI_BUILDS_DIR}/mpk/gqtest/googletest  -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DQT_QMAKE_EXECUTABLE=qmake
+    - cmake --build .build -j 8
+    - pushd .build && ctest --output-on-failure -j 8
+
+gcc-release-alpine-ninja:
+  stage: build
+  image: registry.dev.mpksoft.ru/mpk/internal/qt6-alpine-builder:latest
+  script:
+    - cmake -B.build -GNinja -DGMOCK_SOURCE=${CI_BUILDS_DIR}/mpk/gqtest/googletest -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DCMAKE_BUILD_TYPE=Release  -DCMAKE_CXX_STANDARD=20 -DQT_QMAKE_EXECUTABLE=qmake
+    - cmake --build .build -j 8
+    - pushd .build && ctest --output-on-failure -j 8
+
+gcc-release-debian:
+  stage: build
+  image: registry.dev.mpksoft.ru/mpk/internal/debian-builder:current
+  script:
+    - cmake -B.build -DGMOCK_SOURCE=${CI_BUILDS_DIR}/mpk/gqtest/googletest -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DCMAKE_BUILD_TYPE=Release  -DCMAKE_CXX_STANDARD=17 -DQT_QMAKE_EXECUTABLE=qmake
+    - cmake --build .build -j 8
+    - pushd .build && ctest --output-on-failure -j 8

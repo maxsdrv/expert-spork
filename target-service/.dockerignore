@@ -1,0 +1,23 @@
+.git/
+
+# IDE files
+.vscode/
+.idea/
+
+# Build dirs
+build*/
+cmake-build-*/
+examples/build*/
+examples/cmake-build-*/
+
+# Dockerfile(s)
+**/Dockerfile
+
+# DevSpace cache and log folder
+.devspace/
+examples/.devspace/
+
+tests/api/__pypackages__/
+tests/api/.venv/
+
+configs/defaults/*.yaml

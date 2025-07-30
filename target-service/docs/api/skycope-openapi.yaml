@@ -1,0 +1,1056 @@
+openapi: 3.1.0
+
+info:
+  description: 'Description text'
+  title: ''
+  version: ''
+
+servers:
+- url: http://10.8.0.72:5000/api/v4.1
+
+paths:
+  /login:
+    get:
+      operationId: login
+      summary: Authenticates the user
+      description: Authenticates the user with a password or refresh token.
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/auth_token'
+      security:
+      - basicAuth: []
+
+  /system:
+    get:
+      operationId: get_data
+      parameters:
+        - name: full
+          in: query
+          required: true
+          description: arg full
+          schema:
+            type: string
+            enum: [0, 1]
+            description: >
+              * 0
+              * 1 Fill all fields
+            default: 0
+        - name: ts
+          in: query
+          required: true
+          description: arg timestamp
+          schema:
+            description: Date and time of the request
+            type: string
+        - name: uuid
+          in: query
+          required: true
+          description: arg uuid
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+  /configurations:
+    post:
+      operationId: post_data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Model'
+      responses:
+        '200':
+          description: 'Success'
+        '204':
+          description: 'Success'
+  /mass-defense:
+    get:
+      operationId: get_defense_data
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/MassDefense'
+  /mass-defense/{id}:
+    post:
+      operationId: post_defense_data
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MassDefense'
+      responses:
+        '200':
+          description: 'Success'
+        '204':
+          description: 'Success'
+    delete:
+      operationId: delete_mass_defense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'Success'
+  /auto-defense/{id}:
+    post:
+      operationId: post_auto_defense
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 'Success'
+        '204':
+          description: 'Success'
+    delete:
+      operationId: delete_auto_defense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'Success'
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Use `root` / `root` as the test credentials
+  schemas:
+    auth_token:
+      type: object
+      required:
+      - token
+      properties:
+        token:
+          type: string
+    Sensor:
+      type: object
+      required:
+      - auto_defense_status
+      - compass
+      - defense_radius
+      - gps
+      - mcu_status
+      - status
+      - wifi_status
+      properties:
+        ai_enabled:
+          type: boolean
+          title: Ai Enabled
+        antenna:
+          type: string
+          title: Antenna
+        auto_defense_status:
+          type: boolean
+          title: Auto Defense Status
+        capture_status:
+          type: boolean
+          title: Capture Status
+        compass:
+          type: integer
+          title: Compass
+        compass_enabled:
+          type: boolean
+          title: Compass Enabled
+        configured_gps:
+          type: boolean
+          title: Configured Gps
+        core_protection_radius:
+          type: integer
+          title: Core Protection Radius
+        defense_radius:
+          type: integer
+          title: Defense Radius
+        detection_radius:
+          type: integer
+          title: Detection Radius
+        df_cone_sectors:
+          type: object
+          title: Df Cone Sectors
+        disk_has_space:
+          type: boolean
+          title: Disk Has Space
+        dv_status:
+          type: boolean
+          title: Dv Status
+        gps:
+          $ref: '#/components/schemas/Gps'
+        gps_signal:
+          items:
+            type: integer
+          type: array
+          title: Gps Signal
+        gps_signal_good:
+          type: boolean
+          title: Gps Signal Good
+        has_tdd_pa:
+          type: boolean
+          title: Has Tdd Pa
+        ip:
+          type: string
+          title: Ip
+        is_anchor_server:
+          type: boolean
+          title: Is Anchor Server
+        is_df_enabled:
+          type: boolean
+          title: Is Df Enabled
+        is_rmservice_on:
+          type: boolean
+          title: Is Rmservice On
+        is_wideband_enabled:
+          type: boolean
+          title: Is Wideband Enabled
+        license_language:
+          type: string
+          title: License Language
+        mass_defense_status:
+          type: boolean
+          title: Mass Defense Status
+        mcu_status:
+          $ref: '#/components/schemas/McuStatus'
+        mgmt_details:
+          $ref: '#/components/schemas/MgmtDetails'
+        nfz_spoof_status:
+          $ref: '#/components/schemas/NfzSpoofStatus'
+        noise_list:
+          items: {}
+          type: array
+          title: Noise List
+        ou:
+          type: string
+          title: Ou
+        rmservice_mgmt_port: 
+          type: string
+          title: Rmservice Mgmt Port
+        rmservice_port: 
+          type: string
+          title: Rmservice Port
+        sanity_test_status:
+          type: boolean
+          title: Sanity Test Status
+        sectors:
+          type: string
+          title: Sectors
+        sectors_label:
+          type: string
+          title: Sectors Label
+        sensor_name:
+          type: string
+          title: Sensor Name
+        status:
+          $ref: '#/components/schemas/Status'
+        termdate:
+          type: integer
+          title: Termdate
+        wifi_status:
+          $ref: '#/components/schemas/WifiStatus'
+      title: TheSensor
+
+    Status:
+      type: string
+      description: Device status
+      enum:
+        - DETECTING 
+        - DEFENDING
+    McuStatus:
+      type: string
+      enum:
+        - CONNECTED 
+    WifiStatus:
+      type: string
+      enum:
+        - CONNECTED 
+    SpoofStatus:
+      type: object
+      properties:
+        can_cancel_spoof:
+          type: boolean
+          title: Can Cancel Spoof
+        detection_direction:
+          type: integer
+          title: Detection Direction
+        spoof_direction:
+          type: integer
+          title: Spoof Direction
+        spoof_range:
+          type: integer
+          title: Spoof Range
+        spoofing:
+          type: boolean
+          title: Spoofing
+
+    DroneWifiDevice:
+      type: object
+      required:
+      - fc_khz_and_count_recent
+      - model
+      - modulation
+      properties:
+        actions:
+          $ref: '#/components/schemas/Actions'
+        bw_khz:
+          type: integer
+          title: Bw Khz
+        color_trajectory:
+          type: string
+          title: Color Trajectory
+        detect_counter:
+          type: integer
+          title: Detect Counter
+        detection_engine:
+          type: string
+          title: Detection Engine
+        df_marker_gps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Gps'
+        drone_height:
+          type: integer
+          title: Drone Height
+        fc_khz_and_count:
+          $ref: '#/components/schemas/FcKhzAndCount'
+        fc_khz_and_count_recent:
+          items:
+            items:
+              type: integer
+            type: array
+          type: array
+          title: Fc Khz And Count Recent
+        finder:
+          type: string
+          title: Finder
+        frequency:
+          type: string
+          title: Frequency
+        frequency_hop:
+          type: boolean
+          title: Frequency Hop
+        gps:
+          $ref: '#/components/schemas/Gps'
+        gps_sector:
+          type: object
+          title: Gps Sector
+        gps_trajectory:
+          items: {}
+          type: array
+          title: Gps Trajectory
+        gui_first_detected_at:
+          type: string
+          title: Gui First Detected At
+        gui_id:
+          type: string
+          title: Gui Id
+        home_gps:
+          type: string
+          title: Home Gps
+        icon:
+          type: string
+          title: Icon
+        id:
+          type: string
+          title: Id
+        in_defending_queue:
+          type: boolean
+          title: In Defending Queue
+        is_dual_wbj:
+          type: boolean
+          title: Is Dual Wbj
+        is_ldval_testing:
+          type: boolean
+          title: Is Ldval Testing
+        is_remote_id:
+          type: boolean
+          title: Is Remote Id
+        is_triple_wbj:
+          type: boolean
+          title: Is Triple Wbj
+        is_wifi_tab:
+          type: boolean
+          title: Is Wifi Tab
+        ld_result:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/DroneSensorLdResult'
+        lf_error_radius:
+          type: string
+          title: Lf Error Radius
+        model:
+          type: string
+          title: Model
+        modulation:
+          type: string
+          title: Modulation
+        paired_rc:
+          type: string
+          title: Paired Rc
+        prev_id:
+          type: string
+          title: Prev Id
+        remote_id_model_name:
+          type: string
+          title: Remote Id Model Name
+        seen_times:
+          type: integer
+          title: Seen Times
+        sensor_ids:
+          items:
+            type: string
+          type: array
+          title: Sensor Ids
+        sensors:
+          items:
+            type: string
+          type: array
+          title: Sensors
+        shared_names:
+          $ref: '#/components/schemas/SharedNames'
+        signals:
+          items:
+            type: integer
+          type: array
+          title: Signals
+        spoof_status:
+          $ref: '#/components/schemas/SpoofStatus'
+        status:
+          type: string
+          title: Status
+        switch_for_whitelist:
+          type: boolean
+          title: Switch For Whitelist
+        threat:
+          $ref: '#/components/schemas/Threat'
+        type:
+          type: string
+          title: Type
+        wifi_mac_id:
+          type: string
+          title: Wifi Mac Id
+        wifi_ssid:
+          type: string
+          title: Wifi Ssid
+        wl_name:
+          type: string
+          title: Wl Name
+
+    Actions:
+      type: object
+      properties:
+        can_cancel_defense:
+          type: boolean
+          title: Can Cancel Defense
+        can_friend:
+          type: boolean
+          title: Can Friend
+        can_ignore:
+          type: boolean
+          title: Can Ignore
+        can_ldval_test:
+          type: boolean
+          title: Can Ldval Test
+        can_manual_defend:
+          type: boolean
+          title: Can Manual Defend
+        can_smart_defend:
+          type: boolean
+          title: Can Smart Defend
+        is_decrypted:
+          type: boolean
+          title: Is Decrypted
+        is_spoofable:
+          type: integer
+          title: Is Spoofable
+      title: Actions
+    DefenseStatus:
+      properties:
+        defense_duration:
+          type: integer
+          title: Defense Duration
+      type: object
+    DetectingFrequency:
+      properties:
+        '1':
+          items:
+            type: string
+          type: array
+          title: '1'
+      type: object
+    DiskIoUsage:
+      properties:
+        io_read:
+          type: string
+          title: Io Read
+        io_write:
+          type: string
+          title: Io Write
+      type: object
+      title: DiskIoUsage
+    FcKhzAndCount:
+      required:
+      - duration
+      - fc_khz_and_count
+      properties:
+        duration:
+          type: integer
+          title: Duration
+        fc_khz_and_count:
+          items: {}
+          type: array
+          title: Fc Khz And Count
+      type: object
+    FixedGain:
+      properties:
+        '1':
+          type: string
+          title: '1'
+      type: object
+      title: FixedGain
+    Gps:
+      required:
+      - lat
+      - lng
+      properties:
+        lat:
+          type: number
+          title: Lat
+        lng:
+          type: number
+          title: Lng
+      type: object
+    LAN1:
+      properties:
+        rx:
+          type: number
+          title: Rx
+        tx:
+          type: number
+          title: Tx
+      type: object
+    LAN2:
+      properties:
+        rx:
+          type: number
+          title: Rx
+        tx:
+          type: number
+          title: Tx
+      type: object
+    MgmtDetails:
+      properties:
+        Module 1:
+          $ref: '#/components/schemas/Module1'
+      type: object
+      title: MgmtDetails
+    Model:
+      type: object
+      required:
+        - devices_info
+        - sensors_info
+        - unknown_wifi_devices_info
+      properties:
+        center_location: 
+          type: string
+          title: Center Location
+        db_migration_error:
+          type: boolean
+          title: Db Migration Error
+        defense_status:
+          $ref: '#/components/schemas/DefenseStatus'
+        devices_info:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Drone'
+        drone_list_enabled:
+          type: boolean
+          title: Drone List Enabled
+        gps_limit:
+          type: integer
+          title: Gps Limit
+        has_danger:
+          type: boolean
+          title: Has Danger
+        hide_defense_features:
+          type: boolean
+          title: Hide Defense Features
+        hide_detection_page:
+          type: boolean
+          title: Hide Detection Page
+        hide_spectrum_page:
+          type: boolean
+          title: Hide Spectrum Page
+        is_all_expired:
+          type: boolean
+          title: Is All Expired
+        is_anchor_server:
+          type: boolean
+          title: Is Anchor Server
+        is_local_mode:
+          type: boolean
+          title: Is Local Mode
+        is_remote_id_enabled:
+          type: boolean
+          title: Is Remote Id Enabled
+        is_unknown_wifi_enabled:
+          type: boolean
+          title: Is Unknown Wifi Enabled
+        lf_radius:
+          type: integer
+          title: Lf Radius
+        non_ai_ignorable:
+          type: boolean
+          title: Non Ai Ignorable
+        nondf_result:
+          type: object
+          title: Nondf Result
+        offline_map_loaded:
+          type: boolean
+          title: Offline Map Loaded
+        online_map_enabled:
+          type: boolean
+          title: Online Map Enabled
+        sensors_info:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Sensor'
+        setting_mode:
+          type: boolean
+          title: Setting Mode
+        show_enhanced_features:
+          type: boolean
+          title: Show Enhanced Features
+        total_devices:
+          type: integer
+          title: Total Devices
+        total_remote_ids:
+          type: integer
+          title: Total Remote Ids
+        total_wifi_devices:
+          type: integer
+          title: Total Wifi Devices
+        unknown_wifi_devices_info:
+          $ref: '#/components/schemas/UnknownWifiDevicesInfo'
+        upgrade_status:
+          type: object
+          title: Upgrade Status
+        user_locations:
+          type: object
+          title: User Locations
+        version:
+          type: string
+          title: Version
+      title: Model
+    Drone:
+      type: object
+      required:
+      - fc_khz_and_count_recent
+      - model
+      - modulation
+      properties:
+        actions:
+          $ref: '#/components/schemas/Actions'
+        bw_khz:
+          type: integer
+          title: Bw Khz
+        color_trajectory:
+          type: string
+          title: Color Trajectory
+        detect_counter:
+          type: integer
+          title: Detect Counter
+        detection_engine:
+          type: string
+          title: Detection Engine
+        df_marker_gps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Gps'
+        drone_height:
+          type: integer
+          title: Drone Height
+        fc_khz_and_count:
+          $ref: '#/components/schemas/FcKhzAndCount'
+        fc_khz_and_count_recent:
+          items:
+            items:
+              type: integer
+            type: array
+          type: array
+          title: Fc Khz And Count Recent
+        finder:
+          type: string
+          title: Finder
+        frequency:
+          type: string
+          title: Frequency
+        frequency_hop:
+          type: boolean
+          title: Frequency Hop
+        gps:
+          $ref: '#/components/schemas/Gps'
+        gps_sector:
+          type: object
+          additionalProperties:          
+            type: array
+            items:
+              $ref: '#/components/schemas/Gps'
+        gps_trajectory:
+          items: {}
+          type: array
+          title: Gps Trajectory
+        gui_first_detected_at:
+          type: string
+          title: Gui First Detected At
+        gui_id:
+          type: string
+          title: Gui Id
+        gui_index:
+          type: string
+          title: Gui Index
+        home_gps:
+          type: string
+          title: Home Gps
+        icon:
+          type: string
+          title: Icon
+        id:
+          type: string
+          title: Id
+        in_defending_queue:
+          type: boolean
+          title: In Defending Queue
+        is_dual_wbj:
+          type: boolean
+          title: Is Dual Wbj
+        is_ldval_testing:
+          type: boolean
+          title: Is Ldval Testing
+        is_remote_id:
+          type: boolean
+          title: Is Remote Id
+        is_triple_wbj:
+          type: boolean
+          title: Is Triple Wbj
+        is_wifi_tab:
+          type: boolean
+          title: Is Wifi Tab
+        ld_result:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/DroneSensorLdResult'
+        lf_error_radius:
+          type: string
+          title: Lf Error Radius
+        model:
+          type: string
+          title: Model
+        modulation:
+          type: string
+          title: Modulation
+        paired_rc:
+          $ref: '#/components/schemas/PairedRC'
+        prev_id:
+          type: string
+          title: Prev Id
+        remote_id_model_name:
+          type: string
+          title: Remote Id Model Name
+        seen_times:
+          type: integer
+          title: Seen Times
+        sensor_ids:
+          items:
+            type: string
+          type: array
+          title: Sensor Ids
+        sensors:
+          items:
+            type: string
+          type: array
+          title: Sensors
+        shared_names:
+          $ref: '#/components/schemas/SharedNames'
+        signals:
+          items:
+            type: integer
+          type: array
+          title: Signals
+        spoof_status:
+          $ref: '#/components/schemas/SpoofStatus'
+        status:
+          type: string
+          title: Status
+        switch_for_whitelist:
+          type: boolean
+          title: Switch For Whitelist
+        threat:
+          $ref: '#/components/schemas/Threat'
+        type:
+          type: string
+          title: Type
+        wifi_mac_id:
+          type: string
+          title: Wifi Mac Id
+        wifi_ssid:
+          type: string
+          title: Wifi Ssid
+        wl_name:
+          type: string
+          title: Wl Name
+
+    PairedRC:
+      type: object
+      required:
+      - gps
+      - type
+      properties:
+          id:
+            type: string
+          status:
+            type: string
+          gps:
+            $ref: '#/components/schemas/Gps'
+          type:
+            type: string
+          ld_result:
+            type: object
+            additionalProperties:
+              $ref: '#/components/schemas/DroneSensorLdResult'
+
+    Module1:
+      type: object
+      required:
+      - software_build
+      - software_version
+      properties:
+        cpu_temp:
+          type: number
+          title: Cpu Temp
+        cpu_usage:
+          type: number
+          title: Cpu Usage
+        detecting_frequency:
+          $ref: '#/components/schemas/DetectingFrequency'
+        disk_io_usage:
+          $ref: '#/components/schemas/DiskIoUsage'
+        disk_usage:
+          type: string
+          title: Disk Usage
+        engine_status:
+          type: string
+          title: Engine Status
+        fixed_gain:
+          $ref: '#/components/schemas/FixedGain'
+        gpu_temp:
+          type: number
+          title: Gpu Temp
+        gpu_usage:
+          type: number
+          title: Gpu Usage
+        mem_usage:
+          type: number
+          title: Mem Usage
+        mgmt_status:
+          type: string
+          title: Mgmt Status
+        network_usage:
+          $ref: '#/components/schemas/NetworkUsage'
+        power_consumption:
+          type: integer
+          title: Power Consumption
+        power_options_status:
+          type: string
+          title: Power Options Status
+        software_build:
+          type: string
+          title: Software Build
+        software_version:
+          type: string
+          title: Software Version
+        som_status:
+          $ref: '#/components/schemas/SomStatus'
+        som_temp:
+          $ref: '#/components/schemas/SomTemp'
+        uptime:
+          type: number
+          title: Uptime
+        xpu_freq:
+          type: number
+          title: Xpu Freq
+      title: Module1
+    NetworkUsage:
+      type: object
+      properties:
+        LAN1:
+          $ref: '#/components/schemas/LAN1'
+        LAN2:
+          $ref: '#/components/schemas/LAN2'
+      title: NetworkUsage
+    NfzSpoofStatus:
+      type: object
+      properties:
+        direction_spoof_inprogress:
+          type: boolean
+          title: Direction Spoof Inprogress
+        nfz_height:
+          type: integer
+          title: Nfz Height
+        nfz_inprogress:
+          type: boolean
+          title: Nfz Inprogress
+        nfz_latitude:
+          type: integer
+          title: Nfz Latitude
+        nfz_longitude:
+          type: integer
+          title: Nfz Longitude
+      title: NfzSpoofStatus
+    SharedNames:
+      type: object
+      properties:
+        devices:
+          items: {}
+          type: array
+          title: Devices
+        ignored_devices:
+          type: string
+          title: Ignored Devices
+        protocol:
+          type: string
+          title: Protocol
+      title: SharedNames
+    SomStatus:
+      type: object
+      properties:
+        '1':
+          type: string
+          title: '1'
+      title: SomStatus
+    SomTemp:
+      properties:
+        '1':
+          type: number
+          title: '1'
+      type: object
+    Threat:
+      type: object
+      properties:
+        color:
+          type: integer
+          title: Color
+        level:
+          type: integer
+          title: Level
+      title: Threat
+    DroneSensorLdResult:
+      properties:
+        azimuth:
+          type: number
+          title: Azimuth
+        distance:
+          type: string
+          title: Distance
+        sensor_id:
+          type: string
+          title: Sensor Id
+    UnknownWifiDevicesInfo:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/DroneWifiDevice'
+
+# *** JAMMERS *** #         
+
+
+    FrequencyOption:
+      properties:
+        freq:
+          items:
+            type: string
+          type: array
+          title: Freq
+        name:
+          type: string
+          title: Name
+      type: object
+      title: FrequencyOption
+    MassDefense:
+      type: object
+      required:
+      - azimuth
+      - directional_defense
+      - duration
+      - frequency
+      - frequencyOptions
+      - in_progress
+      - sensor_name
+      - strategy
+      - timingOptions
+      properties:
+        azimuth:
+          type: integer
+          title: Azimuth
+        current:
+          type: integer
+        directional_defense:
+          type: boolean
+          title: Directional Defense
+        duration:
+          type: integer
+          title: Duration
+        frequency:
+          items:
+            type: string
+          type: array
+          title: Frequency
+        frequencyOptions:
+          items:
+            $ref: '#/components/schemas/FrequencyOption'
+          type: array
+          title: Frequencyoptions
+        in_progress:
+          type: boolean
+          title: In Progress
+        sensor_name:
+          type: string
+          title: Sensor Name
+        strategy:
+          type: string
+          title: Strategy
+        timingOptions:
+          items:
+            type: integer
+          type: array
+          title: Timingoptions
+

@@ -1,0 +1,252 @@
+version: v2beta1
+name: dds-target-provider
+
+imports:
+- path: devspace.local-env.yaml
+- path: tests/api/devspace.yaml
+- path: configs/defaults/env.yaml
+
+
+vars:
+  BUILD_DIR:
+    default: "build-dev"
+    source: env
+  IMAGECACHE_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/imagecache
+  BUILDCACHE_IMAGE: ${CI_REGISTRY_IMAGE}/buildcache:${BUILDER_TAG}
+  BUILDCACHE_CONTEXT:
+    command: docker manifest inspect ${BUILDCACHE_IMAGE} &> /dev/null && echo docker-image://${BUILDCACHE_IMAGE} || mktemp -d
+
+
+images:
+  analyser:
+    image: ${PUBLISH_REGISTRY_IMAGE}/analyser
+    target: analyser
+    buildKit:
+      args: [
+        "--platform=${PLATFORMS}",
+        "--cache-from=${CI_REGISTRY_IMAGE}/analyser:${BUILDER_TAG}",
+        "--cache-from=${CI_REGISTRY_IMAGE}/analyser:${IMAGE_TAG}",
+        "--cache-from=type=registry,ref=${IMAGECACHE_IMAGE_NAME}:${BUILDER_TAG}",
+        "--cache-from=type=registry,ref=${IMAGECACHE_IMAGE_NAME}:${IMAGE_TAG}",
+      ]
+  buildcache:
+    image: ${PUBLISH_REGISTRY_IMAGE}/buildcache
+    target: buildcache-out
+    buildArgs:
+      APP_ID: dds-target-provider
+      VERSION: ${VERSION}
+    buildKit:
+      args: [
+        "--platform=${PLATFORMS}",
+        "--build-context=buildcache-in=${BUILDCACHE_CONTEXT}",
+      ]
+  app:
+    image: ${PUBLISH_REGISTRY_IMAGE}
+    buildArgs:
+      APP_ID: dds-target-provider
+      VERSION: ${VERSION}
+    buildKit:
+      args: [
+        "--platform=${PLATFORMS}",
+        "--build-context=buildcache-in=${BUILDCACHE_CONTEXT}",
+        "--cache-from=${CI_REGISTRY_IMAGE}/analyser:${BUILDER_TAG}",
+        "--cache-from=${CI_REGISTRY_IMAGE}/analyser:${IMAGE_TAG}",
+        "--cache-from=type=registry,ref=${IMAGECACHE_IMAGE_NAME}:${BUILDER_TAG}",
+        "--cache-from=type=registry,ref=${IMAGECACHE_IMAGE_NAME}:${IMAGE_TAG}",
+      ]
+
+pipelines:
+  build: |-
+    run_dependencies --all --pipeline build
+    git submodule update --init
+    build_images ${@:-app} -t $IMAGE_TAG
+
+  deploy: |-
+    run_dependencies --all --pipeline deploy
+    export "$@"
+    . configs/defaults/set_profiles_defaults.sh
+    # just for viewing from ui
+    mkdir -p ${DATA_ROOT}/configs
+    if ! env | grep "_DEVICES" > ${DATA_ROOT}/configs/devices.env; then
+      echo ERROR: No devices configuration has given
+      exit 1
+    fi
+
+    mkdir -p $(dirname $LICENSE_FILE)
+    mkdir -p $BUILD_DIR/config
+    docker compose up -d
+
+  purge: |-
+    run_dependencies --all --pipeline purge
+    docker compose down "$@" --remove-orphans
+
+
+commands:
+  logs: |-
+    docker compose logs -f "$@"
+
+  dev: |-
+    # Check we are not in dev container
+    [ ! -d /workspace ] && devspace purge || true
+
+    while [ -n "$1" ]; do
+      [ "$1" = "--" ] && break
+      export "$1"
+      shift
+    done
+    shift
+    . configs/defaults/set_profiles_defaults.sh
+    #env
+
+    mkdir -p $BUILD_DIR && cd $BUILD_DIR
+    target_bin=bin/dss-target-service
+    git submodule update --init
+    if [ ! -f $target_bin ] || [ -n "$CMAKE_DEFS" ]; then
+      CMAKE_DEFS="$CMAKE_DEFS $DEV_CMAKE_DEFS -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
+      cmake .. $CMAKE_DEFS -DBUILD_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=OFF -DINSTALL_PREFIX=${PWD} -DCMAKE_INSTALL_PREFIX=${PWD}
+    fi
+    cmake --build . --parallel $(($(nproc) - 1))
+    if is_in tamerlan-rtu "$DEVSPACE_PROFILES" || is_in tamerlan-sensor-rtu "$DEVSPACE_PROFILES"; then
+      sudo cmake --install . --component dss-target-service
+      sudo chown root $target_bin
+      sudo chmod +s $target_bin
+    else
+      cmake --install . --component dss-target-service
+    fi
+
+    cd .. && migrations/apply.sh
+    cd $BUILD_DIR/config
+    ../../entrypoint.sh ../$target_bin "$@"
+
+  gen-migration: |-
+    if [ -z "$1" ]; then
+      echo Missing migration name
+      exit 1
+    fi
+    atlas migrate diff "$1" \
+      --dir "file://migrations" \
+      --to "file://migrations/schema.hcl" \
+      --dev-url docker://postgres/16/dev?search_path=public \
+      --format "{{ sql . \"  \" }}"
+
+  status-migration: |-
+    atlas migrate status \
+      --dir "file://migrations" \
+      --url postgres://$DB_PG_USER:$DB_PG_PASS@$DB_PG_HOST:$DB_PG_PORT/$DB_PG_NAME?sslmode=disable
+
+  cli: |-
+    BUILD_DIR=$BUILD_DIR-cli
+    mkdir -p $BUILD_DIR && cd $BUILD_DIR
+    target_bin=examples/items/tamerlan-cli/tamerlan-cli
+    if [ ! -f $target_bin ]; then
+      cmake .. -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=OFF
+      cmake --build . --target tamerlan-cli --parallel $(nproc)
+      sudo chown root $target_bin
+      sudo chmod +s $target_bin
+    fi
+    $target_bin "$@"
+
+  format: |-
+    CI_SERVER_HOST= devspace --silent run format_cxx src "$@"
+
+  lint: |-
+    export CI_SERVER_HOST=
+    devspace build analyser
+    devspace --silent run lint_spell src "$@"
+    export CHECK_FOLDERS=src
+    devspace --silent run lint_cxx ${CI_REGISTRY_IMAGE}/analyser:${IMAGE_TAG} src "$@"
+    devspace --silent run lint_cxx_qt ${CI_REGISTRY_IMAGE}/analyser:${IMAGE_TAG} src "$@"
+
+  validate: |-
+    export CI_SERVER_HOST=
+    if [ -z "$DEVSPACE_PROFILE" ]; then
+      devspace --silent run lint_openapi docs/api/dss-target-service-schema.yaml
+      devspace --silent run lint_asyncapi docs/api/dss-target-service-ws.yaml
+    fi
+    if [ "$DEVSPACE_PROFILE" = "imitators" ]; then
+      devspace --silent run lint_openapi docs/api/dss-sensor-schema.yaml
+    fi
+    if [ "$DEVSPACE_PROFILE" = "skycope" ]; then
+      devspace --silent run lint_openapi docs/api/skycope-openapi.yaml
+    fi
+
+  gen: |-
+    export CI_SERVER_HOST=
+    if [ -z "$DEVSPACE_PROFILE" ]; then
+      devspace --silent run gen_cxx_openapi_qt_models \
+        docs/api/dss-target-service-schema.yaml \
+        src/generated/openapi/http-service-models OAService
+      #devspace --silent run gen_cxx_asyncapi_qt_models \
+      #  docs/api/dss-target-service-ws.yaml \
+      #  src/generated/asyncapi/ws-service-models AAService
+    fi
+    if [ "$DEVSPACE_PROFILE" = "radariq" ]; then
+      devspace --silent run gen_cxx_openapi_qt_client \
+        ../../../tsnk/tts/rct/rct-apps/docs/api/rct-service/rct-service-schema.yaml \
+        src/generated/openapi/radariq-client OARadarIq
+    fi
+    if [ "$DEVSPACE_PROFILE" = "skycope" ]; then
+      devspace --silent run gen_cxx_openapi_qt_client \
+        docs/api/skycope-openapi.yaml \
+        src/generated/openapi/skycope-client OASkycope
+    fi
+    find src/generated -type f | LC_ALL=C sort > .linterignore
+
+  gen-license-dev: |-
+    mkdir -p $(dirname $LICENSE_FILE)
+    rm -f $LICENSE_FILE
+    signature="$1"
+    if [ -z "$signature" ]; then
+      [ -z "$LICENSE_HOST" ] && LICENSE_HOST=localhost
+      signature=$(curl $LICENSE_HOST:19080/api/v1/common/get_license_status | sed 's/.*"signature":"\(.*\)",.*/\1/')
+    fi
+    echo Signature: $signature
+    date=$(date "$DEV_LICENSE_LIFETIME" "+%Y-%m-%d")
+    echo Date: $date
+    cd ../dds-license && devspace run gen-license $LICENSE_FILE "$signature" "$date"
+
+  gen-license-pubkey: |-
+    [ -n "$1" ] && export LICENSE_KEY="$1"
+    scripts/generate_public_key.sh
+
+  deps: |-
+    git submodule update --init
+
+  clean: |-
+    docker builder prune -f
+
+profiles:
+- name: imitators
+- name: alia
+- name: tamerlan
+- name: tamerlan-rtu
+- name: tamerlan-sensor
+- name: tamerlan-sensor-rtu
+- name: radariq
+- name: skycope
+- name: ci
+  activation:
+    - env:
+        CI_JOB_ID: "\\d+"
+  patches:
+    - op: add
+      path: images.analyser.buildKit.args
+      value: "--cache-to=type=inline"
+    - op: add
+      path: images.app.buildKit.args
+      value: "--cache-to=type=registry,ref=${IMAGECACHE_IMAGE_NAME}:${IMAGE_TAG},mode=max,compression=zstd"
+
+
+dependencies:
+  dds-infra:
+    path: ../dds-infra
+    overwriteVars: true
+    disabled: $(is_equal "$DEVSPACE_NAME" "local-env" && echo "false" || echo "true")
+  dds-camera:
+    path: ../dds-camera
+    overwriteVars: true
+    disabled: $(is_equal "$DEVSPACE_NAME" "local-env" && echo "false" || echo "true")
+  dds-imitators:
+    path: examples
+    overwriteVars: false
+    disabled: $(is_in imitators "$DEVSPACE_PROFILES" && echo "false" || echo "true")

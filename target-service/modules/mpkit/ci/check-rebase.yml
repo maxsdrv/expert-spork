@@ -1,0 +1,14 @@
+variables:
+  CHECK_REBASE_IMAGE: registry.dev.mpksoft.ru/mpk/internal/docker-builder:current
+  CI_PATH: "${CI_PROJECT_DIR}/ci"
+
+check-rebase/mr:
+  variables:
+    GIT_DEPTH: 100
+  stage: repository-check
+  image: ${CHECK_REBASE_IMAGE}
+  script:
+    - ${CI_PATH}/scripts/check_rebase.sh
+  only:
+    refs:
+      - merge_requests

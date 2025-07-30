@@ -1,0 +1,24 @@
+{
+    "test_node2": 
+    {
+        "token": "abcdef",
+        "any" :
+        {
+	        "any_node1": 0,
+	        "any_node3" : "any_value"
+        } 
+    },
+    "test_node3":
+    {
+        "0":
+        {
+            "chrome": "rome"
+        },
+        "1":
+        {
+            "chrome": "sodom",
+            "kron": "slon"
+        }
+    },
+    "array_node": ["one", "two", "three"]
+}

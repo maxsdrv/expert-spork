@@ -1,0 +1,13 @@
+/*
+ * Translation macros definition
+ */
+
+#pragma once
+
+#include "boost/translations/Translations.h"
+
+// clang-format off
+#define @TR_MACRO_NAME@_TR(...) TR_N("@TR_DOMAIN_NAME@", __VA_ARGS__)
+#define @TR_MACRO_NAME@_TR_PL(...) TR_PL_N("@TR_DOMAIN_NAME@", __VA_ARGS__)
+#define @TR_MACRO_NAME@_TR_CTX(...) TR_CTX_N("@TR_DOMAIN_NAME@", __VA_ARGS__)
+// clang-format on

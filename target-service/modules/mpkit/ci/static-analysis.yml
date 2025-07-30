@@ -1,0 +1,21 @@
+variables:
+  STATIC_ANALYSIS_IMAGE: ${CI_REGISTRY}/mpk/ci/static-analysis-image:latest
+  CI_PATH: "${CI_PROJECT_DIR}/ci"
+  CMAKE_ARGS: "-DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DQT_QMAKE_EXECUTABLE=qmake \
+            -DBUILD_EXAMPLES=ON \
+            -DBUILD_TESTS=ON"
+
+code-lint/mr:
+  stage: analysis
+  image: ${STATIC_ANALYSIS_IMAGE}
+  script:
+    - mkdir -p .build
+    - cmake -B.build -DCODE_LINT=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ${CMAKE_ARGS}
+    - ${CI_PATH}/scripts/run_clang-tidy.sh
+    - ${CI_PATH}/scripts/run_clazy.sh
+  only:
+    refs:
+      - merge_requests

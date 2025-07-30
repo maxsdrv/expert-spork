@@ -1,0 +1,40 @@
+/**
+ * Auto-generated file. Do not modify it manually.
+ * Base definitions for project
+ */
+
+#pragma once
+
+//namespace build
+//{
+
+// Project version string (MAJOR.MINOR.FIX)
+constexpr auto VERSION = "@VERSION@";
+
+constexpr auto VERSION_MAJOR = "@VERSION_MAJOR@";
+constexpr auto VERSION_MINOR = "@VERSION_MINOR@";
+constexpr auto VERSION_NUMBER = "@VERSION_NUMBER@";
+
+// Build revision (git sha)
+constexpr auto REVISION = "@REVISION@";
+
+// Build branch (git branch --show-current)
+constexpr auto CURRENT_BRANCH = "@CURRENT_BRANCH@";
+
+// Build number (from CI)
+constexpr auto BUILD_NUMBER = "@BUILD_NUMBER@";
+
+// Build date
+constexpr auto BUILD_DATE = "@BUILD_DATE@";
+
+constexpr auto BUILD_YEAR = "@BUILD_YEAR@";
+constexpr auto BUILD_MONTH = "@BUILD_MONTH@";
+constexpr auto BUILD_DAY = "@BUILD_DAY@";
+
+// Compiler identification
+constexpr auto COMPILER_ID = "@CMAKE_CXX_COMPILER_ID@";
+
+// Compiler version string
+constexpr auto COMPILER_VERSION = "@CMAKE_CXX_COMPILER_VERSION@";
+
+//} // namespace build

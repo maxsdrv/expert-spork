@@ -1,0 +1,23 @@
+{
+    "simple":
+    {
+        "id": 123,
+        "value": "v"
+    },
+    "string_array": ["one", "two", "three"],
+    "int_array": [1, 2, 3],
+    "incorrect_int_array": ["one"],
+    "subtree_array":
+    {
+        "0":
+        {
+            "id": 22,
+            "number": "one"
+        },
+        "1":
+        {
+            "id": 33,
+            "value": "ufo driver"
+        }
+    }
+}

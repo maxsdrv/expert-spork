@@ -1,0 +1,190 @@
+variables:
+  STATIC_CHECKS_IMAGE: "${CI_REGISTRY}/mpk/ci/static-check-image:latest"
+  GIT_DEPTH: 200
+
+include:
+  - project: 'tsnk/tts/general'
+    ref: fb5b3a2b76ec7c08de852a4d7c59679df026ab6a
+    file:
+      - '/ci/common_project_template.yml'
+  - file:
+      - ci/gitlab/docker.yml
+      - ci/gitlab/rebase.yml
+    project: irz/tamerlan/dds-shared
+    ref: develop
+
+stages:
+  - check
+  - analysis
+  - build
+#  - test
+  - deploy
+#  - test-deploy
+  - trash
+
+
+app:
+  stage: build
+  script:
+    - MERGE_SOURCE_BRANCH=$(echo $CI_COMMIT_MESSAGE | grep " into '$CI_COMMIT_BRANCH'" | sed "s/Merge branch '\(.*\)' into .*/\1/") || true
+    - BUILDER_TAG=${MERGE_SOURCE_BRANCH:-$BUILDER_TAG}
+    - devspace build
+    - devspace build buildcache
+
+imitators:
+  stage: build
+  variables:
+    PLATFORMS: linux/amd64
+  script:
+    - MERGE_SOURCE_BRANCH=$(echo $CI_COMMIT_MESSAGE | grep " into '$CI_COMMIT_BRANCH'" | sed "s/Merge branch '\(.*\)' into .*/\1/") || true
+    - BUILDER_TAG=${MERGE_SOURCE_BRANCH:-$BUILDER_TAG}
+    - cd examples
+    - devspace build
+
+dds-target-provider:
+  stage: deploy
+  image: $CI_REGISTRY/irz/tamerlan/dds-control/update:$CI_COMMIT_BRANCH
+  services: []
+  variables:
+    HOST_ADDR: "$ENVIRONMENT.$STAGES_DOMAIN"
+    HOST_USER: "user"
+    HOST_PASS: "user"
+  before_script:
+    - apk add sshpass openssh-client
+    - cd /provision
+  script:
+    - sshpass -p "$HOST_PASS" scp -o StrictHostKeyChecking=no $HOST_USER@$HOST_ADDR:/var/opt/dds/configs/system.yaml /provision/group_vars/production.yml
+    - ansible-playbook update-services.yml -i inventory/production --tags target-provider -e image_tag=$CI_COMMIT_BRANCH -e online=yes -e ansible_host=$HOST_ADDR -e ansible_user=$HOST_USER -e ansible_ssh_pass=$HOST_PASS
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      variables:
+        ENVIRONMENT: "dev"
+    - if: $CI_COMMIT_BRANCH == "staging"
+      variables:
+        ENVIRONMENT: "qa"
+
+dds-imitators:
+  stage: deploy
+  services: []
+  variables:
+    DOCKER_HOST: tcp://$ENVIRONMENT.$STAGES_DOMAIN:2375
+    IMAGE_TAG: $CI_COMMIT_BRANCH
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+  script:
+    - cd examples
+    - devspace deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      variables:
+        ENVIRONMENT: "dev-ext"
+        LOG_LEVEL: TRACE
+    - if: $CI_COMMIT_BRANCH == "staging"
+      variables:
+        ENVIRONMENT: "qa-ext"
+        LOG_LEVEL: DEBUG
+
+publish:
+  stage: deploy
+  variables:
+    PUBLISH_REGISTRY_IMAGE: $PUBLIC_REGISTRY_IMAGE
+  script:
+    - MERGE_SOURCE_BRANCH=$(echo $CI_COMMIT_MESSAGE | grep " into '$CI_COMMIT_BRANCH'" | sed "s/Merge branch '\(.*\)' into .*/\1/") || true
+    - BUILDER_TAG=${MERGE_SOURCE_BRANCH:-$BUILDER_TAG}
+    - devspace run gen-license-pubkey
+    - devspace build --disable-profile-activation
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "hotfix"
+      when: manual
+    - when: on_success
+
+spell-check/mr:
+  services: []
+  before_script: []
+  only:
+    changes:
+    - src/**/*
+    - tests/**/*
+    - examples/**/*
+
+cmake-format/mr:
+  services: []
+  before_script: []
+  only:
+    changes:
+    - src/**/*
+    - examples/**/*
+
+code-format/mr:
+  services: []
+  before_script: []
+  only:
+    changes:
+    - src/**/*
+    - examples/**/*
+
+build/analyser:
+  stage: analysis
+  variables:
+    PLATFORMS: linux/amd64
+  script:
+    - devspace build analyser
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        BUILDER_TAG: "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        IMAGE_TAG: "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
+
+code-lint/mr:
+  services: []
+  before_script: []
+  variables:
+    STATIC_ANALYSIS_IMAGE: $CI_REGISTRY_IMAGE/analyser:$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    CHECK_FOLDERS: src,examples
+  only:
+    changes:
+    - src/**/*
+    - examples/**/*
+  needs: ["build/analyser"]
+
+
+images/mr:
+  stage: trash
+  services: []
+  before_script: []
+  variables:
+    MERGE_COMMIT_MESSAGE_PATTERN: "/Merge branch '.*' into '$CI_COMMIT_BRANCH'/"
+    HEADER: "JOB-TOKEN: ${CI_JOB_TOKEN}"
+  script:
+    - MERGE_SOURCE_BRANCH=$(echo $CI_COMMIT_MESSAGE | grep " into '$CI_COMMIT_BRANCH'" | sed "s/Merge branch '\(.*\)' into .*/\1/")
+    - image_repo=$(devspace list vars -o json | jq ".IMAGE_REPO")
+    - image_tag=$MERGE_SOURCE_BRANCH
+    - repos=$(curl -k -s --header "$HEADER" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/registry/repositories")
+    - repo_id=$(echo $repos | jq ".[] | select (.location == $image_repo).id")
+    - echo Deleting image $image_repo:$image_tag in repository id $repo_id
+    - curl -k -s --request DELETE --header "$HEADER" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/registry/repositories/$repo_id/tags/$image_tag"
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(develop|staging|main)$/ && $CI_COMMIT_MESSAGE =~ $MERGE_COMMIT_MESSAGE_PATTERN
+
+docker-retag-images:
+  stage: trash
+  only:
+    variables:
+      - $TRASH_JOB
+docker-release-images:
+  stage: trash
+  only:
+    variables:
+      - $TRASH_JOB
+docker-clear-images:
+  stage: trash
+  only:
+    variables:
+      - $TRASH_JOB
+check-rebase/mr:
+  stage: trash
+  only:
+    variables:
+      - $TRASH_JOB

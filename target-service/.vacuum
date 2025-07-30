@@ -1,0 +1,5 @@
+extends: [[spectral:oas, recommended]]
+rules:
+  operation-description: false
+  oas3-missing-example: false
+  paths-kebab-case: false

@@ -1,0 +1,18 @@
+{
+  "test_node1": 
+  {
+    "host": "local",
+    "port": "7777"
+  },
+  "test_node2": 
+  {
+    "token": "abcdef",
+    "any" :
+    {
+	"any_node1": 0,
+	"any_node2" : null,
+	"any_node3" : "any_value"
+    } 
+  },
+  "test_node3": "hklmn"
+}
