@@ -19,7 +19,7 @@ import (
 )
 
 
-// CameraAPIService CameraAPI service
+// CameraAPIService CameraAPI proxy
 type CameraAPIService service
 
 type ApiGetIdRequest struct {
@@ -39,7 +39,7 @@ func (r ApiGetIdRequest) Execute() (*CameraId, *http.Response, error) {
 }
 
 /*
-GetId Get ID for the camera in camera service
+GetId Get ID for the camera in camera proxy
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiGetIdRequest

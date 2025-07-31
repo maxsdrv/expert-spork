@@ -9,13 +9,13 @@ import (
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 )
 
-type SensorDataMapper struct{}
+//type SensorDataMapper struct{}
 
-func NewSensorDataMapper() *SensorDataMapper {
-	return &SensorDataMapper{}
-}
+//func NewSensorDataMapper() *SensorDataMapper {
+//	return &SensorDataMapper{}
+//}
 
-func (m *SensorDataMapper) ConvertToSensorInfoDynamic(ctx context.Context, data json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
+func ConvertToSensorInfoDynamic(ctx context.Context, data json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
 	logger := logging.WithCtxFields(ctx)
 
 	var sensorData dss_target_service.SensorInfo
@@ -30,7 +30,7 @@ func (m *SensorDataMapper) ConvertToSensorInfoDynamic(ctx context.Context, data 
 		State:    string(sensorData.State),
 	}
 
-	if position := m.convertToAPIPosition(&sensorData.Position); position != nil {
+	if position := convertToAPIPosition(&sensorData.Position); position != nil {
 		if position.Coordinate != nil {
 			lat := position.Coordinate.GetLatitude()
 			lon := position.Coordinate.GetLongitude()
@@ -39,11 +39,11 @@ func (m *SensorDataMapper) ConvertToSensorInfoDynamic(ctx context.Context, data 
 		}
 	}
 
-	if positionMode := m.convertToAPIPositionMode(&sensorData.PositionMode); positionMode != nil {
+	if positionMode := convertToAPIPositionMode(&sensorData.PositionMode); positionMode != nil {
 		sensorInfo.PositionMode = core.GeoPositionMode(*positionMode)
 	}
 
-	if workZone := m.convertToAPIWorkZone(sensorData.Workzone); workZone != nil {
+	if workZone := convertToAPIWorkZone(sensorData.Workzone); workZone != nil {
 		if len(workZone) > 0 {
 			sector := workZone[0]
 			number := int(sector.GetNumber())
@@ -54,14 +54,14 @@ func (m *SensorDataMapper) ConvertToSensorInfoDynamic(ctx context.Context, data 
 		}
 	}
 
-	if hwInfo := m.convertToAPIHwInfo(sensorData.HwInfo); hwInfo != nil {
+	if hwInfo := convertToAPIHwInfo(sensorData.HwInfo); hwInfo != nil {
 		sensorInfo.HwInfo = core.NewHwInfo(hwInfo.Temperature, hwInfo.Voltage, nil)
 	}
 
 	return sensorInfo, nil
 }
 
-func (m *SensorDataMapper) ConvertJammerMode(jammerMode core.JammerMode) (dss_target_service.JammerMode, error) {
+func ConvertJammerMode(jammerMode core.JammerMode) (dss_target_service.JammerMode, error) {
 	switch jammerMode {
 	case core.JammerMode(apiv1.JammerMode_JAMMER_AUTO):
 		return dss_target_service.JAMMERMODE_AUTO, nil
@@ -72,7 +72,18 @@ func (m *SensorDataMapper) ConvertJammerMode(jammerMode core.JammerMode) (dss_ta
 	}
 }
 
-func (m *SensorDataMapper) ConvertToAPISensorInfo(sensorInfo dss_target_service.SensorInfo) *apiv1.SensorInfo {
+func ConvertToAPIJammerInfo(jammerInfo dss_target_service.JammerInfo) *apiv1.JammerInfo {
+	return &apiv1.JammerInfo{
+		JammerId:  &jammerInfo.Id,
+		Model:     &jammerInfo.Model,
+		Serial:    jammerInfo.Serial,
+		SwVersion: jammerInfo.SwVersion,
+		SensorId:  jammerInfo.SensorId,
+		GroupId:   jammerInfo.GroupId,
+	}
+}
+
+func ConvertToAPISensorInfo(sensorInfo dss_target_service.SensorInfo) *apiv1.SensorInfo {
 	var sensorType *apiv1.SensorType
 
 	switch sensorInfo.Type {
@@ -104,7 +115,7 @@ func (m *SensorDataMapper) ConvertToAPISensorInfo(sensorInfo dss_target_service.
 	}
 }
 
-func (m *SensorDataMapper) convertToAPIPosition(pos *dss_target_service.GeoPosition) *apiv1.GeoPosition {
+func convertToAPIPosition(pos *dss_target_service.GeoPosition) *apiv1.GeoPosition {
 	if pos == nil {
 		return nil
 	}
@@ -121,7 +132,7 @@ func (m *SensorDataMapper) convertToAPIPosition(pos *dss_target_service.GeoPosit
 	}
 }
 
-func (m *SensorDataMapper) convertToAPIPositionMode(posMode *dss_target_service.GeoPositionMode) *apiv1.GeoPositionMode {
+func convertToAPIPositionMode(posMode *dss_target_service.GeoPositionMode) *apiv1.GeoPositionMode {
 
 	switch *posMode {
 	case dss_target_service.GEOPOSITIONMODE_AUTO:
@@ -138,7 +149,7 @@ func (m *SensorDataMapper) convertToAPIPositionMode(posMode *dss_target_service.
 	}
 }
 
-func (m *SensorDataMapper) convertToAPIWorkZone(dssWorkZone []dss_target_service.WorkzoneSector) []*apiv1.WorkzoneSector {
+func convertToAPIWorkZone(dssWorkZone []dss_target_service.WorkzoneSector) []*apiv1.WorkzoneSector {
 	if len(dssWorkZone) == 0 {
 		return nil
 	}
@@ -156,7 +167,7 @@ func (m *SensorDataMapper) convertToAPIWorkZone(dssWorkZone []dss_target_service
 	return workZones
 }
 
-func (m *SensorDataMapper) convertToAPIHwInfo(dssHwInfo *dss_target_service.HwInfo) *apiv1.HwInfo {
+func convertToAPIHwInfo(dssHwInfo *dss_target_service.HwInfo) *apiv1.HwInfo {
 	hwInfo := &apiv1.HwInfo{
 		Temperature: dssHwInfo.Temperature,
 		Voltage:     dssHwInfo.Voltage,

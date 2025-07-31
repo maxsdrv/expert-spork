@@ -2,32 +2,32 @@ package controllers
 
 import (
 	"dds-provider/internal/core"
+	"dds-provider/internal/core/components"
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/common"
-	"dds-provider/internal/services/notifier"
-	"dds-provider/internal/services/service"
+	"dds-provider/internal/services/proxy"
 )
 
 type Controllers struct {
 	svcCommon         *common.CommonService
 	svcBackend        backend.BackendService
-	svcJammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic]
-	svcSensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic]
-	svcTargetProvider *service.Service
+	svcSensorNotifier *components.Notifier[*core.SensorInfoDynamic]
+	svcJammerNotifier *components.Notifier[*core.JammerInfoDynamic]
+	svcTargetProvider *proxy.Service
 }
 
-func New(
+func NewControllers(
 	svcCommon *common.CommonService,
 	svcBackend backend.BackendService,
-	svcNotifier *notifier.NotifierService[*core.JammerInfoDynamic],
-	svcSensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic],
-	svcTargetProvider *service.Service,
+	svcSensorNotifier *components.Notifier[*core.SensorInfoDynamic],
+	svcJammerNotifier *components.Notifier[*core.JammerInfoDynamic],
+	svcTargetProvider *proxy.Service,
 ) *Controllers {
 	return &Controllers{
 		svcCommon:         svcCommon,
 		svcBackend:        svcBackend,
-		svcJammerNotifier: svcNotifier,
 		svcSensorNotifier: svcSensorNotifier,
+		svcJammerNotifier: svcJammerNotifier,
 		svcTargetProvider: svcTargetProvider,
 	}
 }

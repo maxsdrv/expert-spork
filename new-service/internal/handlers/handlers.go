@@ -8,6 +8,6 @@ type Handlers struct {
 	controllers *controllers.Controllers
 }
 
-func New(controllers *controllers.Controllers) *Handlers {
+func NewHandlers(controllers *controllers.Controllers) *Handlers {
 	return &Handlers{controllers: controllers}
 }

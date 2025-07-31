@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
@@ -15,12 +14,9 @@ type EntityId struct {
 	id string
 }
 
-func NewId(uuid_arg string) (EntityId, error) {
+func NewId(uuid_arg string) EntityId {
 	trimmed := strings.TrimSpace(uuid_arg)
-	if err := uuid.Validate(trimmed); err != nil {
-		return EntityId{}, fmt.Errorf("new entity id: %w: %s", err, trimmed)
-	}
-	return EntityId{id: trimmed}, nil
+	return EntityId{id: trimmed}
 }
 
 func GenerateId() EntityId {
@@ -30,6 +26,13 @@ func GenerateId() EntityId {
 
 func (d EntityId) String() string {
 	return d.id
+}
+
+func (d EntityId) Validate() error {
+	if err := uuid.Validate(d.id); err != nil {
+		return coreError("validate uuid: %v: id string: %s", err, d.id)
+	}
+	return nil
 }
 
 func (d EntityId) Equal(other EntityId) bool {

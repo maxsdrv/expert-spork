@@ -19,7 +19,7 @@ import (
 )
 
 
-// TrackAPIService TrackAPI service
+// TrackAPIService TrackAPI proxy
 type TrackAPIService service
 
 type ApiGetTrackRequest struct {

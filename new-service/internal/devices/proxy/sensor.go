@@ -10,29 +10,29 @@ import (
 )
 
 type Sensor struct {
-	sensorId     string
-	serviceAPI   *dss_target_service.SensorAPIService
-	sensorMapper *wsclient.SensorDataMapper
-	info         *dss_target_service.SensorInfo
+	id         string
+	serviceAPI *dss_target_service.SensorAPIService
+	//mapper     *wsclient.SensorDataMapper
+	info *dss_target_service.SensorInfo
 }
 
 func NewSensor(sensorId string, api *dss_target_service.SensorAPIService, info *dss_target_service.SensorInfo) *Sensor {
 	return &Sensor{
-		sensorId:     sensorId,
-		serviceAPI:   api,
-		sensorMapper: wsclient.NewSensorDataMapper(),
-		info:         info,
+		id:         sensorId,
+		serviceAPI: api,
+		//mapper:     wsclient.NewSensorDataMapper(),
+		info: info,
 	}
 }
 
 func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
-	dssMode, err := s.sensorMapper.ConvertJammerMode(mode)
+	dssMode, err := wsclient.ConvertJammerMode(mode)
 	if err != nil {
 		return err
 	}
 
 	setJammerModeReq := dss_target_service.SetJammerModeRequest{
-		Id:         s.sensorId,
+		Id:         s.id,
 		JammerMode: dssMode,
 		Timeout:    timeout,
 	}
@@ -45,11 +45,11 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 }
 
 func (s *Sensor) SensorInfo() apiv1.SensorInfo {
-	return *s.sensorMapper.ConvertToAPISensorInfo(*s.info)
+	return *s.mapper.ConvertToAPISensorInfo(*s.info)
 }
 
 func (s *Sensor) GetSensorId() string {
-	return s.sensorId
+	return s.id
 }
 
 func (s *Sensor) SetDisabled(disabled bool) {
@@ -59,3 +59,5 @@ func (s *Sensor) SetDisabled(disabled bool) {
 func (s *Sensor) SetPosition(position *core.GeoPosition) error {
 	return nil
 }
+
+func (s *Sensor) SetPositionMode(mode core.GeoPositionMode) error { return nil }

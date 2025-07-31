@@ -11,6 +11,6 @@ var logging = ctx_log.GetLogger(nil)
 type CommonService struct {
 }
 
-func New(ctx context.Context) *CommonService {
+func NewCommonService(ctx context.Context) *CommonService {
 	return &CommonService{}
 }

@@ -47,10 +47,7 @@ func (s *Controllers) SensorInfoDynamic(
 
 	logger.Debugf("Start sensor info dynamic sensor %s", sensorId)
 
-	deviceId, err := core.NewId(sensorId)
-	if err != nil {
-		return err
-	}
+	deviceId := core.NewId(sensorId)
 
 	sensorChan, closeFunc, err := s.svcSensorNotifier.Stream(ctx, deviceId)
 	if err != nil {
@@ -84,10 +81,7 @@ func (s *Controllers) SetJammerMode(ctx context.Context,
 
 	logger.Debugf("Set jammer mode for sensor %s to %s", sensorId, jammerMode)
 
-	deviceId, err := core.NewId(sensorId)
-	if err != nil {
-		return connect.NewError(connect.CodeInvalidArgument, err)
-	}
+	deviceId := core.NewId(sensorId)
 
 	sensorBase, err := s.svcBackend.Sensor(deviceId)
 	if err != nil {

@@ -1,4 +1,4 @@
-package service
+package proxy
 
 import (
 	"context"
@@ -8,12 +8,12 @@ import (
 	"github.com/opticoder/ctx-log/go/ctx_log"
 
 	"dds-provider/internal/core"
+	"dds-provider/internal/core/components"
 	"dds-provider/internal/devices/proxy"
 	"dds-provider/internal/enums"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/httpclient"
-	"dds-provider/internal/services/notifier"
 	"dds-provider/internal/services/wsclient"
 )
 
@@ -21,6 +21,7 @@ var logging = ctx_log.GetLogger(nil)
 
 const (
 	msgTypeSensorInfo    = "sensor_info"
+	msgTypeJammerInfo    = "jammer_info"
 	msgTypeLicenseStatus = "license_status"
 )
 
@@ -40,8 +41,8 @@ type Service struct {
 
 func New(ctx context.Context,
 	connections []Connection,
-	jammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic],
-	sensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic],
+	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
+	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
 	backendService backend.BackendService,
 ) *Service {
 	sharedHttpClient := httpclient.NewSharedHttpClient()
@@ -64,7 +65,7 @@ func New(ctx context.Context,
 func (s *Service) start(ctx context.Context) {
 	logger := logging.WithCtxFields(ctx)
 
-	logger.Debug("Starting proxy service")
+	logger.Debug("Starting proxy proxy")
 
 	for _, connection := range s.connections {
 		go s.connect(ctx, connection)
@@ -89,7 +90,7 @@ func (s *Service) connect(ctx context.Context, connection Connection) {
 
 		_, _, err := apiClient.CommonAPI.GetApiVersion(ctx).Execute()
 		if err != nil {
-			logger.WithError(err).Error("failed to connect to DDS target service")
+			logger.WithError(err).Error("failed to connect to DDS target proxy")
 
 			timer := time.NewTimer(retryDelay)
 			select {
@@ -105,7 +106,7 @@ func (s *Service) connect(ctx context.Context, connection Connection) {
 			continue
 		}
 
-		logger.Info("Connected to DDS target service")
+		logger.Info("Connected to DDS target proxy")
 
 		go func() {
 			healthRetryDelay := time.Second
@@ -156,4 +157,17 @@ func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId
 	s.backendService.AppendDevice(deviceId, proxySensor)
 
 	logger.Infof("Registered sensor %s from WebSocket notification", sensorId)
+}
+
+func (s *Service) registerJammers(ctx context.Context, jammerId string, deviceId core.DeviceId, jammerInfo *dss_target_service.JammerInfo) {
+	logger := logging.WithCtxFields(ctx)
+
+	if _, err := s.backendService.Jammer(deviceId); err == nil {
+		return
+	}
+
+	proxyJammer := proxy.NewJammer(jammerId, nil, jammerInfo)
+	s.backendService.AppendDevice(deviceId, proxyJammer)
+
+	logger.Infof("Registered Jammer %s from WebSocket notification", jammerId)
 }

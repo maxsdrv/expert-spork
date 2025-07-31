@@ -22,7 +22,7 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
-	// JammerServiceName is the fully-qualified name of the JammerService service.
+	// JammerServiceName is the fully-qualified name of the JammerService proxy.
 	JammerServiceName = "api.v1.JammerService"
 )
 
@@ -46,7 +46,7 @@ const (
 	JammerServiceSetJammerBandsProcedure = "/api.v1.JammerService/SetJammerBands"
 )
 
-// JammerServiceClient is a client for the api.v1.JammerService service.
+// JammerServiceClient is a client for the api.v1.JammerService proxy.
 type JammerServiceClient interface {
 	Jammers(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.JammersResponse], error)
 	// Get the initial jammer state with the first stream message
@@ -61,7 +61,7 @@ type JammerServiceClient interface {
 	SetJammerBands(context.Context, *connect.Request[proto.SetJammerBandsRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
-// NewJammerServiceClient constructs a client for the api.v1.JammerService service. By default, it
+// NewJammerServiceClient constructs a client for the api.v1.JammerService proxy. By default, it
 // uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
 // uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
 // connect.WithGRPCWeb() options.
@@ -127,7 +127,7 @@ func (c *jammerServiceClient) SetJammerBands(ctx context.Context, req *connect.R
 	return c.setJammerBands.CallUnary(ctx, req)
 }
 
-// JammerServiceHandler is an implementation of the api.v1.JammerService service.
+// JammerServiceHandler is an implementation of the api.v1.JammerService proxy.
 type JammerServiceHandler interface {
 	Jammers(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.JammersResponse], error)
 	// Get the initial jammer state with the first stream message
@@ -142,7 +142,7 @@ type JammerServiceHandler interface {
 	SetJammerBands(context.Context, *connect.Request[proto.SetJammerBandsRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
-// NewJammerServiceHandler builds an HTTP handler from the service implementation. It returns the
+// NewJammerServiceHandler builds an HTTP handler from the proxy implementation. It returns the
 // path on which to mount the handler and the handler itself.
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf

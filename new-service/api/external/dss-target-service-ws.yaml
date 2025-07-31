@@ -2,7 +2,7 @@ asyncapi: 3.0.0
 info:
   title: DSS Service WebSocket API
   version: 2.3.0
-  description: WebSocket API of `dss-target-service`
+  description: WebSocket API of `dss-target-proxy`
 servers:
   ws:
     host: http://127.0.0.1:19081

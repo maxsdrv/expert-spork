@@ -21,7 +21,7 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
-	// CameraServiceName is the fully-qualified name of the CameraService service.
+	// CameraServiceName is the fully-qualified name of the CameraService proxy.
 	CameraServiceName = "api.v1.CameraService"
 )
 
@@ -37,12 +37,12 @@ const (
 	CameraServiceCameraIdProcedure = "/api.v1.CameraService/CameraId"
 )
 
-// CameraServiceClient is a client for the api.v1.CameraService service.
+// CameraServiceClient is a client for the api.v1.CameraService proxy.
 type CameraServiceClient interface {
 	CameraId(context.Context, *connect.Request[proto.CameraIdRequest]) (*connect.Response[proto.CameraIdResponse], error)
 }
 
-// NewCameraServiceClient constructs a client for the api.v1.CameraService service. By default, it
+// NewCameraServiceClient constructs a client for the api.v1.CameraService proxy. By default, it
 // uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
 // uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
 // connect.WithGRPCWeb() options.
@@ -72,12 +72,12 @@ func (c *cameraServiceClient) CameraId(ctx context.Context, req *connect.Request
 	return c.cameraId.CallUnary(ctx, req)
 }
 
-// CameraServiceHandler is an implementation of the api.v1.CameraService service.
+// CameraServiceHandler is an implementation of the api.v1.CameraService proxy.
 type CameraServiceHandler interface {
 	CameraId(context.Context, *connect.Request[proto.CameraIdRequest]) (*connect.Response[proto.CameraIdResponse], error)
 }
 
-// NewCameraServiceHandler builds an HTTP handler from the service implementation. It returns the
+// NewCameraServiceHandler builds an HTTP handler from the proxy implementation. It returns the
 // path on which to mount the handler and the handler itself.
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf

@@ -22,7 +22,7 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
-	// TargetServiceName is the fully-qualified name of the TargetService service.
+	// TargetServiceName is the fully-qualified name of the TargetService proxy.
 	TargetServiceName = "api.v1.TargetService"
 )
 
@@ -38,12 +38,12 @@ const (
 	TargetServiceTargetsProcedure = "/api.v1.TargetService/Targets"
 )
 
-// TargetServiceClient is a client for the api.v1.TargetService service.
+// TargetServiceClient is a client for the api.v1.TargetService proxy.
 type TargetServiceClient interface {
 	Targets(context.Context, *connect.Request[emptypb.Empty]) (*connect.ServerStreamForClient[proto.TargetsResponse], error)
 }
 
-// NewTargetServiceClient constructs a client for the api.v1.TargetService service. By default, it
+// NewTargetServiceClient constructs a client for the api.v1.TargetService proxy. By default, it
 // uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
 // uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
 // connect.WithGRPCWeb() options.
@@ -73,12 +73,12 @@ func (c *targetServiceClient) Targets(ctx context.Context, req *connect.Request[
 	return c.targets.CallServerStream(ctx, req)
 }
 
-// TargetServiceHandler is an implementation of the api.v1.TargetService service.
+// TargetServiceHandler is an implementation of the api.v1.TargetService proxy.
 type TargetServiceHandler interface {
 	Targets(context.Context, *connect.Request[emptypb.Empty], *connect.ServerStream[proto.TargetsResponse]) error
 }
 
-// NewTargetServiceHandler builds an HTTP handler from the service implementation. It returns the
+// NewTargetServiceHandler builds an HTTP handler from the proxy implementation. It returns the
 // path on which to mount the handler and the handler itself.
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf

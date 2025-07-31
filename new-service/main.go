@@ -16,12 +16,12 @@ import (
 	"dds-provider/internal/config"
 	"dds-provider/internal/controllers"
 	"dds-provider/internal/core"
+	"dds-provider/internal/core/components"
 	"dds-provider/internal/generated/api/proto/apiv1connect"
 	"dds-provider/internal/handlers"
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/common"
-	"dds-provider/internal/services/notifier"
-	"dds-provider/internal/services/service"
+	"dds-provider/internal/services/proxy"
 )
 
 func main() {
@@ -41,15 +41,14 @@ func main() {
 
 	ctx := context.Background()
 
-	svcCommon := common.New(ctx)
-	svcBackend := backend.New(ctx)
-	svcJammerNotifier := notifier.New[*core.JammerInfoDynamic](ctx)
-	svcSensorNotifier := notifier.New[*core.SensorInfoDynamic](ctx)
+	svcCommon := common.NewCommonService(ctx)
+	svcBackend := backend.NewBackendService(ctx)
+	svcJammerNotifier := components.NewNotifier[*core.JammerInfoDynamic](ctx)
+	svcSensorNotifier := components.NewNotifier[*core.SensorInfoDynamic](ctx)
+	svcTargetProvider := proxy.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier, svcBackend)
 
-	proxyService := service.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier, svcBackend)
-
-	controllers := controllers.New(svcCommon, svcBackend, svcJammerNotifier, svcSensorNotifier, proxyService)
-	handlers := handlers.New(controllers)
+	controllers := controllers.NewControllers(svcCommon, svcBackend, svcSensorNotifier, svcJammerNotifier, svcTargetProvider)
+	handlers := handlers.NewHandlers(controllers)
 	interceptors := connect.WithInterceptors(
 		middleware.NewLoggingInterceptor(),
 		middleware.NewValidateInterceptor(),

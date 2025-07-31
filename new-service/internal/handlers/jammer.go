@@ -17,18 +17,7 @@ func (s *Handlers) Jammers(
 	logger := logging.WithCtxFields(ctx)
 	logger.Debug("Request data: ", req.Msg)
 
-	jammerInfos := []*apiv1.JammerInfo{
-		{
-			JammerId: proto.String("550e8400-e29b-41d4-a716-446655440000"),
-			Model:    proto.String("Test Model 1"),
-		},
-		{
-			JammerId: proto.String("6ba7b810-9dad-11d1-80b4-00c04fd430c8"),
-			Model:    proto.String("Test Model 2"),
-		},
-	}
-
-	return connect.NewResponse(&apiv1.JammersResponse{JammerInfos: jammerInfos}), nil
+	return s.controllers.GetJammers(ctx)
 }
 
 func (s *Handlers) JammerInfoDynamic(

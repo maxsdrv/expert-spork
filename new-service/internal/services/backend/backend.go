@@ -2,12 +2,12 @@ package backend
 
 import (
 	"context"
-	"fmt"
+	"dds-provider/internal/core"
 
 	"github.com/opticoder/ctx-log/go/ctx_log"
-
-	"dds-provider/internal/core"
 )
+
+var backendError = core.ProviderErrorFn("backend")
 
 var logging = ctx_log.GetLogger(nil)
 
@@ -18,7 +18,7 @@ type BackendService interface {
 	Jammer(id core.DeviceId) (*core.JammerBase, error)
 	Sensor(id core.DeviceId) (*core.SensorBase, error)
 	Device(id core.DeviceId) (*core.DeviceBase, error)
-	AppendDevice(id core.DeviceId, device core.DeviceBase)
+	AppendDevice(id core.DeviceId, device core.DeviceBase) error
 }
 
 type backendService struct {
@@ -27,7 +27,7 @@ type backendService struct {
 	devices map[core.DeviceId]*core.DeviceBase
 }
 
-func New(ctx context.Context) BackendService {
+func NewBackendService(ctx context.Context) BackendService {
 	return &backendService{
 		sensors: map[core.DeviceId]*core.SensorBase{},
 		jammers: map[core.DeviceId]*core.JammerBase{},
@@ -35,7 +35,11 @@ func New(ctx context.Context) BackendService {
 	}
 }
 
-func (s *backendService) AppendDevice(id core.DeviceId, device core.DeviceBase) {
+func (s *backendService) AppendDevice(id core.DeviceId, device core.DeviceBase) error {
+	if err := id.Validate(); err != nil {
+		return backendError("%v", err)
+	}
+
 	if jammer, ok := device.(core.JammerBase); ok {
 		s.jammers[id] = &jammer
 		s.devices[id] = &device
@@ -43,8 +47,10 @@ func (s *backendService) AppendDevice(id core.DeviceId, device core.DeviceBase) 
 		s.sensors[id] = &sensor
 		s.devices[id] = &device
 	} else {
-		logging.Errorf("backend: Incorrect device type, %s", id)
+		return backendError("incorrect device type, %s", id)
 	}
+
+	return nil
 }
 
 func getKeys[T any](m map[core.DeviceId]*T) []core.DeviceId {
@@ -71,7 +77,7 @@ func (s *backendService) Jammer(id core.DeviceId) (*core.JammerBase, error) {
 	if jammer, ok := s.jammers[id]; ok {
 		return jammer, nil
 	}
-	return nil, fmt.Errorf("jammer not found, %s", id)
+	return nil, backendError("jammer not found, id: %s", id)
 }
 
 func (s *backendService) Sensor(id core.DeviceId) (*core.SensorBase, error) {
@@ -80,12 +86,12 @@ func (s *backendService) Sensor(id core.DeviceId) (*core.SensorBase, error) {
 	if sensor, ok := s.sensors[id]; ok {
 		return sensor, nil
 	}
-	return nil, fmt.Errorf("sensor not found, %s", id)
+	return nil, backendError("sensor not found, id: %s", id)
 }
 
 func (s *backendService) Device(id core.DeviceId) (*core.DeviceBase, error) {
 	if device, ok := s.devices[id]; ok {
 		return device, nil
 	}
-	return nil, fmt.Errorf("device not found, %s", id)
+	return nil, backendError("device not found, id: %s", id)
 }

@@ -15,6 +15,14 @@ func ParseSensorInfo(dataRaw json.RawMessage) (*dss_target_service.SensorInfo, e
 	return &sensor, nil
 }
 
+func ParseJammerInfo(dataRaw json.RawMessage) (*dss_target_service.JammerInfo, error) {
+	var jammer dss_target_service.JammerInfo
+	if err := json.Unmarshal(dataRaw, &jammer); err != nil {
+		return nil, err
+	}
+	return &jammer, nil
+}
+
 func ParseLicenseStatus(dataRaw json.RawMessage) (*dss_target_service.LicenseStatus, error) {
 	var licenseStatus dss_target_service.LicenseStatus
 	if err := json.Unmarshal(dataRaw, &licenseStatus); err != nil {

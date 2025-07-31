@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"dds-provider/internal/services/service"
+	"dds-provider/internal/services/proxy"
 )
 
 const (
@@ -17,7 +17,7 @@ var Proxy struct {
 	Devices []string `envSeparator:" "`
 }
 
-var TargetProviderConnections []service.Connection
+var TargetProviderConnections []proxy.Connection
 
 func init() {
 	load(&Proxy)
@@ -28,8 +28,8 @@ func init() {
 	}
 }
 
-func parseConnection(device string) service.Connection {
-	var connection service.Connection
+func parseConnection(device string) proxy.Connection {
+	var connection proxy.Connection
 
 	entry := strings.SplitN(device, "#", 2)[0]
 	hostParts := strings.Split(entry, ":")

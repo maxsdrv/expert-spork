@@ -1,25 +1,25 @@
-package service
+package proxy
 
 import (
 	"context"
 	"encoding/json"
 
 	"dds-provider/internal/core"
-	"dds-provider/internal/services/notifier"
+	"dds-provider/internal/core/components"
 	"dds-provider/internal/services/parsers"
 	"dds-provider/internal/services/wsclient"
 )
 
 type NotificationProcessor struct {
-	jammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic]
-	sensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic]
+	jammerNotifier *components.Notifier[*core.JammerInfoDynamic]
+	sensorNotifier *components.Notifier[*core.SensorInfoDynamic]
 	sensorMapper   *wsclient.SensorDataMapper
 	service        *Service
 }
 
 func NewNotificationProcessor(
-	jammerNotifier *notifier.NotifierService[*core.JammerInfoDynamic],
-	sensorNotifier *notifier.NotifierService[*core.SensorInfoDynamic],
+	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
+	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
 	service *Service,
 ) *NotificationProcessor {
 	return &NotificationProcessor{
@@ -40,6 +40,8 @@ func (n *NotificationProcessor) HandleNotification(ctx context.Context, message 
 		return n.processSensorInfo(ctx, data)
 	case msgTypeLicenseStatus:
 		return n.licenseStatusUpdate(ctx, data)
+	case msgTypeJammerInfo:
+		return n.processJammerInfo(ctx, data)
 	default:
 		logger.Tracef("Unknown message type: %s", message)
 		return nil
@@ -55,11 +57,7 @@ func (n *NotificationProcessor) processSensorInfo(ctx context.Context, dataRaw j
 		return err
 	}
 
-	deviceId, err := core.NewId(sensor.Id)
-	if err != nil {
-		logger.WithError(err).Error("Failed to create device id")
-		return err
-	}
+	deviceId := core.NewId(sensor.Id)
 
 	n.service.registerSensors(ctx, sensor.Id, deviceId, sensor)
 
@@ -86,6 +84,22 @@ func (n *NotificationProcessor) dynamicSensorInfo(ctx context.Context, dataRaw j
 	}
 
 	return sensorInfoDynamic, err
+}
+
+func (n *NotificationProcessor) processJammerInfo(ctx context.Context, dataRaw json.RawMessage) error {
+	logger := logging.WithCtxFields(ctx)
+
+	jammerInfo, err := parsers.ParseJammerInfo(dataRaw)
+	if err != nil {
+		logger.WithError(err).Error("Failed to parse jammer info")
+		return err
+	}
+
+	deviceId := core.NewId(jammerInfo.Id)
+
+	n.service.registerJammers(ctx, jammerInfo.Id, deviceId, jammerInfo)
+	logger.Tracef("Successfully updated jammer info")
+	return nil
 }
 
 func (n *NotificationProcessor) licenseStatusUpdate(ctx context.Context, dataRaw json.RawMessage) error {

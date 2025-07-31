@@ -58,7 +58,6 @@ message JammerInfoDynamicResponse {
   optional JammerTimeoutStatus timeout_status = 14;
 }
 
-
 message GroupsResponse {
   repeated JammerGroup jammer_groups = 1 [(buf.validate.field).required = true];
 }

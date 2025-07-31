@@ -76,7 +76,7 @@ func (c *WSNotificationClient) updateLoop(ctx context.Context, conn *websocket.C
 	for {
 		_, data, err := conn.Read(ctx)
 		if err != nil {
-			logger.WithError(err).Warn("Failed to read data from DDS target service")
+			logger.WithError(err).Warn("Failed to read data from DDS target proxy")
 			break
 		}
 

@@ -8,7 +8,7 @@ import (
 )
 
 func TestJammerInfo(id DeviceId) *apiv1.JammerInfo {
-	sensorId, _ := NewId("9f86d081-884c-4d63-a159-f35e7e5b72a0")
+	sensorId := NewId("9f86d081-884c-4d63-a159-f35e7e5b72a0")
 	deviceIdStr := id.String()
 	sensorIdStr := sensorId.String()
 	return &apiv1.JammerInfo{
