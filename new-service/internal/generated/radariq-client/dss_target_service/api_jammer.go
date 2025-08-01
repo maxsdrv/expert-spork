@@ -19,7 +19,7 @@ import (
 )
 
 
-// JammerAPIService JammerAPI proxy
+// JammerAPIService JammerAPI service
 type JammerAPIService service
 
 type ApiGetJammerRequest struct {

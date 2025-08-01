@@ -9,28 +9,25 @@ import (
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
-	"dds-provider/internal/services/wsclient"
+	"dds-provider/internal/services/mapping"
 )
 
 type Jammer struct {
 	id         string
 	serviceApi *dss_target_service.JammerAPIService
-	//mapper     *wsclient.SensorDataMapper
-	info *dss_target_service.JammerInfo
+	info       *dss_target_service.JammerInfo
 }
 
 func NewJammer(jammerId string, api *dss_target_service.JammerAPIService, info *dss_target_service.JammerInfo) *Jammer {
 	return &Jammer{
 		id:         jammerId,
 		serviceApi: api,
-		//mapper:     wsclient.NewSensorDataMapper(),
-		info: info,
+		info:       info,
 	}
 }
 
 func (j *Jammer) JammerInfo() apiv1.JammerInfo {
-	wsclient.SensorDataMapper.ConvertToAPISensorInfo(*j.info)
-	return *j.mapper.ConvertToAPIJammerInfo(*j.info)
+	return *mapping.ConvertToAPIJammerInfo(*j.info)
 }
 
 func (j *Jammer) SetDisabled(disabled bool) {

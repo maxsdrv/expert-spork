@@ -19,7 +19,7 @@ import (
 )
 
 
-// TargetAPIService TargetAPI proxy
+// TargetAPIService TargetAPI service
 type TargetAPIService service
 
 type ApiGetTargetRequest struct {

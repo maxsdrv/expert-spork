@@ -22,7 +22,7 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
-	// DeviceServiceName is the fully-qualified name of the DeviceService proxy.
+	// DeviceServiceName is the fully-qualified name of the DeviceService service.
 	DeviceServiceName = "api.v1.DeviceService"
 )
 
@@ -45,14 +45,14 @@ const (
 	DeviceServiceSetPositionProcedure = "/api.v1.DeviceService/SetPosition"
 )
 
-// DeviceServiceClient is a client for the api.v1.DeviceService proxy.
+// DeviceServiceClient is a client for the api.v1.DeviceService service.
 type DeviceServiceClient interface {
 	SetDisabled(context.Context, *connect.Request[proto.SetDisabledRequest]) (*connect.Response[emptypb.Empty], error)
 	SetPositionMode(context.Context, *connect.Request[proto.SetPositionModeRequest]) (*connect.Response[emptypb.Empty], error)
 	SetPosition(context.Context, *connect.Request[proto.SetPositionRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
-// NewDeviceServiceClient constructs a client for the api.v1.DeviceService proxy. By default, it
+// NewDeviceServiceClient constructs a client for the api.v1.DeviceService service. By default, it
 // uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
 // uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
 // connect.WithGRPCWeb() options.
@@ -106,14 +106,14 @@ func (c *deviceServiceClient) SetPosition(ctx context.Context, req *connect.Requ
 	return c.setPosition.CallUnary(ctx, req)
 }
 
-// DeviceServiceHandler is an implementation of the api.v1.DeviceService proxy.
+// DeviceServiceHandler is an implementation of the api.v1.DeviceService service.
 type DeviceServiceHandler interface {
 	SetDisabled(context.Context, *connect.Request[proto.SetDisabledRequest]) (*connect.Response[emptypb.Empty], error)
 	SetPositionMode(context.Context, *connect.Request[proto.SetPositionModeRequest]) (*connect.Response[emptypb.Empty], error)
 	SetPosition(context.Context, *connect.Request[proto.SetPositionRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
-// NewDeviceServiceHandler builds an HTTP handler from the proxy implementation. It returns the
+// NewDeviceServiceHandler builds an HTTP handler from the service implementation. It returns the
 // path on which to mount the handler and the handler itself.
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf

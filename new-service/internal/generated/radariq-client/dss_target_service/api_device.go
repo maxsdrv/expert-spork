@@ -19,7 +19,7 @@ import (
 )
 
 
-// DeviceAPIService DeviceAPI proxy
+// DeviceAPIService DeviceAPI service
 type DeviceAPIService service
 
 type ApiGetPositionModeRequest struct {

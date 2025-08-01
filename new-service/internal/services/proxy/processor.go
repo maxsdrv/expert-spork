@@ -6,14 +6,13 @@ import (
 
 	"dds-provider/internal/core"
 	"dds-provider/internal/core/components"
+	"dds-provider/internal/services/mapping"
 	"dds-provider/internal/services/parsers"
-	"dds-provider/internal/services/wsclient"
 )
 
 type NotificationProcessor struct {
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic]
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic]
-	sensorMapper   *wsclient.SensorDataMapper
 	service        *Service
 }
 
@@ -25,7 +24,6 @@ func NewNotificationProcessor(
 	return &NotificationProcessor{
 		jammerNotifier: jammerNotifier,
 		sensorNotifier: sensorNotifier,
-		sensorMapper:   wsclient.NewSensorDataMapper(),
 		service:        service,
 	}
 }
@@ -77,7 +75,7 @@ func (n *NotificationProcessor) processSensorInfo(ctx context.Context, dataRaw j
 func (n *NotificationProcessor) dynamicSensorInfo(ctx context.Context, dataRaw json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
 	logger := logging.WithCtxFields(ctx)
 
-	sensorInfoDynamic, err := n.sensorMapper.ConvertToSensorInfoDynamic(ctx, dataRaw, deviceId)
+	sensorInfoDynamic, err := mapping.ConvertToSensorInfoDynamic(ctx, dataRaw, deviceId)
 	if err != nil {
 		logger.WithError(err).Error("Sensor info dynamic response failed")
 		return nil, err
@@ -98,8 +96,29 @@ func (n *NotificationProcessor) processJammerInfo(ctx context.Context, dataRaw j
 	deviceId := core.NewId(jammerInfo.Id)
 
 	n.service.registerJammers(ctx, jammerInfo.Id, deviceId, jammerInfo)
+
+	dynamicInfo, err := n.dynamicJammerInfo(ctx, dataRaw, deviceId)
+	if err != nil {
+		logger.WithError(err).Error("Failed to update jammer info")
+		return err
+	}
+
+	n.jammerNotifier.Notify(ctx, dynamicInfo)
+
 	logger.Tracef("Successfully updated jammer info")
+
 	return nil
+}
+
+func (n *NotificationProcessor) dynamicJammerInfo(ctx context.Context, dataRaw json.RawMessage, deviceId core.DeviceId) (*core.JammerInfoDynamic, error) {
+	logger := logging.WithCtxFields(ctx)
+
+	jammerInfoDynamic, err := mapping.ConvertToJammerInfoDynamic(ctx, dataRaw, deviceId)
+	if err != nil {
+		logger.WithError(err).Error("Jammer info dynamic response failed")
+		return nil, err
+	}
+	return jammerInfoDynamic, err
 }
 
 func (n *NotificationProcessor) licenseStatusUpdate(ctx context.Context, dataRaw json.RawMessage) error {

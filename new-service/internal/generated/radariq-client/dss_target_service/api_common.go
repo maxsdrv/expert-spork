@@ -19,7 +19,7 @@ import (
 )
 
 
-// CommonAPIService CommonAPI proxy
+// CommonAPIService CommonAPI service
 type CommonAPIService service
 
 type ApiGetApiVersionRequest struct {

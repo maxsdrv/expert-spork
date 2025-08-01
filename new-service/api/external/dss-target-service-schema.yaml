@@ -654,7 +654,7 @@ paths:
       tags:
         - camera
 #        - beta
-      summary: Get ID for the camera in camera proxy
+      summary: Get ID for the camera in camera service
       operationId: get_id
       parameters:
         - name: id

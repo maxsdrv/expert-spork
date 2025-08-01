@@ -22,7 +22,7 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
-	// CommonServiceName is the fully-qualified name of the CommonService proxy.
+	// CommonServiceName is the fully-qualified name of the CommonService service.
 	CommonServiceName = "api.v1.CommonService"
 )
 
@@ -47,7 +47,7 @@ const (
 	CommonServiceUploadLicenseProcedure = "/api.v1.CommonService/UploadLicense"
 )
 
-// CommonServiceClient is a client for the api.v1.CommonService proxy.
+// CommonServiceClient is a client for the api.v1.CommonService service.
 type CommonServiceClient interface {
 	Settings(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.SettingsResponse], error)
 	SetSettings(context.Context, *connect.Request[proto.SetSettingsRequest]) (*connect.Response[emptypb.Empty], error)
@@ -55,7 +55,7 @@ type CommonServiceClient interface {
 	UploadLicense(context.Context, *connect.Request[proto.UploadLicenseRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
-// NewCommonServiceClient constructs a client for the api.v1.CommonService proxy. By default, it
+// NewCommonServiceClient constructs a client for the api.v1.CommonService service. By default, it
 // uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
 // uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
 // connect.WithGRPCWeb() options.
@@ -121,7 +121,7 @@ func (c *commonServiceClient) UploadLicense(ctx context.Context, req *connect.Re
 	return c.uploadLicense.CallUnary(ctx, req)
 }
 
-// CommonServiceHandler is an implementation of the api.v1.CommonService proxy.
+// CommonServiceHandler is an implementation of the api.v1.CommonService service.
 type CommonServiceHandler interface {
 	Settings(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[proto.SettingsResponse], error)
 	SetSettings(context.Context, *connect.Request[proto.SetSettingsRequest]) (*connect.Response[emptypb.Empty], error)
@@ -129,7 +129,7 @@ type CommonServiceHandler interface {
 	UploadLicense(context.Context, *connect.Request[proto.UploadLicenseRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
-// NewCommonServiceHandler builds an HTTP handler from the proxy implementation. It returns the
+// NewCommonServiceHandler builds an HTTP handler from the service implementation. It returns the
 // path on which to mount the handler and the handler itself.
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf

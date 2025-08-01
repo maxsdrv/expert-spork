@@ -19,7 +19,7 @@ import (
 )
 
 
-// SensorAPIService SensorAPI proxy
+// SensorAPIService SensorAPI service
 type SensorAPIService service
 
 type ApiGetJammerModeRequest struct {
