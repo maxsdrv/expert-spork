@@ -3,6 +3,7 @@ package proxy
 import (
 	"context"
 	"dds-provider/internal/services/mapping"
+	"errors"
 
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
@@ -15,12 +16,15 @@ type Sensor struct {
 	info       *dss_target_service.SensorInfo
 }
 
-func NewSensor(sensorId string, api *dss_target_service.SensorAPIService, info *dss_target_service.SensorInfo) *Sensor {
+func NewSensor(sensorId string, api *dss_target_service.SensorAPIService, info *dss_target_service.SensorInfo) (*Sensor, error) {
+	if sensorId == "" {
+		return nil, errors.New("sensor id required")
+	}
 	return &Sensor{
 		id:         sensorId,
 		serviceAPI: api,
 		info:       info,
-	}
+	}, nil
 }
 
 func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {

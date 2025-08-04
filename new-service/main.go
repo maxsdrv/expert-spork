@@ -21,7 +21,7 @@ import (
 	"dds-provider/internal/handlers"
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/common"
-	"dds-provider/internal/services/proxy"
+	"dds-provider/internal/services/target_service"
 )
 
 func main() {
@@ -45,7 +45,7 @@ func main() {
 	svcBackend := backend.NewBackendService(ctx)
 	svcJammerNotifier := components.NewNotifier[*core.JammerInfoDynamic](ctx)
 	svcSensorNotifier := components.NewNotifier[*core.SensorInfoDynamic](ctx)
-	svcTargetProvider := proxy.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier, svcBackend)
+	svcTargetProvider := target_service.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier, svcBackend)
 
 	controllers := controllers.NewControllers(svcCommon, svcBackend, svcSensorNotifier, svcJammerNotifier, svcTargetProvider)
 	handlers := handlers.NewHandlers(controllers)

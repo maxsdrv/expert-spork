@@ -5,7 +5,7 @@ import (
 	"dds-provider/internal/core/components"
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/common"
-	"dds-provider/internal/services/proxy"
+	"dds-provider/internal/services/target_service"
 )
 
 type Controllers struct {
@@ -13,7 +13,7 @@ type Controllers struct {
 	svcBackend        backend.BackendService
 	svcSensorNotifier *components.Notifier[*core.SensorInfoDynamic]
 	svcJammerNotifier *components.Notifier[*core.JammerInfoDynamic]
-	svcTargetProvider *proxy.Service
+	svcTargetProvider *target_service.Service
 }
 
 func NewControllers(
@@ -21,7 +21,7 @@ func NewControllers(
 	svcBackend backend.BackendService,
 	svcSensorNotifier *components.Notifier[*core.SensorInfoDynamic],
 	svcJammerNotifier *components.Notifier[*core.JammerInfoDynamic],
-	svcTargetProvider *proxy.Service,
+	svcTargetProvider *target_service.Service,
 ) *Controllers {
 	return &Controllers{
 		svcCommon:         svcCommon,
