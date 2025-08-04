@@ -7,7 +7,6 @@ import (
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 	"dds-provider/internal/services/mapping"
 	"errors"
-	"net/http"
 )
 
 type Jammer struct {
@@ -43,20 +42,6 @@ func (j *Jammer) SetPositionMode(mode core.GeoPositionMode) error {
 }
 
 func (j *Jammer) SetJammerBands(bands core.JammerBands, duration int32) error {
-	/*
-		Test scenario
-	*/
-	//if 0 == duration {
-	//	err := errors.New("local error")
-	//	return fmt.Errorf("proxy: %v", err)
-	//}
-	//if duration == 2 {
-	//	err := http.ErrHandlerTimeout
-	//	return proxyError("something went wrong: %w", err)
-	//}
-	//if duration == 3 {
-	//	return ErrTimeout
-	//}
 
 	activeBands := bands.GetActive()
 
@@ -70,12 +55,5 @@ func (j *Jammer) SetJammerBands(bands core.JammerBands, duration int32) error {
 		SetJammerBandsRequest(setJammerBandsReq).
 		Execute()
 
-	if err != nil {
-		if errors.Is(err, http.ErrHandlerTimeout) {
-			return ErrTimeout
-		}
-		return proxyError("SetJammerBands failed for jammer %s: %w", j.id, err)
-	}
-
-	return nil
+	return handleJammerError("SetJammerBands", j.id, err)
 }

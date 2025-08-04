@@ -2,6 +2,11 @@ package proxy
 
 import (
 	"dds-provider/internal/core"
+	"dds-provider/internal/generated/radariq-client/dss_target_service"
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
 )
 
 var proxyError = core.ProviderErrorFn("proxy")
@@ -12,18 +17,76 @@ var (
 	ErrConnectionReset    = proxyError("connection reset")
 	ErrNetworkUnreachable = proxyError("network unreachable")
 	ErrHostNotFound       = proxyError("host not found")
-
-	ErrHTTPTimeout      = proxyError("http timeout")
-	ErrHTTPServerError  = proxyError("http server error")
-	ErrHTTPUnauthorized = proxyError("http unauthorized")
-	ErrHTTPBadStatus    = proxyError("http bad status")
-
+	ErrServerError        = proxyError("http server error")
+	ErrUnauthorized       = proxyError("http unauthorized")
 	ErrServiceUnavailable = proxyError("service unavailable")
 	ErrDeviceNotFound     = proxyError("device not found")
-	ErrInvalidDeviceType  = proxyError("invalid device type")
-
-	ErrInvalidMessageFormat = proxyError("invalid message format")
-	ErrMarshallingFailed    = proxyError("marshalling failed")
-	ErrUnmarshallingFailed  = proxyError("unmarshalling failed")
-	ErrDataValidationFailed = proxyError("data validation failed")
 )
+
+func handleProxyError(operation, deviceId string, err error) error {
+	if errors.Is(err, http.ErrHandlerTimeout) {
+		return ErrTimeout
+	}
+
+	errStr := err.Error()
+	switch {
+	case strings.Contains(errStr, "connection refused"):
+		return ErrConnectionRefused
+	case strings.Contains(errStr, "connection reset"):
+		return ErrConnectionReset
+	case strings.Contains(errStr, "timeout"):
+		return ErrTimeout
+	case strings.Contains(errStr, "network unreachable"):
+		return ErrNetworkUnreachable
+	case strings.Contains(errStr, "no such host"):
+		return ErrHostNotFound
+	}
+
+	var apiErr *dss_target_service.GenericOpenAPIError
+	if errors.As(err, &apiErr) {
+		return handleApiErrors(operation, deviceId, apiErr)
+	}
+
+	return wrapWithContext(nil, operation, deviceId, err)
+}
+
+func handleApiErrors(operation, deviceId string, apiErr *dss_target_service.GenericOpenAPIError) error {
+	errBody := string(apiErr.Body())
+
+	var categorizedErr error
+	switch {
+	case strings.Contains(errBody, "500"):
+		categorizedErr = ErrServerError
+	case strings.Contains(errBody, "401"):
+		categorizedErr = ErrUnauthorized
+	case strings.Contains(errBody, "404"):
+		categorizedErr = ErrDeviceNotFound
+	case strings.Contains(errBody, "503"):
+		categorizedErr = ErrServiceUnavailable
+	default:
+		categorizedErr = nil
+	}
+
+	return wrapWithContext(categorizedErr, operation, deviceId, apiErr)
+}
+
+func wrapWithContext(categorizedErr error, operation, deviceId string, originalErr error) error {
+	if categorizedErr != nil {
+		return categorizedErr
+	}
+
+	context := operation
+	if deviceId != "" {
+		context = fmt.Sprintf("%s %s %s", context, " for device ", deviceId)
+	}
+
+	return proxyError("%s failed: %v", context, originalErr)
+}
+
+func handleJammerError(operation, jammerId string, err error) error {
+	return handleProxyError(operation, jammerId, err)
+}
+
+func handleSensorError(operation, sensorId string, err error) error {
+	return handleProxyError(operation, sensorId, err)
+}
