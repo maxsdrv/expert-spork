@@ -48,6 +48,18 @@ func (s *Controllers) SetJammerBands(
 
 	logger.Debug("SetJammerBands request")
 
+	deviceId := core.NewId(jammerId)
+
+	jammerBase, err := s.svcBackend.Jammer(deviceId)
+	if err != nil {
+		logger.WithError(err).Errorf("Failed to get jammer %s", deviceId)
+		return err
+	}
+
+	if jammerBandsWriter, ok := (*jammerBase).(core.JammerBandsWriter); ok {
+
+	}
+
 	return nil
 }
 

@@ -43,7 +43,11 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 		SetJammerModeRequest(setJammerModeReq).
 		Execute()
 
-	return handleSensorError("SetJammerMode", s.id, err)
+	if err != nil {
+		return handleSensorError("SetJammerMode", s.id, err)
+	}
+
+	return nil
 }
 
 func (s *Sensor) SensorInfo() apiv1.SensorInfo {

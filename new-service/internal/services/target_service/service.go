@@ -51,6 +51,7 @@ type Service struct {
 	notificationClients   map[string]*wsclient.WSNotificationClient
 	notificationProcessor *NotificationProcessor
 	connections           []Connection
+	apiClients            map[string]*dss_target_service.APIClient
 }
 
 func New(ctx context.Context,
@@ -67,6 +68,7 @@ func New(ctx context.Context,
 		notificationClients:   make(map[string]*wsclient.WSNotificationClient),
 		notificationProcessor: nil,
 		connections:           connections,
+		apiClients:            make(map[string]*dss_target_service.APIClient),
 	}
 
 	service.notificationProcessor = NewNotificationProcessor(jammerNotifier, sensorNotifier, service)
@@ -130,6 +132,10 @@ func (s *Service) connect(ctx context.Context, connection Connection) {
 
 		logger.Info("Connected to DDS target service")
 
+		if s.apiClients[deviceID] == nil {
+			s.apiClients[deviceID] = apiClient
+		}
+
 		go func() {
 			healthRetryDelay := time.Second
 			healthCheckInterval := 60 * time.Second
@@ -181,7 +187,17 @@ func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId
 		return nil
 	}
 
-	proxySensor, err := proxy.NewSensor(sensorId, nil, sensorInfo)
+	var apiClient *dss_target_service.APIClient
+	for _, client := range s.apiClients {
+		apiClient = client
+		break
+	}
+
+	if apiClient == nil {
+		return serviceError("No API client for sensor %s", deviceId)
+	}
+
+	proxySensor, err := proxy.NewSensor(sensorId, apiClient.SensorAPI, sensorInfo)
 	if err != nil {
 		logger.WithError(err).Error("failed to create proxy sensor")
 		return serviceError("Registration proxy sensor failed for device %s", deviceId)
@@ -199,7 +215,17 @@ func (s *Service) registerJammers(ctx context.Context, jammerId string, deviceId
 		return nil
 	}
 
-	proxyJammer, err := proxy.NewJammer(jammerId, nil, jammerInfo)
+	var apiClient *dss_target_service.APIClient
+	for _, client := range s.apiClients {
+		apiClient = client
+		break
+	}
+
+	if apiClient == nil {
+		return serviceError("No API client for jammer %s", deviceId)
+	}
+
+	proxyJammer, err := proxy.NewJammer(jammerId, apiClient.JammerAPI, jammerInfo)
 	if err != nil {
 		logger.WithError(err).Error("failed to create proxy jammer")
 		return serviceError("Registration jammer failed for device %s", deviceId)
