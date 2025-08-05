@@ -2,17 +2,19 @@ package core
 
 import (
 	apiv1 "dds-provider/internal/generated/api/proto"
+	"google.golang.org/protobuf/proto"
 )
 
-type GeoPositionMode apiv1.GeoPositionMode
-type GeoPosition apiv1.GeoPosition
-
-func NewGeoPosition(longitude float64, latitude float64, azimuth float64) GeoPosition {
-	return (GeoPosition)(apiv1.GeoPosition{
-		Coordinate: &apiv1.GeoCoordinate{
-			Longitude: &longitude,
-			Latitude:  &latitude,
-		},
-		Azimuth: &azimuth,
-	})
+type GeoPosition struct {
+	Azimuth    AngleType
+	Coordinate GeoCoordinate
 }
+
+func (g *GeoPosition) ToAPI() *apiv1.GeoPosition {
+	return &apiv1.GeoPosition{
+		Azimuth:    proto.Float32(float32(g.Azimuth)),
+		Coordinate: g.Coordinate.ToAPI(),
+	}
+}
+
+//func NewDevicePosition(jsonStr string) DevicePosition {}

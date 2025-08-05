@@ -2,12 +2,12 @@ package proxy
 
 import (
 	"context"
-	"dds-provider/internal/services/mapping"
 	"errors"
 
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
+	"dds-provider/internal/services/mapping"
 )
 
 type Sensor struct {
@@ -28,10 +28,7 @@ func NewSensor(sensorId string, api *dss_target_service.SensorAPIService, info *
 }
 
 func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
-	dssMode, err := mapping.ConvertJammerMode(mode)
-	if err != nil {
-		return err
-	}
+	dssMode := mapping.ConvertToJammerMode(mode)
 
 	setJammerModeReq := dss_target_service.SetJammerModeRequest{
 		Id:         s.id,
@@ -39,7 +36,7 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 		Timeout:    timeout,
 	}
 
-	_, err = s.serviceAPI.SetJammerMode(context.Background()).
+	_, err := s.serviceAPI.SetJammerMode(context.Background()).
 		SetJammerModeRequest(setJammerModeReq).
 		Execute()
 
@@ -51,7 +48,7 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 }
 
 func (s *Sensor) SensorInfo() apiv1.SensorInfo {
-	return *mapping.ConvertToAPISensorInfo(*s.info)
+	return *mapping.ConvertToSensorInfo(*s.info)
 }
 
 func (s *Sensor) SetDisabled(disabled bool) {

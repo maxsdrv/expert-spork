@@ -9,13 +9,13 @@ images:
   app:
     image: ${CI_REGISTRY_IMAGE}
     buildArgs:
-      APP_ID: dds-provider
       VERSION: ${VERSION}
+      APP_ID: dds-provider
       GO_VER: ${GO_VER}
+      GOMOD_TOKEN: ${GOMOD_TOKEN}
       GOMOD_HOST: ${CI_SERVER_HOST}
     buildKit:
       args: [
-        "--secret=id=gomod_token,env=GOMOD_TOKEN",
         "--platform=${PLATFORMS}",
         "--cache-from=type=registry,ref=${CI_REGISTRY_IMAGE}/buildcache:${BUILDER_TAG}",
         "--cache-from=type=registry,ref=${CI_REGISTRY_IMAGE}/buildcache:${IMAGE_TAG}",
@@ -64,4 +64,3 @@ profiles:
       - op: add
         path: images.app.buildKit.args
         value: "--cache-to=type=registry,ref=${CI_REGISTRY_IMAGE}/buildcache:${IMAGE_TAG},mode=max,compression=zstd"
-

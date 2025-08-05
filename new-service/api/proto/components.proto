@@ -11,7 +11,7 @@ enum GeoPositionMode {
 }
 
 message GeoPosition {
-  optional double azimuth = 1 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 360}];
+  optional float azimuth = 1 [(buf.validate.field).required = true, (buf.validate.field).float = {gte: 0, lt: 360}];
   optional GeoCoordinate coordinate = 2 [(buf.validate.field).required = true];
 }
 
@@ -21,18 +21,18 @@ message GeoCoordinate {
   // Longitude in decimal degrees
   optional double longitude = 2 [(buf.validate.field).required = true, (buf.validate.field).double.gte = -180.0, (buf.validate.field).double.lt = 180.0];
   // Altitude in meters above sea level
-  optional double altitude = 3;
+  optional float altitude = 3;
 }
 
 message WorkzoneSector {
-  optional int32 number = 1 [(buf.validate.field).required = true];
-  optional double distance = 2 [(buf.validate.field).required = true];
-  optional double min_angle = 3 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 360}];
-  optional double max_angle = 4 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 360}];
+  optional uint32 number = 1 [(buf.validate.field).required = true];
+  optional float distance = 2 [(buf.validate.field).required = true];
+  optional float min_angle = 3 [(buf.validate.field).required = true, (buf.validate.field).float = {gte: 0, lt: 360}];
+  optional float max_angle = 4 [(buf.validate.field).required = true, (buf.validate.field).float = {gte: 0, lt: 360}];
 }
 
 message HwInfo {
-  optional string temperature = 1;
-  optional string voltage = 2;
-  optional string current = 3;
+  optional float temperature = 1;
+  optional float voltage = 2;
+  optional float current = 3;
 }

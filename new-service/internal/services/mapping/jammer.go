@@ -1,56 +1,28 @@
 package mapping
 
 import (
-	"context"
 	"encoding/json"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 )
 
-func ConvertToJammerInfoDynamic(ctx context.Context, dataRaw json.RawMessage, deviceId core.DeviceId) (*core.JammerInfoDynamic, error) {
-	logger := logging.WithCtxFields(ctx)
-
+func ConvertToJammerInfoDynamic(dataRaw json.RawMessage, deviceId core.DeviceId) (*core.JammerInfoDynamic, error) {
 	var jammerData dss_target_service.JammerInfo
 	if err := json.Unmarshal(dataRaw, &jammerData); err != nil {
-		logger.WithError(err).Error("Convert to JammerInfoDynamicResponse")
-		return nil, err
+		return nil, mappingError("to jammer info dynamic: %v", err)
 	}
 
 	jammerInfo := &core.JammerInfoDynamic{
-		DeviceId: deviceId,
-		Disabled: jammerData.Disabled,
-		State:    string(jammerData.State),
-	}
-
-	if position := convertToAPIPosition(&jammerData.Position); position != nil {
-		if position.Coordinate != nil {
-			lat := position.Coordinate.GetLatitude()
-			lon := position.Coordinate.GetLongitude()
-			azimuth := position.GetAzimuth()
-			jammerInfo.Position = core.NewGeoPosition(lat, lon, azimuth)
-		}
-	}
-
-	if positionMode := convertToAPIPositionMode(&jammerData.PositionMode); positionMode != nil {
-		jammerInfo.PositionMode = core.GeoPositionMode(*positionMode)
-	}
-	if workZone := convertToAPIWorkZone(jammerData.Workzone); workZone != nil {
-		if len(workZone) > 0 {
-			sector := workZone[0]
-			number := int(sector.GetNumber())
-			distance := sector.GetDistance()
-			minAngle := sector.GetMinAngle()
-			maxAngle := sector.GetMaxAngle()
-
-			deviceWorkzone := core.DeviceWorkzone{
-				core.NewDeviceWorkzoneSector(number, distance, minAngle, maxAngle),
-			}
-			jammerInfo.Workzone = deviceWorkzone
-		}
+		JammerId:     deviceId,
+		Disabled:     jammerData.Disabled,
+		State:        string(jammerData.State),
+		Position:     convertToPosition(jammerData.Position),
+		PositionMode: convertToPositionMode(jammerData.PositionMode),
+		Workzone:     convertToWorkZone(jammerData.Workzone),
+		HwInfo:       convertToHwInfo(jammerData.HwInfo),
 	}
 
 	if jammerData.Bands != nil {
@@ -69,48 +41,52 @@ func ConvertToJammerInfoDynamic(ctx context.Context, dataRaw json.RawMessage, de
 		if bands, err := core.NewBands(allBands, activeBands); err == nil {
 			jammerInfo.Bands = bands
 		} else {
-			logger.WithError(err).Error("Failed to create bands")
-			return nil, err
+			return nil, mappingError("to jammer info dynamic: %v", err)
 		}
 
-		if jammerData.BandOptions != nil {
-			jammerInfo.BandOptions = core.NewBandOptions(jammerData.BandOptions)
+		if bandOptions, ok := jammerData.GetBandOptionsOk(); ok && bandOptions != nil {
+			options := core.NewBandOptions(bandOptions)
+			jammerInfo.BandOptions = &options
+		} else {
+			jammerInfo.BandOptions = nil
 		}
-	}
-
-	if hwInfo := convertToAPIHwInfo(jammerData.HwInfo); hwInfo != nil {
-		jammerInfo.HwInfo = core.NewHwInfo(hwInfo.Temperature, hwInfo.Voltage, nil)
 	}
 
 	if jammerData.TimeoutStatus != nil {
-		jammerInfo.TimeoutStatus = core.NewJammerTimeoutStatus(
-			timestamppb.New(jammerData.TimeoutStatus.Started),
-			timestamppb.New(jammerData.TimeoutStatus.Now),
-			jammerData.TimeoutStatus.Duration,
-		)
+		jammerInfo.TimeoutStatus = &core.JammerTimeoutStatus{
+			Started:  jammerData.TimeoutStatus.Started,
+			Now:      jammerData.TimeoutStatus.Now,
+			Duration: time.Duration(jammerData.TimeoutStatus.Duration),
+		}
 	}
 
 	return jammerInfo, nil
 }
 
-func ConvertToAPIJammerInfo(jammerInfo dss_target_service.JammerInfo) *apiv1.JammerInfo {
-	return &apiv1.JammerInfo{
-		JammerId:  &jammerInfo.Id,
-		Model:     &jammerInfo.Model,
+func ConvertToJammerInfo(jammerInfo dss_target_service.JammerInfo) *core.JammerInfo {
+	var sensorId *core.DeviceId
+	if jammerInfo.SensorId != nil {
+		id := core.NewId(*jammerInfo.SensorId)
+		sensorId = &id
+	}
+
+	return &core.JammerInfo{
+		JammerId:  core.NewId(jammerInfo.Id),
+		Model:     jammerInfo.Model,
 		Serial:    jammerInfo.Serial,
 		SwVersion: jammerInfo.SwVersion,
-		SensorId:  jammerInfo.SensorId,
+		SensorId:  sensorId,
 		GroupId:   jammerInfo.GroupId,
 	}
 }
 
-func ConvertJammerMode(jammerMode core.JammerMode) (dss_target_service.JammerMode, error) {
+func ConvertToJammerMode(jammerMode core.JammerMode) dss_target_service.JammerMode {
 	switch jammerMode {
-	case core.JammerMode(apiv1.JammerMode_JAMMER_AUTO):
-		return dss_target_service.JAMMERMODE_AUTO, nil
-	case core.JammerMode(apiv1.JammerMode_JAMMER_MANUAL):
-		return dss_target_service.JAMMERMODE_MANUAL, nil
+	case apiv1.JammerMode_JAMMER_AUTO:
+		return dss_target_service.JAMMERMODE_AUTO
+	case apiv1.JammerMode_JAMMER_MANUAL:
+		return dss_target_service.JAMMERMODE_MANUAL
 	default:
-		return dss_target_service.JAMMERMODE_UNDEFINED, nil
+		return dss_target_service.JAMMERMODE_UNDEFINED
 	}
 }

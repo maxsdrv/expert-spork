@@ -73,7 +73,7 @@ func (GeoPositionMode) EnumDescriptor() ([]byte, []int) {
 
 type GeoPosition struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Azimuth       *float64               `protobuf:"fixed64,1,opt,name=azimuth,proto3,oneof" json:"azimuth,omitempty"`
+	Azimuth       *float32               `protobuf:"fixed32,1,opt,name=azimuth,proto3,oneof" json:"azimuth,omitempty"`
 	Coordinate    *GeoCoordinate         `protobuf:"bytes,2,opt,name=coordinate,proto3,oneof" json:"coordinate,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -109,7 +109,7 @@ func (*GeoPosition) Descriptor() ([]byte, []int) {
 	return file_components_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *GeoPosition) GetAzimuth() float64 {
+func (x *GeoPosition) GetAzimuth() float32 {
 	if x != nil && x.Azimuth != nil {
 		return *x.Azimuth
 	}
@@ -130,7 +130,7 @@ type GeoCoordinate struct {
 	// Longitude in decimal degrees
 	Longitude *float64 `protobuf:"fixed64,2,opt,name=longitude,proto3,oneof" json:"longitude,omitempty"`
 	// Altitude in meters above sea level
-	Altitude      *float64 `protobuf:"fixed64,3,opt,name=altitude,proto3,oneof" json:"altitude,omitempty"`
+	Altitude      *float32 `protobuf:"fixed32,3,opt,name=altitude,proto3,oneof" json:"altitude,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -179,7 +179,7 @@ func (x *GeoCoordinate) GetLongitude() float64 {
 	return 0
 }
 
-func (x *GeoCoordinate) GetAltitude() float64 {
+func (x *GeoCoordinate) GetAltitude() float32 {
 	if x != nil && x.Altitude != nil {
 		return *x.Altitude
 	}
@@ -188,10 +188,10 @@ func (x *GeoCoordinate) GetAltitude() float64 {
 
 type WorkzoneSector struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Number        *int32                 `protobuf:"varint,1,opt,name=number,proto3,oneof" json:"number,omitempty"`
-	Distance      *float64               `protobuf:"fixed64,2,opt,name=distance,proto3,oneof" json:"distance,omitempty"`
-	MinAngle      *float64               `protobuf:"fixed64,3,opt,name=min_angle,json=minAngle,proto3,oneof" json:"min_angle,omitempty"`
-	MaxAngle      *float64               `protobuf:"fixed64,4,opt,name=max_angle,json=maxAngle,proto3,oneof" json:"max_angle,omitempty"`
+	Number        *uint32                `protobuf:"varint,1,opt,name=number,proto3,oneof" json:"number,omitempty"`
+	Distance      *float32               `protobuf:"fixed32,2,opt,name=distance,proto3,oneof" json:"distance,omitempty"`
+	MinAngle      *float32               `protobuf:"fixed32,3,opt,name=min_angle,json=minAngle,proto3,oneof" json:"min_angle,omitempty"`
+	MaxAngle      *float32               `protobuf:"fixed32,4,opt,name=max_angle,json=maxAngle,proto3,oneof" json:"max_angle,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -226,28 +226,28 @@ func (*WorkzoneSector) Descriptor() ([]byte, []int) {
 	return file_components_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *WorkzoneSector) GetNumber() int32 {
+func (x *WorkzoneSector) GetNumber() uint32 {
 	if x != nil && x.Number != nil {
 		return *x.Number
 	}
 	return 0
 }
 
-func (x *WorkzoneSector) GetDistance() float64 {
+func (x *WorkzoneSector) GetDistance() float32 {
 	if x != nil && x.Distance != nil {
 		return *x.Distance
 	}
 	return 0
 }
 
-func (x *WorkzoneSector) GetMinAngle() float64 {
+func (x *WorkzoneSector) GetMinAngle() float32 {
 	if x != nil && x.MinAngle != nil {
 		return *x.MinAngle
 	}
 	return 0
 }
 
-func (x *WorkzoneSector) GetMaxAngle() float64 {
+func (x *WorkzoneSector) GetMaxAngle() float32 {
 	if x != nil && x.MaxAngle != nil {
 		return *x.MaxAngle
 	}
@@ -256,9 +256,9 @@ func (x *WorkzoneSector) GetMaxAngle() float64 {
 
 type HwInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Temperature   *string                `protobuf:"bytes,1,opt,name=temperature,proto3,oneof" json:"temperature,omitempty"`
-	Voltage       *string                `protobuf:"bytes,2,opt,name=voltage,proto3,oneof" json:"voltage,omitempty"`
-	Current       *string                `protobuf:"bytes,3,opt,name=current,proto3,oneof" json:"current,omitempty"`
+	Temperature   *float32               `protobuf:"fixed32,1,opt,name=temperature,proto3,oneof" json:"temperature,omitempty"`
+	Voltage       *float32               `protobuf:"fixed32,2,opt,name=voltage,proto3,oneof" json:"voltage,omitempty"`
+	Current       *float32               `protobuf:"fixed32,3,opt,name=current,proto3,oneof" json:"current,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -293,34 +293,36 @@ func (*HwInfo) Descriptor() ([]byte, []int) {
 	return file_components_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *HwInfo) GetTemperature() string {
+func (x *HwInfo) GetTemperature() float32 {
 	if x != nil && x.Temperature != nil {
 		return *x.Temperature
 	}
-	return ""
+	return 0
 }
 
-func (x *HwInfo) GetVoltage() string {
+func (x *HwInfo) GetVoltage() float32 {
 	if x != nil && x.Voltage != nil {
 		return *x.Voltage
 	}
-	return ""
+	return 0
 }
 
-func (x *HwInfo) GetCurrent() string {
+func (x *HwInfo) GetCurrent() float32 {
 	if x != nil && x.Current != nil {
 		return *x.Current
 	}
-	return ""
+	return 0
 }
 
 var File_components_proto protoreflect.FileDescriptor
 
 const file_components_proto_rawDesc = "" +
 	"\n" +
-	"\x10components.proto\x12\x06api.v1\x1a\x1bbuf/validate/validate.proto\"\xa7\x01\n" +
-	"\vGeoPosition\x129\n" +
-	"\aazimuth\x18\x01 \x01(\x01B\x1a\xbaH\x17\xc8\x01\x01\x12\x12\x11\x00\x00\x00\x00\x00\x80v@)\x00\x00\x00\x00\x00\x00\x00\x00H\x00R\aazimuth\x88\x01\x01\x12B\n" +
+	"\x10components.proto\x12\x06api.v1\x1a\x1bbuf/validate/validate.proto\"\x9f\x01\n" +
+	"\vGeoPosition\x121\n" +
+	"\aazimuth\x18\x01 \x01(\x02B\x12\xbaH\x0f\xc8\x01\x01\n" +
+	"\n" +
+	"\x15\x00\x00\xb4C-\x00\x00\x00\x00H\x00R\aazimuth\x88\x01\x01\x12B\n" +
 	"\n" +
 	"coordinate\x18\x02 \x01(\v2\x15.api.v1.GeoCoordinateB\x06\xbaH\x03\xc8\x01\x01H\x01R\n" +
 	"coordinate\x88\x01\x01B\n" +
@@ -330,16 +332,20 @@ const file_components_proto_rawDesc = "" +
 	"\rGeoCoordinate\x12;\n" +
 	"\blatitude\x18\x01 \x01(\x01B\x1a\xbaH\x17\xc8\x01\x01\x12\x12\x11\x00\x00\x00\x00\x00\x80V@)\x00\x00\x00\x00\x00\x80V\xc0H\x00R\blatitude\x88\x01\x01\x12=\n" +
 	"\tlongitude\x18\x02 \x01(\x01B\x1a\xbaH\x17\xc8\x01\x01\x12\x12\x11\x00\x00\x00\x00\x00\x80f@)\x00\x00\x00\x00\x00\x80f\xc0H\x01R\tlongitude\x88\x01\x01\x12\x1f\n" +
-	"\baltitude\x18\x03 \x01(\x01H\x02R\baltitude\x88\x01\x01B\v\n" +
+	"\baltitude\x18\x03 \x01(\x02H\x02R\baltitude\x88\x01\x01B\v\n" +
 	"\t_latitudeB\f\n" +
 	"\n" +
 	"_longitudeB\v\n" +
-	"\t_altitude\"\x8e\x02\n" +
+	"\t_altitude\"\xfe\x01\n" +
 	"\x0eWorkzoneSector\x12#\n" +
-	"\x06number\x18\x01 \x01(\x05B\x06\xbaH\x03\xc8\x01\x01H\x00R\x06number\x88\x01\x01\x12'\n" +
-	"\bdistance\x18\x02 \x01(\x01B\x06\xbaH\x03\xc8\x01\x01H\x01R\bdistance\x88\x01\x01\x12<\n" +
-	"\tmin_angle\x18\x03 \x01(\x01B\x1a\xbaH\x17\xc8\x01\x01\x12\x12\x11\x00\x00\x00\x00\x00\x80v@)\x00\x00\x00\x00\x00\x00\x00\x00H\x02R\bminAngle\x88\x01\x01\x12<\n" +
-	"\tmax_angle\x18\x04 \x01(\x01B\x1a\xbaH\x17\xc8\x01\x01\x12\x12\x11\x00\x00\x00\x00\x00\x80v@)\x00\x00\x00\x00\x00\x00\x00\x00H\x03R\bmaxAngle\x88\x01\x01B\t\n" +
+	"\x06number\x18\x01 \x01(\rB\x06\xbaH\x03\xc8\x01\x01H\x00R\x06number\x88\x01\x01\x12'\n" +
+	"\bdistance\x18\x02 \x01(\x02B\x06\xbaH\x03\xc8\x01\x01H\x01R\bdistance\x88\x01\x01\x124\n" +
+	"\tmin_angle\x18\x03 \x01(\x02B\x12\xbaH\x0f\xc8\x01\x01\n" +
+	"\n" +
+	"\x15\x00\x00\xb4C-\x00\x00\x00\x00H\x02R\bminAngle\x88\x01\x01\x124\n" +
+	"\tmax_angle\x18\x04 \x01(\x02B\x12\xbaH\x0f\xc8\x01\x01\n" +
+	"\n" +
+	"\x15\x00\x00\xb4C-\x00\x00\x00\x00H\x03R\bmaxAngle\x88\x01\x01B\t\n" +
 	"\a_numberB\v\n" +
 	"\t_distanceB\f\n" +
 	"\n" +
@@ -347,9 +353,9 @@ const file_components_proto_rawDesc = "" +
 	"\n" +
 	"_max_angle\"\x95\x01\n" +
 	"\x06HwInfo\x12%\n" +
-	"\vtemperature\x18\x01 \x01(\tH\x00R\vtemperature\x88\x01\x01\x12\x1d\n" +
-	"\avoltage\x18\x02 \x01(\tH\x01R\avoltage\x88\x01\x01\x12\x1d\n" +
-	"\acurrent\x18\x03 \x01(\tH\x02R\acurrent\x88\x01\x01B\x0e\n" +
+	"\vtemperature\x18\x01 \x01(\x02H\x00R\vtemperature\x88\x01\x01\x12\x1d\n" +
+	"\avoltage\x18\x02 \x01(\x02H\x01R\avoltage\x88\x01\x01\x12\x1d\n" +
+	"\acurrent\x18\x03 \x01(\x02H\x02R\acurrent\x88\x01\x01B\x0e\n" +
 	"\f_temperatureB\n" +
 	"\n" +
 	"\b_voltageB\n" +

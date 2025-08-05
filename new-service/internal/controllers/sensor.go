@@ -18,12 +18,12 @@ func (s *Controllers) GetSensors(
 
 	logger.Debug("Get sensors request")
 
-	ids := s.svcBackend.ListSensors()
+	ids := s.svcDevStorage.ListSensors()
 
 	var sensorInfos []*apiv1.SensorInfo
 
 	for _, sensorId := range ids {
-		sensorBase, err := s.svcBackend.Sensor(sensorId)
+		sensorBase, err := s.svcDevStorage.Sensor(sensorId)
 		if err != nil {
 			logger.WithError(err).Errorf("Failed to get sensor %s", sensorId)
 			continue
@@ -83,7 +83,7 @@ func (s *Controllers) SetJammerMode(ctx context.Context,
 
 	deviceId := core.NewId(sensorId)
 
-	sensorBase, err := s.svcBackend.Sensor(deviceId)
+	sensorBase, err := s.svcDevStorage.Sensor(deviceId)
 	if err != nil {
 		logger.WithError(err).Errorf("Sensor not found %s", sensorId)
 		return connect.NewError(connect.CodeNotFound, err)

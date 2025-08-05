@@ -644,9 +644,9 @@ func (*TargetAttributesCAMERA) Descriptor() ([]byte, []int) {
 
 type TargetDirection struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Bearing       *float64               `protobuf:"fixed64,1,opt,name=bearing,proto3,oneof" json:"bearing,omitempty"`
-	Distance      *float64               `protobuf:"fixed64,2,opt,name=distance,proto3,oneof" json:"distance,omitempty"`
-	Elevation     *float64               `protobuf:"fixed64,3,opt,name=elevation,proto3,oneof" json:"elevation,omitempty"`
+	Bearing       *float32               `protobuf:"fixed32,1,opt,name=bearing,proto3,oneof" json:"bearing,omitempty"`
+	Distance      *float32               `protobuf:"fixed32,2,opt,name=distance,proto3,oneof" json:"distance,omitempty"`
+	Elevation     *float32               `protobuf:"fixed32,3,opt,name=elevation,proto3,oneof" json:"elevation,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -681,21 +681,21 @@ func (*TargetDirection) Descriptor() ([]byte, []int) {
 	return file_target_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *TargetDirection) GetBearing() float64 {
+func (x *TargetDirection) GetBearing() float32 {
 	if x != nil && x.Bearing != nil {
 		return *x.Bearing
 	}
 	return 0
 }
 
-func (x *TargetDirection) GetDistance() float64 {
+func (x *TargetDirection) GetDistance() float32 {
 	if x != nil && x.Distance != nil {
 		return *x.Distance
 	}
 	return 0
 }
 
-func (x *TargetDirection) GetElevation() float64 {
+func (x *TargetDirection) GetElevation() float32 {
 	if x != nil && x.Elevation != nil {
 		return *x.Elevation
 	}
@@ -772,11 +772,11 @@ const file_target_proto_rawDesc = "" +
 	"\f_geolocationB\x0e\n" +
 	"\f_description\"\x17\n" +
 	"\x15TargetAttributesRADAR\"\x18\n" +
-	"\x16TargetAttributesCAMERA\"\xe6\x01\n" +
+	"\x16TargetAttributesCAMERA\"\xe3\x01\n" +
 	"\x0fTargetDirection\x129\n" +
-	"\abearing\x18\x01 \x01(\x01B\x1a\xbaH\x17\xc8\x01\x01\x12\x12\x11\x00\x00\x00\x00\x00\x80v@)\x00\x00\x00\x00\x00\x00\x00\x00H\x00R\abearing\x88\x01\x01\x122\n" +
-	"\bdistance\x18\x02 \x01(\x01B\x11\xbaH\x0e\xc8\x01\x01\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00H\x01R\bdistance\x88\x01\x01\x12=\n" +
-	"\televation\x18\x03 \x01(\x01B\x1a\xbaH\x17\xc8\x01\x01\x12\x12\x11\x00\x00\x00\x00\x00\x80V@)\x00\x00\x00\x00\x00\x00\x00\x00H\x02R\televation\x88\x01\x01B\n" +
+	"\abearing\x18\x01 \x01(\x02B\x1a\xbaH\x17\xc8\x01\x01\x12\x12\x11\x00\x00\x00\x00\x00\x80v@)\x00\x00\x00\x00\x00\x00\x00\x00H\x00R\abearing\x88\x01\x01\x122\n" +
+	"\bdistance\x18\x02 \x01(\x02B\x11\xbaH\x0e\xc8\x01\x01\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00H\x01R\bdistance\x88\x01\x01\x12:\n" +
+	"\televation\x18\x03 \x01(\x02B\x17\xbaH\x14\x12\x12\x11\x00\x00\x00\x00\x00\x80V@)\x00\x00\x00\x00\x00\x00\x00\x00H\x02R\televation\x88\x01\x01B\n" +
 	"\n" +
 	"\b_bearingB\v\n" +
 	"\t_distanceB\f\n" +

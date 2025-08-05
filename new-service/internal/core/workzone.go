@@ -2,22 +2,33 @@ package core
 
 import (
 	apiv1 "dds-provider/internal/generated/api/proto"
+	"google.golang.org/protobuf/proto"
 )
 
-type DeviceWorkzoneSector apiv1.WorkzoneSector
-
-func NewDeviceWorkzoneSector(number int, distance float64, minAngle float64, maxAngle float64) DeviceWorkzoneSector {
-	num := int32(number)
-	return (DeviceWorkzoneSector)(apiv1.WorkzoneSector{
-		Number:   &num,
-		Distance: &distance,
-		MinAngle: &minAngle,
-		MaxAngle: &maxAngle,
-	})
+type WorkzoneSector struct {
+	Number   uint32
+	Distance DistanceType
+	MinAngle AngleType
+	MaxAngle AngleType
 }
 
-type DeviceWorkzone []DeviceWorkzoneSector
+func (w *WorkzoneSector) ToAPI() *apiv1.WorkzoneSector {
+	return &apiv1.WorkzoneSector{
+		Number:   proto.Uint32(w.Number),
+		Distance: proto.Float32(float32(w.Distance)),
+		MinAngle: proto.Float32(float32(w.MinAngle)),
+		MaxAngle: proto.Float32(float32(w.MaxAngle)),
+	}
+}
 
-func NewDeviceWorkzone(sectors []DeviceWorkzoneSector) DeviceWorkzone {
-	return DeviceWorkzone(sectors)
+type Workzone struct {
+	Sectors []WorkzoneSector
+}
+
+func (w *Workzone) ToAPI() []*apiv1.WorkzoneSector {
+	var apiSectors []*apiv1.WorkzoneSector
+	for _, sector := range w.Sectors {
+		apiSectors = append(apiSectors, sector.ToAPI())
+	}
+	return apiSectors
 }

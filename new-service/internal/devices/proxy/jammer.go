@@ -2,11 +2,12 @@ package proxy
 
 import (
 	"context"
+	"errors"
+
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 	"dds-provider/internal/services/mapping"
-	"errors"
 )
 
 type Jammer struct {
@@ -27,7 +28,7 @@ func NewJammer(jammerId string, api *dss_target_service.JammerAPIService, info *
 }
 
 func (j *Jammer) JammerInfo() apiv1.JammerInfo {
-	return *mapping.ConvertToAPIJammerInfo(*j.info)
+	return *mapping.ConvertToJammerInfo(*j.info)
 }
 
 func (j *Jammer) SetDisabled(disabled bool) {
@@ -55,5 +56,9 @@ func (j *Jammer) SetJammerBands(bands core.JammerBands, duration int32) error {
 		SetJammerBandsRequest(setJammerBandsReq).
 		Execute()
 
-	return handleJammerError("SetJammerBands", j.id, err)
+	if err != nil {
+		return handleJammerError("SetJammerBands", j.id, err)
+	}
+
+	return nil
 }

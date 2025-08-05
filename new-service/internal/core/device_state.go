@@ -4,7 +4,7 @@ type DeviceState int32
 
 const (
 	DeviceStateUnavailable DeviceState = iota
-	DeviceStateOff
+	DeviceStateOffDuty
 	DeviceStateOk
 	DeviceStateFailure
 )

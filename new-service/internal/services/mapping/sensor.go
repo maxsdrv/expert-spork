@@ -1,100 +1,108 @@
 package mapping
 
 import (
-	"context"
 	"encoding/json"
-
-	"github.com/opticoder/ctx-log/go/ctx_log"
+	"strconv"
 
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 )
 
-var logging = ctx_log.GetLogger(nil)
+var mappingError = core.ProviderErrorFn("mapping")
 
-func ConvertToSensorInfoDynamic(ctx context.Context, data json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
-	logger := logging.WithCtxFields(ctx)
-
+func ConvertToSensorInfoDynamic(data json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
 	var sensorData dss_target_service.SensorInfo
 	if err := json.Unmarshal(data, &sensorData); err != nil {
-		logger.WithError(err).Error("Convert to SensorInfoDynamicResponse")
-		return nil, err
+		return nil, mappingError("to sensor info dynamic: %v", err)
 	}
 
 	sensorInfo := &core.SensorInfoDynamic{
-		DeviceId: deviceId,
-		Disabled: sensorData.Disabled,
-		State:    string(sensorData.State),
-	}
-
-	if position := convertToAPIPosition(&sensorData.Position); position != nil {
-		if position.Coordinate != nil {
-			lat := position.Coordinate.GetLatitude()
-			lon := position.Coordinate.GetLongitude()
-			azimuth := position.GetAzimuth()
-			sensorInfo.Position = core.NewGeoPosition(lat, lon, azimuth)
-		}
-	}
-
-	if positionMode := convertToAPIPositionMode(&sensorData.PositionMode); positionMode != nil {
-		sensorInfo.PositionMode = core.GeoPositionMode(*positionMode)
-	}
-
-	if workZone := convertToAPIWorkZone(sensorData.Workzone); workZone != nil {
-		if len(workZone) > 0 {
-			sector := workZone[0]
-			number := int(sector.GetNumber())
-			distance := sector.GetDistance()
-			minAngle := sector.GetMinAngle()
-			maxAngle := sector.GetMaxAngle()
-			sensorInfo.Workzone = core.NewDeviceWorkzoneSector(number, distance, minAngle, maxAngle)
-		}
-	}
-
-	if hwInfo := convertToAPIHwInfo(sensorData.HwInfo); hwInfo != nil {
-		sensorInfo.HwInfo = core.NewHwInfo(hwInfo.Temperature, hwInfo.Voltage, nil)
+		SensorId:          deviceId,
+		Disabled:          sensorData.Disabled,
+		State:             string(sensorData.State),
+		Position:          convertToPosition(sensorData.Position),
+		PositionMode:      convertToPositionMode(sensorData.PositionMode),
+		Workzone:          convertToWorkZone(sensorData.Workzone),
+		JammerMode:        convertToJammerMode(sensorData.JammerMode),
+		JammerAutoTimeout: sensorData.JammerAutoTimeout,
+		HwInfo:            convertToHwInfo(sensorData.HwInfo),
 	}
 
 	return sensorInfo, nil
 }
 
-func ConvertToAPISensorInfo(sensorInfo dss_target_service.SensorInfo) *apiv1.SensorInfo {
-	var sensorType *apiv1.SensorType
+func ConvertToSensorInfo(sensorInfo dss_target_service.SensorInfo) *core.SensorInfo {
+	var sensorType core.SensorType
 
 	switch sensorInfo.Type {
 	case dss_target_service.SENSORTYPE_RFD:
-		t := apiv1.SensorType_SENSOR_RFD
-		sensorType = &t
+		sensorType = apiv1.SensorType_SENSOR_RFD
 	case dss_target_service.SENSORTYPE_RADAR:
-		t := apiv1.SensorType_SENSOR_RADAR
-		sensorType = &t
+		sensorType = apiv1.SensorType_SENSOR_RADAR
 	case dss_target_service.SENSORTYPE_CAMERA:
-		t := apiv1.SensorType_SENSOR_CAMERA
-		sensorType = &t
+		sensorType = apiv1.SensorType_SENSOR_CAMERA
 	default:
-		sensorType = nil
+		sensorType = apiv1.SensorType_SENSOR_RFD
 	}
 
-	var jammerIds []string
+	var jammerIds *[]core.DeviceId
 	if sensorInfo.JammerIds != nil {
-		jammerIds = sensorInfo.JammerIds
+		var ids []core.DeviceId
+		for _, id := range sensorInfo.JammerIds {
+			ids = append(ids, core.NewId(id))
+		}
+		jammerIds = &ids
 	}
 
-	return &apiv1.SensorInfo{
-		SensorId:  &sensorInfo.Id,
-		Type:      sensorType,
-		Model:     &sensorInfo.Model,
-		Serial:    sensorInfo.Serial,
-		SwVersion: sensorInfo.SwVersion,
-		JammerIds: jammerIds,
+	return &core.SensorInfo{
+		SensorId:   core.NewId(sensorInfo.Id),
+		SensorType: sensorType,
+		Model:      sensorInfo.Model,
+		Serial:     sensorInfo.Serial,
+		SwVersion:  sensorInfo.SwVersion,
+		JammerIds:  jammerIds,
 	}
 }
 
-func convertToAPIHwInfo(dssHwInfo *dss_target_service.HwInfo) *apiv1.HwInfo {
-	hwInfo := &apiv1.HwInfo{
-		Temperature: dssHwInfo.Temperature,
-		Voltage:     dssHwInfo.Voltage,
+func convertToHwInfo(dssHwInfo *dss_target_service.HwInfo) *core.HwInfo {
+	if dssHwInfo == nil {
+		return nil
 	}
+
+	hwInfo := &core.HwInfo{}
+
+	if dssHwInfo.Temperature != nil {
+		if temp, err := strconv.ParseFloat(*dssHwInfo.Temperature, 32); err == nil {
+			tempFloat := float32(temp)
+			hwInfo.Temperature = &tempFloat
+		}
+	}
+
+	if dssHwInfo.Voltage != nil {
+		if voltage, err := strconv.ParseFloat(*dssHwInfo.Voltage, 32); err == nil {
+			voltageFloat := float32(voltage)
+			hwInfo.Voltage = &voltageFloat
+		}
+	}
+
 	return hwInfo
+}
+
+func convertToJammerMode(jammerMode *dss_target_service.JammerMode) *core.JammerMode {
+	if jammerMode == nil {
+		return nil
+	}
+
+	switch *jammerMode {
+	case dss_target_service.JAMMERMODE_AUTO:
+		mode := apiv1.JammerMode_JAMMER_AUTO
+		return &mode
+	case dss_target_service.JAMMERMODE_MANUAL:
+		mode := apiv1.JammerMode_JAMMER_MANUAL
+		return &mode
+	default:
+		mode := apiv1.JammerMode_JAMMER_AUTO
+		return &mode
+	}
 }

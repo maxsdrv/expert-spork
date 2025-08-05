@@ -17,4 +17,3 @@ services:
       - DB_PG_PORT
 
       - BULAT_DEVICES
-

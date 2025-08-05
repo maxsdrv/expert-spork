@@ -1,58 +1,57 @@
 package mapping
 
 import (
+	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 )
 
-func convertToAPIPosition(pos *dss_target_service.GeoPosition) *apiv1.GeoPosition {
-	if pos == nil {
-		return nil
+func convertToPosition(pos dss_target_service.GeoPosition) core.GeoPosition {
+	var alt *core.DistanceType
+	if pos.Coordinate.Altitude != nil {
+		altVal := core.DistanceType(*pos.Coordinate.Altitude)
+		alt = &altVal
 	}
 
-	coordinate := &apiv1.GeoCoordinate{
-		Latitude:  &pos.Coordinate.Latitude,
-		Longitude: &pos.Coordinate.Longitude,
-		Altitude:  pos.Coordinate.Altitude,
+	coordinate := core.GeoCoordinate{
+		Lat: pos.Coordinate.Latitude,
+		Lon: pos.Coordinate.Longitude,
+		Alt: alt,
 	}
 
-	return &apiv1.GeoPosition{
-		Azimuth:    &pos.Azimuth,
+	return core.GeoPosition{
+		Azimuth:    core.AngleType(pos.Azimuth),
 		Coordinate: coordinate,
 	}
 }
 
-func convertToAPIPositionMode(posMode *dss_target_service.GeoPositionMode) *apiv1.GeoPositionMode {
-
-	switch *posMode {
+func convertToPositionMode(posMode dss_target_service.GeoPositionMode) core.GeoPositionMode {
+	switch posMode {
 	case dss_target_service.GEOPOSITIONMODE_AUTO:
-		mode := apiv1.GeoPositionMode_GEO_AUTO
-		return &mode
+		return apiv1.GeoPositionMode_GEO_AUTO
 	case dss_target_service.GEOPOSITIONMODE_MANUAL:
-		mode := apiv1.GeoPositionMode_GEO_MANUAL
-		return &mode
+		return apiv1.GeoPositionMode_GEO_MANUAL
 	case dss_target_service.GEOPOSITIONMODE_ALWAYS_MANUAL:
-		mode := apiv1.GeoPositionMode_GEO_ALWAYS_MANUAL
-		return &mode
+		return apiv1.GeoPositionMode_GEO_ALWAYS_MANUAL
 	default:
-		return nil
+		return apiv1.GeoPositionMode_GEO_AUTO
 	}
 }
 
-func convertToAPIWorkZone(dssWorkZone []dss_target_service.WorkzoneSector) []*apiv1.WorkzoneSector {
+func convertToWorkZone(dssWorkZone []dss_target_service.WorkzoneSector) core.Workzone {
 	if len(dssWorkZone) == 0 {
-		return nil
+		return core.Workzone{}
 	}
 
-	var workZones []*apiv1.WorkzoneSector
+	var workZones []core.WorkzoneSector
 	for _, sector := range dssWorkZone {
-		workZoneSector := &apiv1.WorkzoneSector{
-			Number:   &sector.Number,
-			Distance: &sector.Distance,
-			MinAngle: &sector.MinAngle,
-			MaxAngle: &sector.MaxAngle,
+		workZoneSector := core.WorkzoneSector{
+			Number:   uint32(sector.Number),
+			Distance: core.DistanceType(sector.Distance),
+			MinAngle: core.AngleType(sector.MinAngle),
+			MaxAngle: core.AngleType(sector.MaxAngle),
 		}
 		workZones = append(workZones, workZoneSector)
 	}
-	return workZones
+	return core.Workzone{Sectors: workZones}
 }

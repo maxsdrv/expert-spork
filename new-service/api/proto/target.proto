@@ -86,9 +86,9 @@ message TargetAttributesCAMERA {
 }
 
 message TargetDirection {
-  optional double bearing = 1 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 360}];
-  optional double distance = 2 [(buf.validate.field).required = true, (buf.validate.field).double.gte = 0.0];
-  optional double elevation = 3 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 90}];
+  optional float bearing = 1 [(buf.validate.field).required = true, (buf.validate.field).double = {gte: 0, lt: 360}];
+  optional float distance = 2 [(buf.validate.field).required = true, (buf.validate.field).double.gte = 0.0];
+  optional float elevation = 3 [(buf.validate.field).double = {gte: 0, lt: 90}];
 }
 
 

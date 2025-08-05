@@ -4,10 +4,12 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"dds-provider/internal/generated/api/proto"
+	apiv1 "dds-provider/internal/generated/api/proto"
 )
 
-func TestJammerInfo(id DeviceId) *apiv1.JammerInfo {
+type GeoPositionMode = apiv1.GeoPositionMode
+
+/*func TestJammerInfo(id DeviceId) *apiv1.JammerInfo {
 	sensorId := NewId("9f86d081-884c-4d63-a159-f35e7e5b72a0")
 	deviceIdStr := id.String()
 	sensorIdStr := sensorId.String()
@@ -19,34 +21,43 @@ func TestJammerInfo(id DeviceId) *apiv1.JammerInfo {
 		SensorId:  &sensorIdStr,
 		GroupId:   proto.String("group1"),
 	}
+}*/
+
+type JammerInfo struct {
+	JammerId  DeviceId
+	Model     string
+	Serial    *string
+	SwVersion *string
+	SensorId  *DeviceId
+	GroupId   *string
 }
 
 type JammerInfoDynamic struct {
-	DeviceId      DeviceId
+	JammerId      DeviceId
 	Disabled      bool
 	State         string
 	Position      GeoPosition
 	PositionMode  GeoPositionMode
-	Workzone      DeviceWorkzone
+	Workzone      Workzone
 	Bands         JammerBands
-	BandOptions   BandOptions
-	HwInfo        HwInfo
-	TimeoutStatus JammerTimeoutStatus
+	BandOptions   *BandOptions
+	HwInfo        *HwInfo
+	TimeoutStatus *JammerTimeoutStatus
 }
 
 func (j *JammerInfoDynamic) Id() DeviceId {
-	return j.DeviceId
+	return j.JammerId
 }
 
 func (j *JammerInfoDynamic) ToAPI() *apiv1.JammerInfoDynamicResponse {
-	apiPosition := (*apiv1.GeoPosition)(&j.Position)
-	apiPositionMode := (*apiv1.GeoPositionMode)(&j.PositionMode)
-	apiHwInfo := (*apiv1.HwInfo)(&j.HwInfo)
-	apiJammerTimeoutStatus := (*apiv1.JammerTimeoutStatus)(&j.TimeoutStatus)
+	var apiHwInfo *apiv1.HwInfo
+	if j.HwInfo != nil {
+		apiHwInfo = j.HwInfo.ToAPI()
+	}
 
-	var apiWorkzone []*apiv1.WorkzoneSector
-	for i := range j.Workzone {
-		apiWorkzone = append(apiWorkzone, (*apiv1.WorkzoneSector)(&j.Workzone[i]))
+	var apiJammerTimeoutStatus *apiv1.JammerTimeoutStatus
+	if j.TimeoutStatus != nil {
+		apiJammerTimeoutStatus = j.TimeoutStatus.ToAPI()
 	}
 
 	var apiBands []*apiv1.Band
@@ -66,16 +77,18 @@ func (j *JammerInfoDynamic) ToAPI() *apiv1.JammerInfoDynamicResponse {
 	}
 
 	var apiBandOptions []*apiv1.BandOption
-	for i := range j.BandOptions {
-		apiBandOptions = append(apiBandOptions, (*apiv1.BandOption)(&j.BandOptions[i]))
+	if j.BandOptions != nil {
+		for i := range *j.BandOptions {
+			apiBandOptions = append(apiBandOptions, &(*j.BandOptions)[i])
+		}
 	}
 
 	return &apiv1.JammerInfoDynamicResponse{
 		Disabled:      &j.Disabled,
 		State:         &j.State,
-		Position:      apiPosition,
-		PositionMode:  apiPositionMode,
-		Workzone:      apiWorkzone,
+		Position:      j.Position.ToAPI(),
+		PositionMode:  &j.PositionMode,
+		Workzone:      j.Workzone.ToAPI(),
 		Bands:         apiBands,
 		BandOptions:   apiBandOptions,
 		HwInfo:        apiHwInfo,
@@ -84,49 +97,57 @@ func (j *JammerInfoDynamic) ToAPI() *apiv1.JammerInfoDynamicResponse {
 }
 
 func TestJammerInfoDynamic(id DeviceId) *JammerInfoDynamic {
+	temp := float32(36.5)
+	voltage := float32(12.0)
+	current := float32(2.5)
+
+	bandOptions := NewBandOptions([][]string{
+		{"900MHz", "1800MHz", "2100MHz"},
+	})
+
 	return &JammerInfoDynamic{
-		DeviceId:     id,
+		JammerId:     id,
 		Disabled:     false,
 		State:        "ACTIVE",
 		PositionMode: GeoPositionMode(apiv1.GeoPositionMode_GEO_MANUAL),
-		Position: GeoPosition(apiv1.GeoPosition{
-			Azimuth: proto.Float64(45.5),
-			Coordinate: &apiv1.GeoCoordinate{
-				Latitude:  proto.Float64(55.7558),
-				Longitude: proto.Float64(37.6173),
-				Altitude:  proto.Float64(120.5),
+		Position: GeoPosition{
+			Azimuth: AngleType(45.5),
+			Coordinate: GeoCoordinate{
+				Lat: 55.7558,
+				Lon: 37.6173,
+				Alt: &temp,
 			},
-		}),
-		Workzone: DeviceWorkzone{
-			DeviceWorkzoneSector(apiv1.WorkzoneSector{
-				Number:   proto.Int32(1),
-				Distance: proto.Float64(100.0),
-				MinAngle: proto.Float64(0.0),
-				MaxAngle: proto.Float64(90.0),
-			}),
-			DeviceWorkzoneSector(apiv1.WorkzoneSector{
-				Number:   proto.Int32(2),
-				Distance: proto.Float64(150.0),
-				MinAngle: proto.Float64(90.0),
-				MaxAngle: proto.Float64(180.0),
-			}),
+		},
+		Workzone: Workzone{
+			Sectors: []WorkzoneSector{
+				{
+					Number:   1,
+					Distance: DistanceType(100.0),
+					MinAngle: AngleType(0.0),
+					MaxAngle: AngleType(90.0),
+				},
+				{
+					Number:   2,
+					Distance: DistanceType(150.0),
+					MinAngle: AngleType(90.0),
+					MaxAngle: AngleType(180.0),
+				},
+			},
 		},
 		Bands: func() JammerBands {
 			bands, _ := NewBands(BandList{"900MHz", "1800MHz", "2100MHz"}, BandList{"900MHz", "2100MHz"})
 			return bands
 		}(),
-		BandOptions: NewBandOptions([][]string{
-			{"900MHz", "1800MHz", "2100MHz"},
-		}),
-		HwInfo: HwInfo(apiv1.HwInfo{
-			Temperature: proto.String("36.5"),
-			Voltage:     proto.String("12.0"),
-			Current:     proto.String("2.5"),
-		}),
-		TimeoutStatus: JammerTimeoutStatus(apiv1.JammerTimeoutStatus{
-			Started:  timestamppb.Now(),
-			Now:      timestamppb.Now(),
-			Duration: proto.Int32(300),
-		}),
+		BandOptions: &bandOptions,
+		HwInfo: &HwInfo{
+			Temperature: &temp,
+			Voltage:     &voltage,
+			Current:     &current,
+		},
+		TimeoutStatus: &JammerTimeoutStatus{
+			Started:  timestamppb.Now().AsTime(),
+			Now:      timestamppb.Now().AsTime(),
+			Duration: 300000000000,
+		},
 	}
 }

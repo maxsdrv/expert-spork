@@ -7,7 +7,8 @@ WORKDIR /go/src/app
 
 RUN apk add git
 ARG GOMOD_HOST
-RUN --mount=type=secret,id=gomod_token echo "machine $GOMOD_HOST login oauth2 password $(cat /run/secrets/gomod_token)" > ~/.netrc
+ARG GOMOD_TOKEN
+RUN echo "machine $GOMOD_HOST login oauth2 password $GOMOD_TOKEN" > ~/.netrc
 RUN git config --global http.sslVerify false
 RUN go env -w GOINSECURE=$GOMOD_HOST
 

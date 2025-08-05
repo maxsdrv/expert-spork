@@ -34,11 +34,11 @@ func (s *Handlers) Settings(
 				Disabled:     proto.Bool(false),
 				PositionMode: apiv1.GeoPositionMode_GEO_AUTO.Enum(),
 				Position: &apiv1.GeoPosition{
-					Azimuth: proto.Float64(0.0),
+					Azimuth: proto.Float32(0.0),
 					Coordinate: &apiv1.GeoCoordinate{
 						Latitude:  proto.Float64(55.7558),
 						Longitude: proto.Float64(37.6173),
-						Altitude:  proto.Float64(120.0),
+						Altitude:  proto.Float32(120.0),
 					},
 				},
 			},
