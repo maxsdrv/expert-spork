@@ -2,8 +2,6 @@ package proxy
 
 import (
 	"context"
-	"errors"
-
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
@@ -18,7 +16,7 @@ type Jammer struct {
 
 func NewJammer(jammerId string, api *dss_target_service.JammerAPIService, info *dss_target_service.JammerInfo) (*Jammer, error) {
 	if jammerId == "" {
-		return nil, errors.New("jammer id is required")
+		return nil, proxyError("jammer id is required")
 	}
 	return &Jammer{
 		id:         jammerId,

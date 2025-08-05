@@ -13,6 +13,7 @@ import (
 	"dds-provider/internal/devices/proxy"
 	"dds-provider/internal/enums"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
+	"dds-provider/internal/services/device_storage"
 	"dds-provider/internal/services/httpclient"
 	"dds-provider/internal/services/wsclient"
 )
@@ -22,14 +23,9 @@ var logging = ctx_log.GetLogger(nil)
 var serviceError = core.ProviderErrorFn("target service")
 
 var (
-	ErrHTTPTimeout            = serviceError("http timeout")
-	ErrHTTPConnectionRefused  = serviceError("http connection refused")
-	ErrHTTPNetworkUnreachable = serviceError("http network unreachable")
-	ErrHTTPHostNotFound       = serviceError("host not found")
-
-	ErrServiceUnavailable = serviceError("service unavailable")
-	ErrDeviceNotFound     = serviceError("device not found")
-	ErrInvalidDeviceType  = serviceError("invalid device type")
+	ErrHTTPTimeout           = serviceError("http timeout")
+	ErrHTTPConnectionRefused = serviceError("http connection refused")
+	ErrHTTPHostNotFound      = serviceError("host not found")
 )
 
 const (
@@ -45,7 +41,7 @@ type Connection struct {
 }
 
 type Service struct {
-	backendService        backend.BackendService
+	devStorage            device_storage.DeviceStorageService
 	httpClient            *httpclient.SharedHttpClient
 	notificationClients   map[string]*wsclient.WSNotificationClient
 	notificationProcessor *NotificationProcessor
@@ -57,12 +53,12 @@ func New(ctx context.Context,
 	connections []Connection,
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
-	backendService backend.BackendService,
+	devStorage device_storage.DeviceStorageService,
 ) *Service {
 	sharedHttpClient := httpclient.NewSharedHttpClient()
 
 	service := &Service{
-		backendService:        backendService,
+		devStorage:            devStorage,
 		httpClient:            sharedHttpClient,
 		notificationClients:   make(map[string]*wsclient.WSNotificationClient),
 		notificationProcessor: nil,
@@ -182,7 +178,7 @@ func (s *Service) connect(ctx context.Context, connection Connection) {
 func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId core.DeviceId, sensorInfo *dss_target_service.SensorInfo) error {
 	logger := logging.WithCtxFields(ctx)
 
-	if _, err := s.backendService.Sensor(deviceId); err == nil {
+	if _, err := s.devStorage.Sensor(deviceId); err == nil {
 		return nil
 	}
 
@@ -201,7 +197,7 @@ func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId
 		logger.WithError(err).Error("failed to create proxy sensor")
 		return serviceError("Registration proxy sensor failed for device %s", deviceId)
 	}
-	s.backendService.AppendDevice(deviceId, proxySensor)
+	s.devStorage.AppendDevice(deviceId, proxySensor)
 
 	logger.Infof("Registered sensor %s from WebSocket notification", sensorId)
 	return nil
@@ -210,7 +206,7 @@ func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId
 func (s *Service) registerJammers(ctx context.Context, jammerId string, deviceId core.DeviceId, jammerInfo *dss_target_service.JammerInfo) error {
 	logger := logging.WithCtxFields(ctx)
 
-	if _, err := s.backendService.Jammer(deviceId); err == nil {
+	if _, err := s.devStorage.Jammer(deviceId); err == nil {
 		return nil
 	}
 
@@ -229,7 +225,7 @@ func (s *Service) registerJammers(ctx context.Context, jammerId string, deviceId
 		logger.WithError(err).Error("failed to create proxy jammer")
 		return serviceError("Registration jammer failed for device %s", deviceId)
 	}
-	s.backendService.AppendDevice(deviceId, proxyJammer)
+	s.devStorage.AppendDevice(deviceId, proxyJammer)
 
 	logger.Infof("Registered Jammer %s from WebSocket notification", jammerId)
 	return nil

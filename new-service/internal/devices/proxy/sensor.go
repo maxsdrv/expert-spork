@@ -2,8 +2,6 @@ package proxy
 
 import (
 	"context"
-	"errors"
-
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
@@ -18,7 +16,7 @@ type Sensor struct {
 
 func NewSensor(sensorId string, api *dss_target_service.SensorAPIService, info *dss_target_service.SensorInfo) (*Sensor, error) {
 	if sensorId == "" {
-		return nil, errors.New("sensor id required")
+		return nil, proxyError("sensor id required")
 	}
 	return &Sensor{
 		id:         sensorId,
@@ -48,8 +46,8 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 }
 
 func (s *Sensor) SensorInfo() apiv1.SensorInfo {
-	coreInfo := mapping.ConvertToSensorInfo(*s.info)
-	return *coreInfo.ToAPI()
+	sensorCoreInfo := mapping.ConvertToSensorInfo(*s.info)
+	return *sensorCoreInfo.ToAPI()
 }
 
 func (s *Sensor) SetDisabled(disabled bool) {

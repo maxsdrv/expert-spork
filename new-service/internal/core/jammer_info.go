@@ -49,6 +49,34 @@ func (j *JammerInfoDynamic) Id() DeviceId {
 	return j.JammerId
 }
 
+func (j *JammerInfo) ToAPI() *apiv1.JammerInfo {
+	jammerIdStr := j.JammerId.String()
+
+	apiJammerInfo := &apiv1.JammerInfo{
+		JammerId: &jammerIdStr,
+		Model:    &j.Model,
+	}
+
+	if j.Serial != nil {
+		apiJammerInfo.Serial = j.Serial
+	}
+
+	if j.SwVersion != nil {
+		apiJammerInfo.SwVersion = j.SwVersion
+	}
+
+	if j.SensorId != nil {
+		sensorIdStr := j.SensorId.String()
+		apiJammerInfo.SensorId = &sensorIdStr
+	}
+
+	if j.GroupId != nil {
+		apiJammerInfo.GroupId = j.GroupId
+	}
+
+	return apiJammerInfo
+}
+
 func (j *JammerInfoDynamic) ToAPI() *apiv1.JammerInfoDynamicResponse {
 	var apiHwInfo *apiv1.HwInfo
 	if j.HwInfo != nil {
