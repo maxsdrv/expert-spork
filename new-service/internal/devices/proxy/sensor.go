@@ -48,7 +48,8 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 }
 
 func (s *Sensor) SensorInfo() apiv1.SensorInfo {
-	return *mapping.ConvertToSensorInfo(*s.info)
+	coreInfo := mapping.ConvertToSensorInfo(*s.info)
+	return *coreInfo.ToAPI()
 }
 
 func (s *Sensor) SetDisabled(disabled bool) {

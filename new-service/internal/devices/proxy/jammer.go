@@ -28,7 +28,8 @@ func NewJammer(jammerId string, api *dss_target_service.JammerAPIService, info *
 }
 
 func (j *Jammer) JammerInfo() apiv1.JammerInfo {
-	return *mapping.ConvertToJammerInfo(*j.info)
+	jammerCoreInfo := mapping.ConvertToJammerInfo(*j.info)
+	return *jammerCoreInfo.ToAPI()
 }
 
 func (j *Jammer) SetDisabled(disabled bool) {

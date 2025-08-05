@@ -2,6 +2,7 @@ include:
   - file:
       - ci/gitlab/docker.yml
       - ci/gitlab/rebase.yml
+      - ci/options/golang.yml
     project: irz/tamerlan/dds-shared
     ref: develop
 
