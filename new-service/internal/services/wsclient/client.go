@@ -4,26 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/coder/websocket"
 	"github.com/opticoder/ctx-log/go/ctx_log"
-
-	"dds-provider/internal/core"
 )
 
 var logging = ctx_log.GetLogger(nil)
-
-var wsclientError = core.ProviderErrorFn("wsclient")
-
-var (
-	ErrWSInvalidMessage    = wsclientError("websocket invalid message format")
-	ErrWSPingFailed        = wsclientError("websocket ping failed")
-	ErrWSDialTimeout       = wsclientError("websocket dial timeout")
-	ErrWSConnectionRefused = wsclientError("websocket connection refused")
-	ErrWSConnectionFailed  = wsclientError("websocket connection failed")
-)
 
 const (
 	pingInterval = 5 * time.Second
@@ -63,13 +50,8 @@ func (c *WSNotificationClient) Start(ctx context.Context) {
 		logger.Infof("Connecting to websocket %s", c.url)
 		conn, _, err := websocket.Dial(ctx, c.url, nil)
 		if err != nil {
-			if strings.Contains(err.Error(), "connection refused") {
-				logger.WithError(ErrWSConnectionRefused).Errorf("Connection refused to %s, retrying in %v", c.url, delay)
-			} else if strings.Contains(err.Error(), "timeout") {
-				logger.WithError(ErrWSDialTimeout).Errorf("Connection timeout to %s, retrying in %v", c.url, delay)
-			} else {
-				logger.WithError(ErrWSConnectionFailed).Errorf("Failed to connect to %s: %v, retrying in %v", c.url, err, delay)
-			}
+			wsErr := handleWebsocketError("dial", c.url, err)
+			logger.WithError(wsErr).Errorf("Failed to connect to DDS target service at %s", c.url)
 			time.Sleep(delay)
 			delay = nextBackoffDelay(delay)
 			continue
@@ -95,13 +77,15 @@ func (c *WSNotificationClient) updateLoop(ctx context.Context, conn *websocket.C
 	for {
 		_, data, err := conn.Read(ctx)
 		if err != nil {
-			logger.WithError(wsclientError("read failed from %s: %w", c.url, err)).Warn("Failed to read data from DDS target service")
+			wsErr := handleReadError("read", c.url, err)
+			logger.WithError(wsErr).Warn("Failed to read data from DDS target service")
 			break
 		}
 
 		var fields map[string]json.RawMessage
 		if err = json.Unmarshal(data, &fields); err != nil {
-			logger.WithError(wsclientError("message unmarshal failed from %s: %w", c.url, err)).Error("Unmarshalling message failed")
+			wsErr := handleUnmarshalError("unmarshal message", c.url, err)
+			logger.WithError(wsErr).Error("Unmarshalling message failed")
 			continue
 		}
 
@@ -112,7 +96,8 @@ func (c *WSNotificationClient) updateLoop(ctx context.Context, conn *websocket.C
 		}
 		var msgType string
 		if err = json.Unmarshal(msgTypeRaw, &msgType); err != nil {
-			logger.WithError(wsclientError("message type unmarshal failed from %s: %w", c.url, err)).Error("Unmarshalling message failed")
+			wsErr := handleUnmarshalError("unmarshal message type", c.url, err)
+			logger.WithError(wsErr).Error("Unmarshalling message failed")
 			continue
 		}
 
@@ -123,7 +108,8 @@ func (c *WSNotificationClient) updateLoop(ctx context.Context, conn *websocket.C
 		}
 
 		if err = c.notificationHandler.HandleNotification(ctx, msgType, dataRaw); err != nil {
-			logger.WithError(wsclientError("notification processing failed for %s from %s: %w", msgType, c.url, err)).Errorf("Failed to process message type: %s", msgType)
+			wsErr := handleNotificationError("process notification", c.url, err)
+			logger.WithError(wsErr).Errorf("Failed to process message type: %s", msgType)
 			continue
 		}
 

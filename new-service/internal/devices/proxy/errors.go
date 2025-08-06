@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var proxyError = core.ProviderErrorFn("proxy")
+var proxyError = core.ProviderError()
 
 var (
 	ErrTimeout            = proxyError("timeout")
@@ -24,6 +24,10 @@ var (
 )
 
 func handleProxyError(operation, deviceId string, err error) error {
+	if err == nil {
+		return nil
+	}
+
 	if errors.Is(err, http.ErrHandlerTimeout) {
 		return ErrTimeout
 	}
@@ -31,15 +35,15 @@ func handleProxyError(operation, deviceId string, err error) error {
 	errStr := err.Error()
 	switch {
 	case strings.Contains(errStr, "connection refused"):
-		return ErrConnectionRefused
+		return wrapWithContext(ErrConnectionRefused, operation, deviceId, err)
 	case strings.Contains(errStr, "connection reset"):
-		return ErrConnectionReset
+		return wrapWithContext(ErrConnectionReset, operation, deviceId, err)
 	case strings.Contains(errStr, "timeout"):
-		return ErrTimeout
+		return wrapWithContext(ErrTimeout, operation, deviceId, err)
 	case strings.Contains(errStr, "network unreachable"):
-		return ErrNetworkUnreachable
+		return wrapWithContext(ErrNetworkUnreachable, operation, deviceId, err)
 	case strings.Contains(errStr, "no such host"):
-		return ErrHostNotFound
+		return wrapWithContext(ErrHostNotFound, operation, deviceId, err)
 	}
 
 	var apiErr *dss_target_service.GenericOpenAPIError

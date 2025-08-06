@@ -51,7 +51,7 @@ func (n *NotificationProcessor) processSensorInfo(ctx context.Context, dataRaw j
 
 	sensor, err := parsers.ParseSensorInfo(dataRaw)
 	if err != nil {
-		logger.WithError(err).Error("Failed to parse sensor info")
+		logger.WithError(serviceError("%v", err)).Error("Failed to parse sensor info")
 		return err
 	}
 
@@ -64,7 +64,7 @@ func (n *NotificationProcessor) processSensorInfo(ctx context.Context, dataRaw j
 
 	dynamicInfo, err := n.dynamicSensorInfo(ctx, dataRaw, deviceId)
 	if err != nil {
-		logger.WithError(err).Error("Failed to update sensor info")
+		logger.WithError(serviceError("%v", err)).Error("Failed to update sensor info")
 		return err
 	}
 
@@ -80,7 +80,7 @@ func (n *NotificationProcessor) dynamicSensorInfo(ctx context.Context, dataRaw j
 
 	sensorInfoDynamic, err := mapping.ConvertToSensorInfoDynamic(dataRaw, deviceId)
 	if err != nil {
-		logger.WithError(err).Error("Sensor info dynamic response failed")
+		logger.WithError(serviceError("%v", err)).Error("Sensor info dynamic response failed")
 		return nil, err
 	}
 
@@ -101,7 +101,7 @@ func (n *NotificationProcessor) processJammerInfo(ctx context.Context, dataRaw j
 
 	dynamicInfo, err := n.dynamicJammerInfo(ctx, dataRaw, deviceId)
 	if err != nil {
-		logger.WithError(err).Error("Failed to update jammer info")
+		logger.WithError(serviceError("%v", err)).Error("Failed to update jammer info")
 		return err
 	}
 
@@ -117,7 +117,7 @@ func (n *NotificationProcessor) dynamicJammerInfo(ctx context.Context, dataRaw j
 
 	jammerInfoDynamic, err := mapping.ConvertToJammerInfoDynamic(dataRaw, deviceId)
 	if err != nil {
-		logger.WithError(err).Error("Jammer info dynamic response failed")
+		logger.WithError(serviceError("%v", err)).Error("Jammer info dynamic response failed")
 		return nil, err
 	}
 	return jammerInfoDynamic, err
@@ -128,7 +128,7 @@ func (n *NotificationProcessor) licenseStatusUpdate(ctx context.Context, dataRaw
 
 	licenseStatus, err := parsers.ParseLicenseStatus(dataRaw)
 	if err != nil {
-		logger.WithError(err).Error("Failed to parse license status")
+		logger.WithError(serviceError("%v", err)).Error("Failed to parse license status")
 		return err
 	}
 

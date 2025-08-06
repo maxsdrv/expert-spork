@@ -20,7 +20,7 @@ import (
 
 var logging = ctx_log.GetLogger(nil)
 
-var serviceError = core.ProviderErrorFn("target service")
+var serviceError = core.ProviderError()
 
 var (
 	ErrHTTPTimeout           = serviceError("http timeout")
@@ -101,15 +101,18 @@ func (s *Service) connect(ctx context.Context, connection Connection) {
 
 		_, _, err := apiClient.CommonAPI.GetApiVersion(ctx).Execute()
 		if err != nil {
+			var connectionErr error
 			if strings.Contains(err.Error(), "connection refused") {
-				logger.WithError(ErrHTTPConnectionRefused).Errorf("Failed to connect to DDS target service at %s", urlRest)
+				connectionErr = ErrHTTPConnectionRefused
 			} else if strings.Contains(err.Error(), "timeout") {
-				logger.WithError(ErrHTTPTimeout).Errorf("Failed to connect to DDS target service at %s", urlRest)
+				connectionErr = ErrHTTPTimeout
 			} else if strings.Contains(err.Error(), "no such host") {
-				logger.WithError(ErrHTTPHostNotFound).Errorf("Failed to connect to DDS target service at %s", urlRest)
+				connectionErr = ErrHTTPHostNotFound
 			} else {
-				logger.WithError(serviceError("connection failed to %s: %v", urlRest, err)).Error("API connection failed")
+				connectionErr = serviceError("failed to connect to %s: %v", urlRest, err)
 			}
+
+			logger.WithError(connectionErr).Errorf("Failed to connect to DDS target service at %s", urlRest)
 
 			timer := time.NewTimer(retryDelay)
 			select {
@@ -141,13 +144,15 @@ func (s *Service) connect(ctx context.Context, connection Connection) {
 					_, _, err := apiClient.CommonAPI.GetApiVersion(ctx).Execute()
 					logger.Tracef("Health check started")
 					if err != nil {
+						var healthErr error
 						if strings.Contains(err.Error(), "connection refused") {
-							logger.WithError(ErrHTTPConnectionRefused).Errorf("Failed to health check, retrying in %v", healthRetryDelay)
+							healthErr = ErrHTTPConnectionRefused
 						} else if strings.Contains(err.Error(), "timeout") {
-							logger.WithError(ErrHTTPTimeout).Errorf("Failed to health check, retrying in %v", healthRetryDelay)
+							healthErr = ErrHTTPTimeout
 						} else {
-							logger.WithError(serviceError("health check failed for %s: %v", urlRest, err)).Errorf("failed to health check, retrying in %v ", healthRetryDelay)
+							healthErr = serviceError("failed to health check for %s: %v", urlRest, err)
 						}
+						logger.WithError(healthErr).Errorf("Failed to health check, retrying in %v", healthRetryDelay)
 						healthRetryDelay = healthRetryDelay * 2
 						if healthRetryDelay > healthCheckInterval {
 							healthRetryDelay = healthCheckInterval
@@ -189,13 +194,13 @@ func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId
 	}
 
 	if apiClient == nil {
-		return serviceError("No API client for sensor %s", deviceId)
+		return serviceError("no API client for sensor %s", deviceId)
 	}
 
-	proxySensor, err := proxy.NewSensor(sensorId, apiClient.SensorAPI, sensorInfo)
+	proxySensor, err := proxy.NewSensor(sensorId, apiClient, sensorInfo)
 	if err != nil {
-		logger.WithError(err).Error("failed to create proxy sensor")
-		return serviceError("Registration proxy sensor failed for device %s", deviceId)
+		logger.WithError(serviceError("%v", err)).Errorf("Failed to create proxy sensor %s", sensorId)
+		return err
 	}
 	s.devStorage.AppendDevice(deviceId, proxySensor)
 
@@ -217,13 +222,13 @@ func (s *Service) registerJammers(ctx context.Context, jammerId string, deviceId
 	}
 
 	if apiClient == nil {
-		return serviceError("No API client for jammer %s", deviceId)
+		return serviceError("no API client for jammer %s", deviceId)
 	}
 
-	proxyJammer, err := proxy.NewJammer(jammerId, apiClient.JammerAPI, jammerInfo)
+	proxyJammer, err := proxy.NewJammer(jammerId, apiClient, jammerInfo)
 	if err != nil {
-		logger.WithError(err).Error("failed to create proxy jammer")
-		return serviceError("Registration jammer failed for device %s", deviceId)
+		logger.WithError(serviceError("%v", err)).Errorf("Failed to create proxy jammer %s", jammerId)
+		return err
 	}
 	s.devStorage.AppendDevice(deviceId, proxyJammer)
 

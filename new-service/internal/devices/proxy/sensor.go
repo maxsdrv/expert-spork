@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"context"
+
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
@@ -11,16 +12,18 @@ import (
 type Sensor struct {
 	id         string
 	serviceAPI *dss_target_service.SensorAPIService
+	deviceAPI  *dss_target_service.DeviceAPIService
 	info       *dss_target_service.SensorInfo
 }
 
-func NewSensor(sensorId string, api *dss_target_service.SensorAPIService, info *dss_target_service.SensorInfo) (*Sensor, error) {
+func NewSensor(sensorId string, api *dss_target_service.APIClient, info *dss_target_service.SensorInfo) (*Sensor, error) {
 	if sensorId == "" {
 		return nil, proxyError("sensor id required")
 	}
 	return &Sensor{
 		id:         sensorId,
-		serviceAPI: api,
+		serviceAPI: api.SensorAPI,
+		deviceAPI:  api.DeviceAPI,
 		info:       info,
 	}, nil
 }
@@ -38,11 +41,7 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 		SetJammerModeRequest(setJammerModeReq).
 		Execute()
 
-	if err != nil {
-		return handleSensorError("SetJammerMode", s.id, err)
-	}
-
-	return nil
+	return handleSensorError("SetJammerMode", s.id, err)
 }
 
 func (s *Sensor) SensorInfo() apiv1.SensorInfo {
@@ -51,11 +50,45 @@ func (s *Sensor) SensorInfo() apiv1.SensorInfo {
 }
 
 func (s *Sensor) SetDisabled(disabled bool) {
-	return
+	setDisabledReq := dss_target_service.SetDisabledRequest{
+		Id:       s.id,
+		Disabled: disabled,
+	}
+
+	_, _ = s.deviceAPI.SetDisabled(context.Background()).
+		SetDisabledRequest(setDisabledReq).
+		Execute()
 }
 
 func (s *Sensor) SetPosition(position *core.GeoPosition) error {
-	return nil
+	if position == nil {
+		return proxyError("position is required")
+	}
+
+	dssPosition := mapping.ConvertToDSSGeoPosition(*position)
+	setPositionReq := dss_target_service.SetPositionRequest{
+		Id:       s.id,
+		Position: dssPosition,
+	}
+
+	_, err := s.deviceAPI.SetPosition(context.Background()).
+		SetPositionRequest(setPositionReq).
+		Execute()
+
+	return handleSensorError("SetPosition", s.id, err)
 }
 
-func (s *Sensor) SetPositionMode(mode core.GeoPositionMode) error { return nil }
+func (s *Sensor) SetPositionMode(mode core.GeoPositionMode) error {
+	dssMode := mapping.ConvertToDSSGeoPositionMode(mode)
+
+	setPositionModeReq := dss_target_service.SetPositionModeRequest{
+		Id:           s.id,
+		PositionMode: dssMode,
+	}
+
+	_, err := s.deviceAPI.SetPositionMode(context.Background()).
+		SetPositionModeRequest(setPositionModeReq).
+		Execute()
+
+	return handleSensorError("SetPositionMode", s.id, err)
+}

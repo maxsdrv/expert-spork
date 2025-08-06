@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 
 	"connectrpc.com/connect"
 	"github.com/opticoder/ctx-log/go/ctx_log"
@@ -12,6 +11,8 @@ import (
 )
 
 var logging = ctx_log.GetLogger(nil)
+
+var controllersError = core.ProviderError()
 
 func (s *Controllers) GetJammers(ctx context.Context) (*connect.Response[apiv1.JammersResponse], error) {
 	logger := logging.WithCtxFields(ctx)
@@ -25,7 +26,7 @@ func (s *Controllers) GetJammers(ctx context.Context) (*connect.Response[apiv1.J
 	for _, jammerId := range ids {
 		sensorBase, err := s.svcDevStorage.Jammer(jammerId)
 		if err != nil {
-			logger.WithError(err).Errorf("Failed to get jammer %s", jammerId)
+			logger.WithError(controllersError("%v", err)).Errorf("Jammer %s not found", jammerId)
 			continue
 		}
 
@@ -49,47 +50,54 @@ func (s *Controllers) SetJammerBands(
 
 	logger.Debug("SetJammerBands request")
 
+	if jammerId == "" {
+		return controllersError("jammer id is required")
+	}
+
+	if duration < 0 {
+		return controllersError("duration must be non-negative, got: %d", duration)
+	}
+
 	deviceId := core.NewId(jammerId)
 
 	jammerBase, err := s.svcDevStorage.Jammer(deviceId)
 	if err != nil {
-		logger.WithError(err).Errorf("Failed to get jammer %s", deviceId)
+		logger.WithError(controllersError("%v", err)).Errorf("Jammer %s not found", deviceId)
 		return err
 	}
 
 	jammerBandsWriter, ok := (*jammerBase).(core.JammerBandsWriter)
 	if !ok {
-		logger.Errorf("Jammer %s does not support band setting", deviceId)
-		return fmt.Errorf("jammer %s does not support band setting", deviceId)
+		return controllersError("jammer does not support bands setting: %s", deviceId)
 	}
 
 	activeBandsList := core.BandList(bandsActive)
 
 	jammerInfoChan, cleanup, err := s.svcJammerNotifier.Stream(ctx, deviceId)
 	if err != nil {
-		logger.WithError(err).Errorf("Failed to get jammer dynamic info for %s", deviceId)
-		return fmt.Errorf("failed to get jammer configuration: %w", err)
+		logger.WithError(controllersError("%v", err)).Errorf("Failed to get jammer configuration: %v", err)
+		return err
 	}
 	defer cleanup()
 
 	select {
 	case jammerDynamic := <-jammerInfoChan:
 		if jammerDynamic == nil {
-			return fmt.Errorf("no dynamic info available for jammer %s", deviceId)
+			return controllersError("No dynamic info available for jammer %s", deviceId)
 		}
 
 		allSupportedBands := jammerDynamic.Bands.GetAll()
 
 		jammerBands, err := core.NewBands(allSupportedBands, activeBandsList)
 		if err != nil {
-			logger.WithError(err).Errorf("Failed to create bands configuration for jammer %s", deviceId)
-			return fmt.Errorf("invalid bands configuration: %w", err)
+			logger.WithError(controllersError("%v", err)).Errorf("Failed to create bands configuration for jammer %s", deviceId)
+			return err
 		}
 
 		err = jammerBandsWriter.SetJammerBands(jammerBands, duration)
 		if err != nil {
-			logger.WithError(err).Errorf("Failed to set jammer bands for device %s", deviceId)
-			return fmt.Errorf("failed to set jammer bands: %w", err)
+			logger.WithError(controllersError("%v", err)).Errorf("Failed to set jammer bands for device %s", deviceId)
+			return err
 		}
 
 	case <-ctx.Done():

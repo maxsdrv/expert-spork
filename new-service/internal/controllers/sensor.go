@@ -21,11 +21,10 @@ func (s *Controllers) GetSensors(
 	ids := s.svcDevStorage.ListSensors()
 
 	var sensorInfos []*apiv1.SensorInfo
-
 	for _, sensorId := range ids {
 		sensorBase, err := s.svcDevStorage.Sensor(sensorId)
 		if err != nil {
-			logger.WithError(err).Errorf("Failed to get sensor %s", sensorId)
+			logger.WithError(controllersError("%v", err)).Errorf("Failed to get sensor %s", sensorId)
 			continue
 		}
 
@@ -81,19 +80,27 @@ func (s *Controllers) SetJammerMode(ctx context.Context,
 
 	logger.Debugf("Set jammer mode for sensor %s to %s", sensorId, jammerMode)
 
+	if sensorId == "" {
+		return controllersError("sensor id is required")
+	}
+
+	if timeout < 0 {
+		return controllersError("timeout must be non-negative, got: %d", timeout)
+	}
+
 	deviceId := core.NewId(sensorId)
 
 	sensorBase, err := s.svcDevStorage.Sensor(deviceId)
 	if err != nil {
-		logger.WithError(err).Errorf("Sensor not found %s", sensorId)
-		return connect.NewError(connect.CodeNotFound, err)
+		logger.WithError(controllersError("%v", err)).Errorf("Failed to get sensor %s", sensorId)
+		return err
 	}
 
 	if jammerWriter, ok := (*sensorBase).(core.SensorJammerWriter); ok {
-		err = jammerWriter.SetJammerMode(core.JammerMode(jammerMode), timeout)
+		err = jammerWriter.SetJammerMode(jammerMode, timeout)
 		if err != nil {
-			logger.WithError(err).Errorf("Failed to set jammer mode for sensor %s", sensorId)
-			return connect.NewError(connect.CodeInternal, err)
+			logger.WithError(controllersError("%v", err)).Errorf("Failed to set jammer mode for sensor %s", sensorId)
+			return err
 		}
 
 		logger.Infof("Successfully set jammer mode for sensor %s to %s", sensorId, jammerMode)

@@ -9,7 +9,7 @@ import (
 	"dds-provider/internal/generated/radariq-client/dss_target_service"
 )
 
-var mappingError = core.ProviderErrorFn("mapping")
+var mappingError = core.ProviderError()
 
 func ConvertToSensorInfoDynamic(data json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
 	var sensorData dss_target_service.SensorInfo
