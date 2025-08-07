@@ -115,8 +115,8 @@ func (s *Controllers) SetPositionMode(
 	req *connect.Request[apiv1.SetPositionModeRequest],
 ) (*connect.Response[emptypb.Empty], error) {
 	logger := logging.WithCtxFields(ctx)
-	logger.Debug("Request data: ", req.Msg)
-	logger.Debug("Position mode: ", req.Msg.PositionMode)
+	logger.Debugf("Request data: %s", req.Msg)
+	logger.Debugf("Position mode: %s", req.Msg.PositionMode)
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
@@ -126,8 +126,30 @@ func (s *Controllers) SetPosition(
 	req *connect.Request[apiv1.SetPositionRequest],
 ) (*connect.Response[emptypb.Empty], error) {
 	logger := logging.WithCtxFields(ctx)
+	logger.Debugf("Request data: %s", req.Msg)
+
+	deviceId := req.Msg.GetDeviceId()
+	if deviceId == "" {
+		return nil, controllersError("device id is required")
+	}
+
+	position := req.Msg.GetPosition()
+	if position == nil {
+		return nil, controllersError("position is required")
+	}
+
+	corePosition := mapping.
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
+func (s *Controllers) SetDisabled(
+	ctx context.Context,
+	req *connect.Request[apiv1.SetDisabledRequest],
+) (*connect.Response[emptypb.Empty], error) {
+	logger := logging.WithCtxFields(ctx)
 	logger.Debug("Request data: ", req.Msg)
-	logger.Debug("Position: ", req.Msg.Position)
+	logger.Debug("Disabled: ", req.Msg.Disabled)
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }

@@ -1,12 +1,13 @@
 package proxy
 
 import (
-	"dds-provider/internal/core"
-	"dds-provider/internal/generated/radariq-client/dss_target_service"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"dds-provider/internal/core"
+	"dds-provider/internal/generated/radariq-client/dss_target_service"
 )
 
 var proxyError = core.ProviderError()
