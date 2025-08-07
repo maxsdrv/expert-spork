@@ -1,8 +1,9 @@
 package core
 
 import (
-	apiv1 "dds-provider/internal/generated/api/proto"
 	"google.golang.org/protobuf/proto"
+
+	apiv1 "dds-provider/internal/generated/api/proto"
 )
 
 type GeoPosition struct {

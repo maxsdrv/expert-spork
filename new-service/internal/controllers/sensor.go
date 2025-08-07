@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"dds-provider/internal/services/mapping"
 	"fmt"
 
 	"connectrpc.com/connect"
@@ -116,8 +117,29 @@ func (s *Controllers) SetPositionMode(
 ) (*connect.Response[emptypb.Empty], error) {
 	logger := logging.WithCtxFields(ctx)
 	logger.Debugf("Request data: %s", req.Msg)
-	logger.Debugf("Position mode: %s", req.Msg.PositionMode)
 
+	deviceId := req.Msg.GetDeviceId()
+	if deviceId == "" {
+		return nil, controllersError("device id is required")
+	}
+	positionMode := req.Msg.GetPositionMode()
+
+	deviceIdCore := core.NewId(deviceId)
+	deviceBase, err := s.svcDevStorage.Device(deviceIdCore)
+	if err != nil {
+		logger.WithError(controllersError("%v", err)).Errorf("Failed to get device %s", deviceId)
+		return nil, err
+	}
+
+	if positionWriter, ok := (*deviceBase).(core.DevicePositionWriter); ok {
+		err = positionWriter.SetPositionMode(positionMode)
+		if err != nil {
+			logger.WithError(controllersError("%v", err)).Errorf("Failed to set position mode for device %s", deviceId)
+			return nil, err
+		}
+	}
+
+	logger.Infof("Successfully set position mode for device %s", deviceId)
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
@@ -138,8 +160,27 @@ func (s *Controllers) SetPosition(
 		return nil, controllersError("position is required")
 	}
 
-	corePosition := mapping.
+	corePosition := mapping.ConvertGeoPosition(position)
+	if corePosition == nil {
+		return nil, controllersError("invalid position data")
+	}
 
+	deviceIdCore := core.NewId(deviceId)
+	deviceBase, err := s.svcDevStorage.Device(deviceIdCore)
+	if err != nil {
+		logger.WithError(controllersError("%v", err)).Errorf("Failed to get device %s", deviceId)
+		return nil, err
+	}
+
+	if positionWriter, ok := (*deviceBase).(core.DevicePositionWriter); ok {
+		err = positionWriter.SetPosition(corePosition)
+		if err != nil {
+			logger.WithError(controllersError("%v", err)).Errorf("Failed to set position for device %s", deviceId)
+			return nil, err
+		}
+	}
+
+	logger.Infof("Successfully set position for device %s", deviceId)
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
@@ -148,8 +189,27 @@ func (s *Controllers) SetDisabled(
 	req *connect.Request[apiv1.SetDisabledRequest],
 ) (*connect.Response[emptypb.Empty], error) {
 	logger := logging.WithCtxFields(ctx)
-	logger.Debug("Request data: ", req.Msg)
-	logger.Debug("Disabled: ", req.Msg.Disabled)
+	logger.Debugf("Request data: %s", req.Msg)
 
-	return connect.NewResponse(&emptypb.Empty{}), nil
+	deviceId := req.Msg.GetDeviceId()
+	if deviceId == "" {
+		return nil, controllersError("device id is required")
+	}
+
+	deviceIdCore := core.NewId(deviceId)
+	deviceBase, err := s.svcDevStorage.Device(deviceIdCore)
+	if err != nil {
+		logger.WithError(controllersError("%v", err)).Errorf("Failed to get device %s", deviceId)
+		return nil, err
+	}
+
+	if disabledWriter, ok := (*deviceBase).(core.DeviceDisabledWriter); ok {
+		disabledWriter.SetDisabled(req.Msg.GetDisabled())
+
+		logger.Infof("Successfully set disabled for device %s", deviceId)
+
+		return connect.NewResponse(&emptypb.Empty{}), nil
+	}
+
+	return nil, controllersError("device does not support disabled setting")
 }

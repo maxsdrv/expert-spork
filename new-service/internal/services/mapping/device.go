@@ -35,3 +35,29 @@ func ConvertToDSSGeoPositionMode(positionMode core.GeoPositionMode) dss_target_s
 		return dss_target_service.GEOPOSITIONMODE_AUTO
 	}
 }
+
+func ConvertGeoPosition(apiPosition *apiv1.GeoPosition) *core.GeoPosition {
+	if apiPosition == nil {
+		return &core.GeoPosition{}
+	}
+
+	coord := apiPosition.GetCoordinate()
+	if coord == nil {
+		return &core.GeoPosition{}
+	}
+
+	var altitude *core.DistanceType
+	if coord.Altitude != nil {
+		alt := *coord.Altitude
+		altitude = &alt
+	}
+
+	return &core.GeoPosition{
+		Azimuth: apiPosition.GetAzimuth(),
+		Coordinate: core.GeoCoordinate{
+			Lat: coord.GetLatitude(),
+			Lon: coord.GetLongitude(),
+			Alt: altitude,
+		},
+	}
+}
