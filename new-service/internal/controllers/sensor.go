@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"dds-provider/internal/services/mapping"
 	"fmt"
 
 	"connectrpc.com/connect"
@@ -10,6 +9,7 @@ import (
 
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
+	"dds-provider/internal/services/mapping"
 )
 
 func (s *Controllers) GetSensors(

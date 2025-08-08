@@ -43,14 +43,14 @@ type Connection struct {
 type Service struct {
 	devStorage            device_storage.DeviceStorageService
 	httpClient            *httpclient.SharedHttpClient
-	notificationClients   map[string]*wsclient.WSNotificationClient
+	notificationClient    *wsclient.WSNotificationClient
 	notificationProcessor *NotificationProcessor
-	connections           []Connection
-	apiClients            map[string]*dss_target_service.APIClient
+	connection            Connection
+	apiClient             *dss_target_service.APIClient
 }
 
 func New(ctx context.Context,
-	connections []Connection,
+	connection Connection,
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
 	devStorage device_storage.DeviceStorageService,
@@ -60,10 +60,10 @@ func New(ctx context.Context,
 	service := &Service{
 		devStorage:            devStorage,
 		httpClient:            sharedHttpClient,
-		notificationClients:   make(map[string]*wsclient.WSNotificationClient),
+		notificationClient:    nil,
 		notificationProcessor: nil,
-		connections:           connections,
-		apiClients:            make(map[string]*dss_target_service.APIClient),
+		connection:            connection,
+		apiClient:             nil,
 	}
 
 	service.notificationProcessor = NewNotificationProcessor(jammerNotifier, sensorNotifier, service)
@@ -78,18 +78,16 @@ func (s *Service) start(ctx context.Context) {
 
 	logger.Debug("Starting proxy")
 
-	for _, connection := range s.connections {
-		go s.connect(ctx, connection)
-	}
+	s.connect(ctx)
 }
 
-func (s *Service) connect(ctx context.Context, connection Connection) {
+func (s *Service) connect(ctx context.Context) {
 	logger := logging.WithCtxFields(ctx)
-	ctx = logger.SetCtxField(ctx, enums.LogFieldHost, connection.Host)
+	ctx = logger.SetCtxField(ctx, enums.LogFieldHost, s.connection.Host)
 
-	deviceID := fmt.Sprintf("%s:%d", connection.Host, connection.PortHttp)
+	deviceID := fmt.Sprintf("%s:%d", s.connection.Host, s.connection.PortHttp)
 
-	urlRest := fmt.Sprintf("http://%s:%d/api/v1", connection.Host, connection.PortHttp)
+	urlRest := fmt.Sprintf("http://%s:%d/api/v1", s.connection.Host, s.connection.PortHttp)
 	deviceConfiguration := s.httpClient.CreateAPIConfiguration(urlRest)
 	apiClient := dss_target_service.NewAPIClient(deviceConfiguration)
 
@@ -130,9 +128,7 @@ func (s *Service) connect(ctx context.Context, connection Connection) {
 
 		logger.Info("Connected to DDS target service")
 
-		if s.apiClients[deviceID] == nil {
-			s.apiClients[deviceID] = apiClient
-		}
+		s.apiClient = apiClient
 
 		go func() {
 			healthRetryDelay := time.Second
@@ -169,9 +165,9 @@ func (s *Service) connect(ctx context.Context, connection Connection) {
 			}
 		}()
 
-		wsURL := fmt.Sprintf("ws://%s:%d", connection.Host, connection.PortWs)
+		wsURL := fmt.Sprintf("ws://%s:%d", s.connection.Host, s.connection.PortWs)
 		wsClient := wsclient.NewWSNotificationClient(wsURL, s.notificationProcessor)
-		s.notificationClients[deviceID] = wsClient
+		s.notificationClient = wsClient
 
 		logger.Infof("Starting WebSocket notification client for device %s", deviceID)
 		go wsClient.Start(ctx)
@@ -187,17 +183,7 @@ func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId
 		return nil
 	}
 
-	var apiClient *dss_target_service.APIClient
-	for _, client := range s.apiClients {
-		apiClient = client
-		break
-	}
-
-	if apiClient == nil {
-		return serviceError("no API client for sensor %s", deviceId)
-	}
-
-	proxySensor, err := proxy.NewSensor(sensorId, apiClient, sensorInfo)
+	proxySensor, err := proxy.NewSensor(sensorId, s.apiClient, sensorInfo)
 	if err != nil {
 		logger.WithError(serviceError("%v", err)).Errorf("Failed to create proxy sensor %s", sensorId)
 		return err
@@ -215,17 +201,7 @@ func (s *Service) registerJammers(ctx context.Context, jammerId string, deviceId
 		return nil
 	}
 
-	var apiClient *dss_target_service.APIClient
-	for _, client := range s.apiClients {
-		apiClient = client
-		break
-	}
-
-	if apiClient == nil {
-		return serviceError("no API client for jammer %s", deviceId)
-	}
-
-	proxyJammer, err := proxy.NewJammer(jammerId, apiClient, jammerInfo)
+	proxyJammer, err := proxy.NewJammer(jammerId, s.apiClient, jammerInfo)
 	if err != nil {
 		logger.WithError(serviceError("%v", err)).Errorf("Failed to create proxy jammer %s", jammerId)
 		return err

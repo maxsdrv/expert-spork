@@ -44,7 +44,7 @@ func main() {
 	svcJammerNotifier := components.NewNotifier[*core.JammerInfoDynamic](ctx)
 	svcSensorNotifier := components.NewNotifier[*core.SensorInfoDynamic](ctx)
 	svcDevStorage := device_storage.NewDeviceStorageService(ctx)
-	svcTargetProvider := proxy_service.New(ctx, config.TargetProviderConnections, svcJammerNotifier, svcSensorNotifier, svcDevStorage)
+	svcTargetProvider := proxy_service.New(ctx, config.ProxyConfig, svcJammerNotifier, svcSensorNotifier, svcDevStorage)
 
 	controllers := controllers.NewControllers(svcCommon, svcDevStorage, svcSensorNotifier, svcJammerNotifier, svcTargetProvider)
 	handlers := handlers.NewHandlers(controllers)
