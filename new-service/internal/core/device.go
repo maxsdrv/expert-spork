@@ -22,7 +22,7 @@ type DeviceDisabledReader interface {
 }
 
 type DeviceDisabledWriter interface {
-	SetDisabled(disabled bool)
+	SetDisabled(disabled bool) error
 }
 
 type SensorJammerReader interface {

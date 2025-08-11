@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	"google.golang.org/protobuf/proto"
 
 	"dds-provider/internal/generated/api/proto"
 )
@@ -14,7 +13,17 @@ func (s *Handlers) CameraId(
 	req *connect.Request[apiv1.CameraIdRequest],
 ) (*connect.Response[apiv1.CameraIdResponse], error) {
 	logger := logging.WithCtxFields(ctx)
-	logger.Debug("Request data: ", req.Msg)
+	logger.Debugf("Request data: %s", req.Msg)
 
-	return connect.NewResponse(&apiv1.CameraIdResponse{CameraId: proto.String("camera-001")}), nil
+	sensorId := req.Msg.GetSensorId()
+
+	cameraId, err := s.controllers.GetCameraId(ctx, sensorId)
+	if err != nil {
+		logger.WithError(err).Error("Get camera id failed")
+		return nil, err
+	}
+
+	logger.Infof("Successfully get camera id for sensor %s to %s", sensorId, cameraId)
+
+	return connect.NewResponse(&apiv1.CameraIdResponse{CameraId: &cameraId}), nil
 }

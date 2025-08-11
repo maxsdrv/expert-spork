@@ -4,22 +4,23 @@ import (
 	"context"
 
 	"dds-provider/internal/core"
+	"dds-provider/internal/devices/proxy/mapping"
 	apiv1 "dds-provider/internal/generated/api/proto"
-	"dds-provider/internal/generated/radariq-client/dss_target_service"
-	"dds-provider/internal/services/mapping"
+	"dds-provider/internal/generated/provider_client"
 )
 
 type Sensor struct {
 	id         string
-	serviceAPI *dss_target_service.SensorAPIService
-	deviceAPI  *dss_target_service.DeviceAPIService
-	info       *dss_target_service.SensorInfo
+	serviceAPI *provider_client.SensorAPIService
+	deviceAPI  *provider_client.DeviceAPIService
+	info       *provider_client.SensorInfo
 }
 
-func NewSensor(sensorId string, api *dss_target_service.APIClient, info *dss_target_service.SensorInfo) (*Sensor, error) {
+func NewSensor(sensorId string, api *provider_client.APIClient, info *provider_client.SensorInfo) (*Sensor, error) {
 	if sensorId == "" {
 		return nil, proxyError("sensor id required")
 	}
+
 	return &Sensor{
 		id:         sensorId,
 		serviceAPI: api.SensorAPI,
@@ -31,7 +32,7 @@ func NewSensor(sensorId string, api *dss_target_service.APIClient, info *dss_tar
 func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 	dssMode := mapping.ConvertToJammerMode(mode)
 
-	setJammerModeReq := dss_target_service.SetJammerModeRequest{
+	setJammerModeReq := provider_client.SetJammerModeRequest{
 		Id:         s.id,
 		JammerMode: dssMode,
 		Timeout:    timeout,
@@ -49,15 +50,17 @@ func (s *Sensor) SensorInfo() apiv1.SensorInfo {
 	return *sensorCoreInfo.ToAPI()
 }
 
-func (s *Sensor) SetDisabled(disabled bool) {
-	setDisabledReq := dss_target_service.SetDisabledRequest{
+func (s *Sensor) SetDisabled(disabled bool) error {
+	setDisabledReq := provider_client.SetDisabledRequest{
 		Id:       s.id,
 		Disabled: disabled,
 	}
 
-	_, _ = s.deviceAPI.SetDisabled(context.Background()).
+	_, err := s.deviceAPI.SetDisabled(context.Background()).
 		SetDisabledRequest(setDisabledReq).
 		Execute()
+
+	return handleSensorError("SetDisabled", s.id, err)
 }
 
 func (s *Sensor) SetPosition(position *core.GeoPosition) error {
@@ -66,7 +69,7 @@ func (s *Sensor) SetPosition(position *core.GeoPosition) error {
 	}
 
 	dssPosition := mapping.ConvertToDSSGeoPosition(*position)
-	setPositionReq := dss_target_service.SetPositionRequest{
+	setPositionReq := provider_client.SetPositionRequest{
 		Id:       s.id,
 		Position: dssPosition,
 	}
@@ -81,7 +84,7 @@ func (s *Sensor) SetPosition(position *core.GeoPosition) error {
 func (s *Sensor) SetPositionMode(mode core.GeoPositionMode) error {
 	dssMode := mapping.ConvertToDSSGeoPositionMode(mode)
 
-	setPositionModeReq := dss_target_service.SetPositionModeRequest{
+	setPositionModeReq := provider_client.SetPositionModeRequest{
 		Id:           s.id,
 		PositionMode: dssMode,
 	}

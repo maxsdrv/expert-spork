@@ -2,29 +2,35 @@ package proxy_service
 
 import (
 	"context"
+	"dds-provider/internal/devices/proxy"
+	"dds-provider/internal/generated/provider_client"
+	"dds-provider/internal/services/device_storage"
 	"encoding/json"
 
 	"dds-provider/internal/core"
 	"dds-provider/internal/core/components"
-	"dds-provider/internal/services/mapping"
+	"dds-provider/internal/devices/proxy/mapping"
 	"dds-provider/internal/services/parsers"
 )
 
 type NotificationProcessor struct {
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic]
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic]
-	service        *Service
+	devStorage     device_storage.DeviceStorageService
+	apiClient      *provider_client.APIClient
 }
 
 func NewNotificationProcessor(
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
-	service *Service,
+	devStorage device_storage.DeviceStorageService,
+	apiClient *provider_client.APIClient,
 ) *NotificationProcessor {
 	return &NotificationProcessor{
 		jammerNotifier: jammerNotifier,
 		sensorNotifier: sensorNotifier,
-		service:        service,
+		devStorage:     devStorage,
+		apiClient:      apiClient,
 	}
 }
 
@@ -57,9 +63,14 @@ func (n *NotificationProcessor) processSensorInfo(ctx context.Context, dataRaw j
 
 	deviceId := core.NewId(sensor.Id)
 
-	err = n.service.registerSensors(ctx, sensor.Id, deviceId, sensor)
-	if err != nil {
-		return err
+	if _, err := n.devStorage.Sensor(deviceId); err != nil {
+		proxySensor, err := proxy.NewSensor(sensor.Id, n.apiClient, sensor)
+		if err != nil {
+			logger.WithError(serviceError("%v", err)).Error("Failed to create proxy sensor")
+			return err
+		}
+		n.devStorage.AppendDevice(deviceId, proxySensor)
+		logger.Infof("Registered sensor %s from WebSocket notification", sensor.Id)
 	}
 
 	dynamicInfo, err := n.dynamicSensorInfo(ctx, dataRaw, deviceId)
@@ -97,7 +108,15 @@ func (n *NotificationProcessor) processJammerInfo(ctx context.Context, dataRaw j
 
 	deviceId := core.NewId(jammerInfo.Id)
 
-	n.service.registerJammers(ctx, jammerInfo.Id, deviceId, jammerInfo)
+	if _, err := n.devStorage.Jammer(deviceId); err != nil {
+		proxyJammer, err := proxy.NewJammer(jammerInfo.Id, n.apiClient, jammerInfo)
+		if err != nil {
+			logger.WithError(serviceError("%v", err)).Error("Failed to create proxy jammer")
+			return err
+		}
+		n.devStorage.AppendDevice(deviceId, proxyJammer)
+		logger.Infof("Registered jammer %s from WebSocket notification", jammerInfo.Id)
+	}
 
 	dynamicInfo, err := n.dynamicJammerInfo(ctx, dataRaw, deviceId)
 	if err != nil {

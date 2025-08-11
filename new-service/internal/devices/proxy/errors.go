@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"dds-provider/internal/core"
-	"dds-provider/internal/generated/radariq-client/dss_target_service"
+	"dds-provider/internal/generated/provider_client"
 )
 
 var proxyError = core.ProviderError()
@@ -47,7 +47,7 @@ func handleProxyError(operation, deviceId string, err error) error {
 		return wrapWithContext(ErrHostNotFound, operation, deviceId, err)
 	}
 
-	var apiErr *dss_target_service.GenericOpenAPIError
+	var apiErr *provider_client.GenericOpenAPIError
 	if errors.As(err, &apiErr) {
 		return handleApiErrors(operation, deviceId, apiErr)
 	}
@@ -55,7 +55,7 @@ func handleProxyError(operation, deviceId string, err error) error {
 	return wrapWithContext(nil, operation, deviceId, err)
 }
 
-func handleApiErrors(operation, deviceId string, apiErr *dss_target_service.GenericOpenAPIError) error {
+func handleApiErrors(operation, deviceId string, apiErr *provider_client.GenericOpenAPIError) error {
 	errBody := string(apiErr.Body())
 
 	var categorizedErr error

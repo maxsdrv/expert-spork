@@ -3,6 +3,7 @@ package proxy_service
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -10,11 +11,9 @@ import (
 
 	"dds-provider/internal/core"
 	"dds-provider/internal/core/components"
-	"dds-provider/internal/devices/proxy"
 	"dds-provider/internal/enums"
-	"dds-provider/internal/generated/radariq-client/dss_target_service"
+	"dds-provider/internal/generated/provider_client"
 	"dds-provider/internal/services/device_storage"
-	"dds-provider/internal/services/httpclient"
 	"dds-provider/internal/services/wsclient"
 )
 
@@ -42,11 +41,11 @@ type Connection struct {
 
 type Service struct {
 	devStorage            device_storage.DeviceStorageService
-	httpClient            *httpclient.SharedHttpClient
+	httpClient            *http.Client
 	notificationClient    *wsclient.WSNotificationClient
 	notificationProcessor *NotificationProcessor
 	connection            Connection
-	apiClient             *dss_target_service.APIClient
+	apiClient             *provider_client.APIClient
 }
 
 func New(ctx context.Context,
@@ -55,41 +54,51 @@ func New(ctx context.Context,
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
 	devStorage device_storage.DeviceStorageService,
 ) *Service {
-	sharedHttpClient := httpclient.NewSharedHttpClient()
-
-	service := &Service{
-		devStorage:            devStorage,
-		httpClient:            sharedHttpClient,
-		notificationClient:    nil,
-		notificationProcessor: nil,
-		connection:            connection,
-		apiClient:             nil,
+	httpClient := &http.Client{
+		Timeout: 30 * time.Second,
+		Transport: &http.Transport{
+			MaxIdleConns:        10,
+			IdleConnTimeout:     60 * time.Second,
+			DisableCompression:  false,
+			DisableKeepAlives:   false,
+			MaxIdleConnsPerHost: 10,
+		},
 	}
 
-	service.notificationProcessor = NewNotificationProcessor(jammerNotifier, sensorNotifier, service)
+	service := &Service{
+		devStorage: devStorage,
+		httpClient: httpClient,
+		connection: connection,
+	}
 
-	go service.start(ctx)
+	go service.start(ctx, jammerNotifier, sensorNotifier)
 
 	return service
 }
 
-func (s *Service) start(ctx context.Context) {
+func (s *Service) start(ctx context.Context,
+	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
+	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
+) {
 	logger := logging.WithCtxFields(ctx)
 
 	logger.Debug("Starting proxy")
 
-	s.connect(ctx)
+	s.connect(ctx, jammerNotifier, sensorNotifier)
 }
 
-func (s *Service) connect(ctx context.Context) {
+func (s *Service) connect(ctx context.Context,
+	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
+	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
+) {
 	logger := logging.WithCtxFields(ctx)
 	ctx = logger.SetCtxField(ctx, enums.LogFieldHost, s.connection.Host)
 
 	deviceID := fmt.Sprintf("%s:%d", s.connection.Host, s.connection.PortHttp)
 
 	urlRest := fmt.Sprintf("http://%s:%d/api/v1", s.connection.Host, s.connection.PortHttp)
-	deviceConfiguration := s.httpClient.CreateAPIConfiguration(urlRest)
-	apiClient := dss_target_service.NewAPIClient(deviceConfiguration)
+	deviceConfiguration := s.createAPIConfiguration(urlRest)
+	apiClient := provider_client.NewAPIClient(deviceConfiguration)
 
 	retryDelay := time.Second
 	maxRetryDelay := 30 * time.Second
@@ -129,6 +138,8 @@ func (s *Service) connect(ctx context.Context) {
 		logger.Info("Connected to DDS target service")
 
 		s.apiClient = apiClient
+
+		s.notificationProcessor = NewNotificationProcessor(jammerNotifier, sensorNotifier, s.devStorage, apiClient)
 
 		go func() {
 			healthRetryDelay := time.Second
@@ -176,38 +187,11 @@ func (s *Service) connect(ctx context.Context) {
 	}
 }
 
-func (s *Service) registerSensors(ctx context.Context, sensorId string, deviceId core.DeviceId, sensorInfo *dss_target_service.SensorInfo) error {
-	logger := logging.WithCtxFields(ctx)
-
-	if _, err := s.devStorage.Sensor(deviceId); err == nil {
-		return nil
+func (s *Service) createAPIConfiguration(baseUrl string) *provider_client.Configuration {
+	config := provider_client.NewConfiguration()
+	config.Servers = provider_client.ServerConfigurations{
+		provider_client.ServerConfiguration{URL: baseUrl},
 	}
-
-	proxySensor, err := proxy.NewSensor(sensorId, s.apiClient, sensorInfo)
-	if err != nil {
-		logger.WithError(serviceError("%v", err)).Errorf("Failed to create proxy sensor %s", sensorId)
-		return err
-	}
-	s.devStorage.AppendDevice(deviceId, proxySensor)
-
-	logger.Infof("Registered sensor %s from WebSocket notification", sensorId)
-	return nil
-}
-
-func (s *Service) registerJammers(ctx context.Context, jammerId string, deviceId core.DeviceId, jammerInfo *dss_target_service.JammerInfo) error {
-	logger := logging.WithCtxFields(ctx)
-
-	if _, err := s.devStorage.Jammer(deviceId); err == nil {
-		return nil
-	}
-
-	proxyJammer, err := proxy.NewJammer(jammerId, s.apiClient, jammerInfo)
-	if err != nil {
-		logger.WithError(serviceError("%v", err)).Errorf("Failed to create proxy jammer %s", jammerId)
-		return err
-	}
-	s.devStorage.AppendDevice(deviceId, proxyJammer)
-
-	logger.Infof("Registered Jammer %s from WebSocket notification", jammerId)
-	return nil
+	config.HTTPClient = s.httpClient
+	return config
 }

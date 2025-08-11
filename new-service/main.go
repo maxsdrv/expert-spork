@@ -41,9 +41,9 @@ func main() {
 	ctx := context.Background()
 
 	svcCommon := common.NewCommonService(ctx)
-	svcJammerNotifier := components.NewNotifier[*core.JammerInfoDynamic](ctx)
-	svcSensorNotifier := components.NewNotifier[*core.SensorInfoDynamic](ctx)
 	svcDevStorage := device_storage.NewDeviceStorageService(ctx)
+	svcSensorNotifier := components.NewNotifier[*core.SensorInfoDynamic](ctx)
+	svcJammerNotifier := components.NewNotifier[*core.JammerInfoDynamic](ctx)
 	svcTargetProvider := proxy_service.New(ctx, config.ProxyConfig, svcJammerNotifier, svcSensorNotifier, svcDevStorage)
 
 	controllers := controllers.NewControllers(svcCommon, svcDevStorage, svcSensorNotifier, svcJammerNotifier, svcTargetProvider)
@@ -61,6 +61,10 @@ func main() {
 	path, handler = apiv1connect.NewSensorServiceHandler(handlers, interceptors)
 	router.Handle(path, handler)
 	path, handler = apiv1connect.NewDeviceServiceHandler(handlers, interceptors)
+	router.Handle(path, handler)
+	path, handler = apiv1connect.NewCameraServiceHandler(handlers, interceptors)
+	router.Handle(path, handler)
+	path, handler = apiv1connect.NewTargetServiceHandler(handlers, interceptors)
 	router.Handle(path, handler)
 
 	logger.Infof("Service at %s", path)

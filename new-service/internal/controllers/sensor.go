@@ -8,8 +8,8 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"dds-provider/internal/core"
+	"dds-provider/internal/devices/proxy/mapping"
 	apiv1 "dds-provider/internal/generated/api/proto"
-	"dds-provider/internal/services/mapping"
 )
 
 func (s *Controllers) GetSensors(
@@ -161,9 +161,6 @@ func (s *Controllers) SetPosition(
 	}
 
 	corePosition := mapping.ConvertGeoPosition(position)
-	if corePosition == nil {
-		return nil, controllersError("invalid position data")
-	}
 
 	deviceIdCore := core.NewId(deviceId)
 	deviceBase, err := s.svcDevStorage.Device(deviceIdCore)
@@ -173,7 +170,7 @@ func (s *Controllers) SetPosition(
 	}
 
 	if positionWriter, ok := (*deviceBase).(core.DevicePositionWriter); ok {
-		err = positionWriter.SetPosition(corePosition)
+		err = positionWriter.SetPosition(&corePosition)
 		if err != nil {
 			logger.WithError(controllersError("%v", err)).Errorf("Failed to set position for device %s", deviceId)
 			return nil, err

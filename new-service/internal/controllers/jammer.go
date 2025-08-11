@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
+	"github.com/golang/protobuf/proto"
 	"github.com/opticoder/ctx-log/go/ctx_log"
 
 	"dds-provider/internal/core"
@@ -17,7 +18,7 @@ var controllersError = core.ProviderError()
 func (s *Controllers) GetJammers(ctx context.Context) (*connect.Response[apiv1.JammersResponse], error) {
 	logger := logging.WithCtxFields(ctx)
 
-	logger.Debugf("Getting Jammers")
+	logger.Debug("Getting Jammers")
 
 	ids := s.svcDevStorage.ListJammers()
 
@@ -131,4 +132,36 @@ func (s *Controllers) JammerInfoDynamic(
 	}
 
 	return err
+}
+
+func (s *Controllers) GetGroups(ctx context.Context) ([]*apiv1.JammerGroup, error) {
+	logger := logging.WithCtxFields(ctx)
+
+	logger.Debug("Getting Groups")
+
+	apiClient := s.svcTargetProvider.GetApiClient()
+	if apiClient == nil {
+		return nil, controllersError("target provider is not configured")
+	}
+
+	response, _, err := apiClient.JammerAPI.GetJammerGroups(ctx).Execute()
+	if err != nil {
+		logger.WithError(controllersError("%v", err)).Error("Failed to get jammer groups")
+		return nil, err
+	}
+
+	if response == nil || response.JammerGroups == nil {
+		return nil, controllersError("jammer groups are not found")
+	}
+
+	var groups []*apiv1.JammerGroup
+	for _, group := range response.JammerGroups {
+		jammerGroup := &apiv1.JammerGroup{
+			GroupId: proto.String(group.GetId()),
+			Name:    proto.String(group.GetName()),
+		}
+		groups = append(groups, jammerGroup)
+	}
+
+	return groups, nil
 }

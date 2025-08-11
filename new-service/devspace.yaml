@@ -42,10 +42,10 @@ commands:
   gen: |-
     export CI_SERVER_HOST=
     devspace --silent run run-tools-cmd gen_go_connectrpc_server api/proto internal/generated dds-provider
-    devspace --silent run gen_go_openapi_client \
-      api/external/dss-target-service-schema.yaml \
-      internal/generated/radariq-client/dss_target_service \
-      dss_target_service 
+    devspace --silent run run-tools-cmd gen_go_openapi_client \
+      ../dds-target-provider/docs/api/dss-target-service-schema.yaml \
+      internal/generated/provider_client \
+      provider_client
 
   buf: |-
     export PATH="$(go env GOPATH)/bin:$PATH"

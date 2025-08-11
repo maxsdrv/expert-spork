@@ -14,7 +14,7 @@ func (s *Handlers) SetDisabled(
 	req *connect.Request[apiv1.SetDisabledRequest],
 ) (*connect.Response[emptypb.Empty], error) {
 	logger := logging.WithCtxFields(ctx)
-	logger.Debug("Request data: ", req.Msg)
+	logger.Debugf("Request data: %s", req.Msg)
 
 	return s.controllers.SetDisabled(ctx, req)
 }
@@ -24,8 +24,7 @@ func (s *Handlers) SetPositionMode(
 	req *connect.Request[apiv1.SetPositionModeRequest],
 ) (*connect.Response[emptypb.Empty], error) {
 	logger := logging.WithCtxFields(ctx)
-	logger.Debug("Request data: ", req.Msg)
-	logger.Debug("Position mode: ", req.Msg.PositionMode)
+	logger.Debugf("Request data: %s", req.Msg)
 
 	return s.controllers.SetPositionMode(ctx, req)
 }
@@ -35,7 +34,7 @@ func (s *Handlers) SetPosition(
 	req *connect.Request[apiv1.SetPositionRequest],
 ) (*connect.Response[emptypb.Empty], error) {
 	logger := logging.WithCtxFields(ctx)
-	logger.Debug("Request data: ", req.Msg)
+	logger.Debugf("Request data: %s", req.Msg)
 
 	return s.controllers.SetPosition(ctx, req)
 }
