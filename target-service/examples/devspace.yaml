@@ -1,0 +1,103 @@
+version: v2beta1
+name: dds-imitators
+
+imports:
+- path: devspace.local-env.yaml
+
+vars:
+  IMITATOR_NAME: dss-sensor-imitator
+  BUILD_DIR:
+    default: "build-dev"
+    source: env
+  PUBLISH_REGISTRY_IMAGE: ${CI_REGISTRY_IMAGE}/dds-imitators
+  IMAGECACHE_IMAGE_NAME: ${PUBLISH_REGISTRY_IMAGE}/imagecache
+
+
+images:
+  app:
+    image: ${PUBLISH_REGISTRY_IMAGE}
+    context: ..
+    buildArgs:
+      APP_ID: dds-imitators
+      VERSION: ${VERSION}
+    buildKit:
+      args: [
+        "--platform=${PLATFORMS}",
+        "--cache-from=type=registry,ref=${IMAGECACHE_IMAGE_NAME}:${CACHE_TAG}",
+        "--cache-from=type=registry,ref=${IMAGECACHE_IMAGE_NAME}:${IMAGE_TAG}",
+      ]
+
+pipelines:
+  build: |-
+    git submodule update --init
+    build_images ${@:---all} -t $IMAGE_TAG
+
+  deploy: |-
+    export "$@"
+    docker compose -p dds-imitators up -d
+
+  purge: |-
+    docker compose -p dds-imitators down "$@" --remove-orphans
+
+
+commands:
+  logs: |-
+    docker compose -p dds-imitators logs -f "$@"
+
+  dev: |-
+    # Check we are not in dev container
+    [ ! -d /workspace ] && devspace purge || true
+
+    while [ -n "$1" ]; do
+      [ "$1" = "--" ] && break
+      ENV_VARS="$ENV_VARS $1"
+      shift
+    done
+    shift
+    export $ENV_VARS
+
+    mkdir -p $BUILD_DIR && cd $BUILD_DIR
+    target_bin=bin/$IMITATOR_NAME
+    git submodule update --init
+    if [ ! -f $target_bin ] || [ -n "$CMAKE_DEFS" ]; then
+      CMAKE_DEFS="$CMAKE_DEFS $DEV_CMAKE_DEFS -DCMAKE_EXPORT_COMPILE_COMMANDS=1"
+      cmake ../.. $CMAKE_DEFS -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=OFF -DINSTALL_PREFIX=${PWD} -DCMAKE_INSTALL_PREFIX=${PWD} -DAVOID_LICENSECC=1
+    fi
+    cmake --build . --target $IMITATOR_NAME --parallel $(($(nproc) - 1))
+    cmake --install . --component $IMITATOR_NAME
+
+    $target_bin "$@"
+
+  format: |-
+    CI_SERVER_HOST= devspace --silent run format_cxx "dss-sensor-imitator dss-tamerlan-imitator" "$@"
+
+  lint: |-
+    export CI_SERVER_HOST=
+    devspace build builder
+    cd ..
+    devspace --silent run lint_spell "examples/dss-sensor-imitator examples/dss-tamerlan-imitator" "$@"
+    export CHECK_FOLDERS=examples
+    devspace --silent run lint_cxx ${PUBLISH_REGISTRY_IMAGE}/builder:${IMAGE_TAG} "examples/dss-sensor-imitator examples/dss-tamerlan-imitator" "$@"
+    devspace --silent run lint_cxx_qt ${PUBLISH_REGISTRY_IMAGE}/builder:${IMAGE_TAG} "examples/dss-sensor-imitator examples/dss-tamerlan-imitator" "$@"
+
+  deps: |-
+    git submodule update --init
+
+  clean: |-
+    docker builder prune --filter type=exec.cachemount -f
+
+
+profiles:
+- name: tamerlan
+  patches:
+  - op: replace
+    path: vars.IMITATOR_NAME
+    value: dss-tamerlan-imitator
+- name: ci
+  activation:
+    - env:
+        CI_JOB_ID: "\\d+"
+  patches:
+    - op: add
+      path: images.app.buildKit.args
+      value: "--cache-to=type=registry,ref=${IMAGECACHE_IMAGE_NAME}:${IMAGE_TAG},mode=max,compression=zstd"

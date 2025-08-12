@@ -1,0 +1,39 @@
+services:
+
+  generic-no-df:
+    image: ${PUBLISH_REGISTRY_IMAGE}:${IMAGE_TAG}
+    ports:
+      - 22080:22080
+      - 22081:22081
+    command: ./dss-sensor-imitator --location=60.003,30.0,0 --azimuth=0 --add_channel='2500,-90,90'  --add_jammer='GPS, auto, 1000' --http_port=22080 --websocket_port=22081 --timeout=50 --target_postion_enabled=false
+    restart: unless-stopped
+
+  generic-long-alarm:
+    image: ${PUBLISH_REGISTRY_IMAGE}:${IMAGE_TAG}
+    ports:
+      - 22082:22082
+      - 22083:22083
+    command: ./dss-sensor-imitator --location=59.99,29.98,0 --azimuth=300 --add_channel='1500,-60,60' --add_channel='1500,120,240' --add_jammer='5.8G, auto, 1000' --add_jammer='5.3G, auto, 1000' --http_port=22082 --websocket_port=22083 --timeout=80
+    restart: unless-stopped
+
+  generic-short-alarm:
+    image: ${PUBLISH_REGISTRY_IMAGE}:${IMAGE_TAG}
+    ports:
+      - 22084:22084
+      - 22085:22085
+    command: ./dss-sensor-imitator --location=59.99,30.02,0 --azimuth=60 --add_channel='1500,-30,30' --add_channel='1500,90,150' --add_channel='1500,210,270' --add_jammer='2.4G, auto, 1000' --add_jammer='1.4G, auto, 1000' --add_jammer='1.2G, auto, 1000' --http_port=22084 --websocket_port=22085 --timeout=7
+    restart: unless-stopped
+
+  tamerlan-noalarm:
+    image: ${PUBLISH_REGISTRY_IMAGE}:${IMAGE_TAG}
+    ports:
+      - 10502:10502
+    command: ./dss-tamerlan-imitator --modbus_type=tcp,0.0.0.0:10502 --azimuth=10 --location=60.03,29.97,0 --sensors=2,noalarm,30,90,1200 --jammers=10,D0_00,D0_01,D0_02,D0_03,D0_04
+    restart: unless-stopped
+
+  tamerlan-alarm:
+    image: ${PUBLISH_REGISTRY_IMAGE}:${IMAGE_TAG}
+    ports:
+      - 10503:10503
+    command: ./dss-tamerlan-imitator --modbus_type=tcp,0.0.0.0:10503 --azimuth=100 --location=60.03,30.03,0 --sensors=2,alarm,130,150,1500 --jammers=10,D0_00,D0_01,D0_02:20,D1_03,D1_04,D1_05
+    restart: unless-stopped
