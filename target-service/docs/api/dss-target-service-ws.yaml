@@ -1,0 +1,248 @@
+asyncapi: 3.0.0
+info:
+  title: DSS Service WebSocket API
+  version: 2.3.0
+  description: WebSocket API of `dss-target-service`
+servers:
+  ws:
+    host: http://127.0.0.1:19081
+    pathname: /
+    protocol: ws
+    description: DSS Service WebSocket server for real-time notifications
+defaultContentType: application/json
+channels:
+  notifications:
+    summary: A WebSocket connections for notifications
+    address: /
+    messages:
+      async_reply:
+        $ref: '#/components/messages/async_reply'
+      sensor_info:
+        $ref: '#/components/messages/sensor_info'
+      jammer_info:
+        $ref: '#/components/messages/jammer_info'
+
+      target_detected:
+        $ref: '#/components/messages/target_detected'
+      target_data_updated:
+        $ref: '#/components/messages/target_data_updated'
+      target_lost:
+        $ref: '#/components/messages/target_lost'
+
+      track_started:
+        $ref: '#/components/messages/track_started'
+      track_updated:
+        $ref: '#/components/messages/track_updated'
+      track_finished:
+        $ref: '#/components/messages/track_finished'
+
+      license_status:
+        $ref: '#/components/messages/license_status'
+
+operations:
+  sensor_info:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications'
+    summary: Sensor info changed notification
+    messages:
+      - $ref: '#/channels/notifications/messages/sensor_info'
+  jammer_info:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications'
+    summary: Jammer info changed notification
+    messages:
+      - $ref: '#/channels/notifications/messages/jammer_info'
+
+  target_detected:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications'
+    summary: Target Detected event notification
+    messages:
+      - $ref: '#/channels/notifications/messages/target_detected'
+  target_data_updated:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications'
+    summary: Target Data Updated event notification
+    messages:
+      - $ref: '#/channels/notifications/messages/target_data_updated'
+    tags:
+      - $ref: '#/components/tags/beta'
+  target_lost:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications'
+    summary: Target lost notification
+    messages:
+      - $ref: '#/channels/notifications/messages/target_lost'
+
+  track_started:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications'
+    summary: Track started notification
+    messages:
+      - $ref: '#/channels/notifications/messages/track_started'
+    tags:
+      - $ref: '#/components/tags/alpha'
+  track_updated:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications'
+    summary: Track data updated notification
+    messages:
+      - $ref: '#/channels/notifications/messages/track_updated'
+    tags:
+      - $ref: '#/components/tags/alpha'
+  track_finished:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications'
+    summary: Track finished notification
+    messages:
+      - $ref: '#/channels/notifications/messages/track_finished'
+    tags:
+      - $ref: '#/components/tags/alpha'
+
+  license_status:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications'
+    summary: License status changed notification
+    messages:
+      - $ref: '#/channels/notifications/messages/license_status'
+
+components:
+  tags:
+    alpha:
+      name: alpha
+      description: Unimplemented draft
+    beta:
+      name: beta
+      description: Unstable implementation
+  messages:
+    sensor_info:
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/sensor_info'
+    jammer_info:
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/jammer_info'
+
+    target_detected:
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/unit_id'
+    target_data_updated:
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/target_data'
+    target_lost:
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/unit_id'
+
+    track_started:
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/unit_id'
+    track_updated:
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/track_data'
+    track_finished:
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/unit_id'
+
+    license_status:
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/license_status'
+
+   async_reply: 
+      payload:
+        required:
+          - message
+          - data
+        properties:
+          message:
+            type: string
+          data:
+            $ref: '#/components/schemas/ws_reply'
+
+
+  schemas:
+    unit_id:
+      $ref: 'dss-target-service-schema.yaml#/components/schemas/unit_id'
+
+    sensor_info:
+      $ref: 'dss-target-service-schema.yaml#/components/schemas/sensor_info'
+    jammer_info:
+      $ref: 'dss-target-service-schema.yaml#/components/schemas/jammer_info'
+
+    target_data:
+      $ref: 'dss-target-service-schema.yaml#/components/schemas/target_data'
+    track_data:
+      $ref: 'dss-target-service-schema.yaml#/components/schemas/track_data'
+
+    license_status:
+      $ref: 'dss-target-service-schema.yaml#/components/schemas/license_status'
