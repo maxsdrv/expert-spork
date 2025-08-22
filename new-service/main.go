@@ -15,8 +15,6 @@ import (
 
 	"dds-provider/internal/config"
 	"dds-provider/internal/controllers"
-	"dds-provider/internal/core"
-	"dds-provider/internal/core/components"
 	"dds-provider/internal/generated/api/proto/apiv1connect"
 	"dds-provider/internal/handlers"
 	"dds-provider/internal/services/common"
@@ -42,9 +40,8 @@ func main() {
 
 	svcCommon := common.NewCommonService(ctx)
 	svcDevStorage := device_storage.NewDeviceStorageService(ctx)
-	svcSensorNotifier := components.NewNotifier[*core.SensorInfoDynamic](ctx)
-	svcJammerNotifier := components.NewNotifier[*core.JammerInfoDynamic](ctx)
-	svcTargetProvider := proxy_service.New(ctx, config.ProxyConfig, svcJammerNotifier, svcSensorNotifier, svcDevStorage)
+	svcSensorNotifier, svcJammerNotifier := proxy_service.NewNotifiers(ctx)
+	svcTargetProvider := proxy_service.New(ctx, config.Proxy, svcSensorNotifier, svcJammerNotifier, svcDevStorage)
 
 	controllers := controllers.NewControllers(svcCommon, svcDevStorage, svcSensorNotifier, svcJammerNotifier, svcTargetProvider)
 	handlers := handlers.NewHandlers(controllers)

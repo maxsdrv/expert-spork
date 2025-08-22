@@ -16,8 +16,8 @@ func (s *Controllers) GetCameraId(
 		return "", controllersError("sensor id is required")
 	}
 
-	apiClient := s.svcTargetProvider.GetApiClient()
-	if apiClient == nil {
+	apiClient, err := s.svcTargetProvider.APIClient()
+	if err != nil {
 		return "", controllersError("target provider is not configured")
 	}
 

@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -49,17 +50,17 @@ func (s *Controllers) SensorInfoDynamic(
 
 	deviceId := core.NewId(sensorId)
 
-	sensorChan, closeFunc, err := s.svcSensorNotifier.Stream(ctx, deviceId)
+	stream, closer, err := s.svcSensorNotifier.Stream(ctx, deviceId)
 	if err != nil {
 		return err
 	}
-	defer closeFunc()
+	defer closer()
 
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case sensorInfo := <-sensorChan:
+		case sensorInfo := <-stream:
 			if sensorInfo == nil {
 				continue
 			}
@@ -75,7 +76,7 @@ func (s *Controllers) SensorInfoDynamic(
 func (s *Controllers) SetJammerMode(ctx context.Context,
 	sensorId string,
 	jammerMode apiv1.JammerMode,
-	timeout int32,
+	timeout time.Duration,
 ) error {
 	logger := logging.WithCtxFields(ctx)
 
@@ -108,7 +109,7 @@ func (s *Controllers) SetJammerMode(ctx context.Context,
 		return nil
 	}
 
-	return connect.NewError(connect.CodeInternal, fmt.Errorf("sensor doesnot support jammer mode"))
+	return connect.NewError(connect.CodeInternal, fmt.Errorf("sensor does not support jammer mode"))
 }
 
 func (s *Controllers) SetPositionMode(

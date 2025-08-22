@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"time"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -44,7 +45,7 @@ func (s *Handlers) SetJammerMode(
 	sensorId := req.Msg.GetSensorId()
 
 	jammerMode := req.Msg.GetJammerMode()
-	timeout := req.Msg.GetTimeout()
+	timeout := time.Duration(req.Msg.GetTimeout()) * time.Second
 
 	err := s.controllers.SetJammerMode(ctx, sensorId, jammerMode, timeout)
 	if err != nil {

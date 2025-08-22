@@ -9,8 +9,6 @@ import (
 var wsclientError = core.ProviderError()
 
 var (
-	ErrWSInvalidMessage     = wsclientError("websocket invalid message format")
-	ErrWSPingFailed         = wsclientError("websocket ping failed")
 	ErrWSDialTimeout        = wsclientError("websocket dial timeout")
 	ErrWSConnectionRefused  = wsclientError("websocket connection refused")
 	ErrWSConnectionFailed   = wsclientError("websocket connection failed")

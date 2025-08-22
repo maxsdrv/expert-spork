@@ -12,17 +12,10 @@ import (
 
 var logging = ctx_log.GetLogger(nil)
 
-const (
-	pingInterval = 5 * time.Second
-	pongInterval = 4 * time.Second
-	minBackoff   = 100 * time.Millisecond
-	maxBackoff   = 10 * time.Second
-)
-
-const (
-	fieldMessage = "message"
-	fieldData    = "data"
-)
+type WSMessage struct {
+	Message string          `json:"message"`
+	Data    json.RawMessage `json:"data"`
+}
 
 type NotificationHandler interface {
 	HandleNotification(ctx context.Context, message string, data json.RawMessage) error
@@ -82,74 +75,28 @@ func (c *WSNotificationClient) updateLoop(ctx context.Context, conn *websocket.C
 			break
 		}
 
-		var fields map[string]json.RawMessage
-		if err = json.Unmarshal(data, &fields); err != nil {
-			wsErr := handleUnmarshalError("unmarshal message", c.url, err)
-			logger.WithError(wsErr).Error("Unmarshalling message failed")
+		var wsMsg WSMessage
+		if err = json.Unmarshal(data, &wsMsg); err != nil {
+			logger.WithError(err).Error("Unmarshalling message failed")
 			continue
 		}
 
-		msgTypeRaw, ok := fields[fieldMessage]
-		if !ok {
-			logger.WithError(ErrWSInvalidMessage).Errorf("Missing message field %s", fieldMessage)
-			continue
-		}
-		var msgType string
-		if err = json.Unmarshal(msgTypeRaw, &msgType); err != nil {
-			wsErr := handleUnmarshalError("unmarshal message type", c.url, err)
-			logger.WithError(wsErr).Error("Unmarshalling message failed")
+		if wsMsg.Message == "" {
+			logger.Error("Missing or empty message field")
 			continue
 		}
 
-		dataRaw, ok := fields[fieldData]
-		if !ok {
-			logger.WithError(ErrWSInvalidMessage).Errorf("Missing data field %s", fieldData)
+		if len(wsMsg.Data) == 0 {
+			logger.Error("Missing or empty data field")
 			continue
 		}
 
-		if err = c.notificationHandler.HandleNotification(ctx, msgType, dataRaw); err != nil {
-			wsErr := handleNotificationError("process notification", c.url, err)
-			logger.WithError(wsErr).Errorf("Failed to process message type: %s", msgType)
+		if err = c.notificationHandler.HandleNotification(ctx, wsMsg.Message, wsMsg.Data); err != nil {
+			logger.WithError(err).Errorf("Failed to process message type: %s", wsMsg.Message)
 			continue
 		}
 
-		logger.Tracef("Successfully processed message type: %s", msgType)
+		logger.Tracef("Successfully processed message type: %s", wsMsg.Message)
 	}
 	logger.Warn("UpdateLoop ended")
-}
-
-func (c *WSNotificationClient) monitorPingPong(ctx context.Context, conn *websocket.Conn, cancel context.CancelFunc) {
-	logger := logging.WithCtxFields(ctx)
-
-	logger.Debugf("Pinging WebSocket %s", c.url)
-
-	pingTicker := time.NewTicker(pingInterval)
-	defer pingTicker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			logger.Debugf("Ping canceled")
-			return
-		case <-pingTicker.C:
-			logger.Tracef("Ping...")
-			pongCtx, _ := context.WithTimeout(ctx, pongInterval)
-			err := conn.Ping(pongCtx)
-
-			if err != nil {
-				logger.WithError(ErrWSPingFailed).Warn("Ping failed")
-				cancel()
-				return
-			}
-			logger.Tracef("Pong...")
-		}
-	}
-}
-
-func nextBackoffDelay(prev time.Duration) time.Duration {
-	next := prev * 2
-	if next > maxBackoff {
-		next = maxBackoff
-	}
-	return next
 }

@@ -11,8 +11,8 @@ import (
 type Controllers struct {
 	svcCommon         *common.CommonService
 	svcDevStorage     device_storage.DeviceStorageService
-	svcJammerNotifier *components.Notifier[*core.JammerInfoDynamic]
 	svcSensorNotifier *components.Notifier[*core.SensorInfoDynamic]
+	svcJammerNotifier *components.Notifier[*core.JammerInfoDynamic]
 	svcTargetProvider *proxy_service.Service
 }
 

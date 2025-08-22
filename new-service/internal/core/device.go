@@ -1,6 +1,10 @@
 package core
 
-import apiv1 "dds-provider/internal/generated/api/proto"
+import (
+	"time"
+
+	apiv1 "dds-provider/internal/generated/api/proto"
+)
 
 type DeviceDataReader interface {
 	Serial() string
@@ -32,7 +36,7 @@ type SensorJammerReader interface {
 }
 
 type SensorJammerWriter interface {
-	SetJammerMode(mode JammerMode, timeout int32) error
+	SetJammerMode(mode JammerMode, timeout time.Duration) error
 }
 
 type SensorInfoReader interface {

@@ -1,11 +1,9 @@
 package config
 
-var ProxyConfig struct {
-	Host     string
-	PortHttp int
-	PortWs   int
+var Proxy struct {
+	Host string
 }
 
 func init() {
-	load(&ProxyConfig)
+	load(&Proxy)
 }

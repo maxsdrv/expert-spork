@@ -16,8 +16,8 @@ func (s *Controllers) Targets(
 
 	logger.Debug("Start targets streaming")
 
-	apiClient := s.svcTargetProvider.GetApiClient()
-	if apiClient == nil {
+	apiClient, err := s.svcTargetProvider.APIClient()
+	if err != nil {
 		return controllersError("target provider is not configured")
 	}
 

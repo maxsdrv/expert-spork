@@ -28,30 +28,33 @@ var (
 )
 
 const (
+	DefaultPortHttp = 19080
+	DefaultPortWs   = 19081
+)
+
+const (
 	msgTypeSensorInfo    = "sensor_info"
 	msgTypeJammerInfo    = "jammer_info"
 	msgTypeLicenseStatus = "license_status"
 )
 
 type Connection struct {
-	Host     string
-	PortHttp int
-	PortWs   int
+	Host string
 }
 
 type Service struct {
 	devStorage            device_storage.DeviceStorageService
 	httpClient            *http.Client
 	notificationClient    *wsclient.WSNotificationClient
-	notificationProcessor *NotificationProcessor
+	notificationProcessor *WsNotification
 	connection            Connection
 	apiClient             *provider_client.APIClient
 }
 
 func New(ctx context.Context,
 	connection Connection,
-	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
+	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
 	devStorage device_storage.DeviceStorageService,
 ) *Service {
 	httpClient := &http.Client{
@@ -87,6 +90,13 @@ func (s *Service) start(ctx context.Context,
 	s.connect(ctx, jammerNotifier, sensorNotifier)
 }
 
+func (s *Service) APIClient() (*provider_client.APIClient, error) {
+	if s.apiClient == nil {
+		return nil, serviceError("api client is not initialized")
+	}
+	return s.apiClient, nil
+}
+
 func (s *Service) connect(ctx context.Context,
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
@@ -94,9 +104,9 @@ func (s *Service) connect(ctx context.Context,
 	logger := logging.WithCtxFields(ctx)
 	ctx = logger.SetCtxField(ctx, enums.LogFieldHost, s.connection.Host)
 
-	deviceID := fmt.Sprintf("%s:%d", s.connection.Host, s.connection.PortHttp)
+	deviceID := fmt.Sprintf("%s:%d", s.connection.Host, DefaultPortHttp)
 
-	urlRest := fmt.Sprintf("http://%s:%d/api/v1", s.connection.Host, s.connection.PortHttp)
+	urlRest := fmt.Sprintf("http://%s:%d/api/v1", s.connection.Host, DefaultPortHttp)
 	deviceConfiguration := s.createAPIConfiguration(urlRest)
 	apiClient := provider_client.NewAPIClient(deviceConfiguration)
 
@@ -139,7 +149,7 @@ func (s *Service) connect(ctx context.Context,
 
 		s.apiClient = apiClient
 
-		s.notificationProcessor = NewNotificationProcessor(jammerNotifier, sensorNotifier, s.devStorage, apiClient)
+		s.notificationProcessor = NewWsNotification(jammerNotifier, sensorNotifier, s.devStorage, apiClient)
 
 		go func() {
 			healthRetryDelay := time.Second
@@ -176,7 +186,7 @@ func (s *Service) connect(ctx context.Context,
 			}
 		}()
 
-		wsURL := fmt.Sprintf("ws://%s:%d", s.connection.Host, s.connection.PortWs)
+		wsURL := fmt.Sprintf("ws://%s:%d", s.connection.Host, DefaultPortWs)
 		wsClient := wsclient.NewWSNotificationClient(wsURL, s.notificationProcessor)
 		s.notificationClient = wsClient
 

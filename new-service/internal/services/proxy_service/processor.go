@@ -2,6 +2,7 @@ package proxy_service
 
 import (
 	"context"
+
 	"dds-provider/internal/devices/proxy"
 	"dds-provider/internal/generated/provider_client"
 	"dds-provider/internal/services/device_storage"
@@ -13,20 +14,20 @@ import (
 	"dds-provider/internal/services/parsers"
 )
 
-type NotificationProcessor struct {
+type WsNotification struct {
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic]
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic]
 	devStorage     device_storage.DeviceStorageService
 	apiClient      *provider_client.APIClient
 }
 
-func NewNotificationProcessor(
+func NewWsNotification(
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
 	devStorage device_storage.DeviceStorageService,
 	apiClient *provider_client.APIClient,
-) *NotificationProcessor {
-	return &NotificationProcessor{
+) *WsNotification {
+	return &WsNotification{
 		jammerNotifier: jammerNotifier,
 		sensorNotifier: sensorNotifier,
 		devStorage:     devStorage,
@@ -34,7 +35,7 @@ func NewNotificationProcessor(
 	}
 }
 
-func (n *NotificationProcessor) HandleNotification(ctx context.Context, message string, data json.RawMessage) error {
+func (n *WsNotification) HandleNotification(ctx context.Context, message string, data json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
 	logger.Tracef("Received notification: %s", message)
@@ -52,7 +53,7 @@ func (n *NotificationProcessor) HandleNotification(ctx context.Context, message 
 	}
 }
 
-func (n *NotificationProcessor) processSensorInfo(ctx context.Context, dataRaw json.RawMessage) error {
+func (n *WsNotification) processSensorInfo(ctx context.Context, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
 	sensor, err := parsers.ParseSensorInfo(dataRaw)
@@ -69,7 +70,11 @@ func (n *NotificationProcessor) processSensorInfo(ctx context.Context, dataRaw j
 			logger.WithError(serviceError("%v", err)).Error("Failed to create proxy sensor")
 			return err
 		}
-		n.devStorage.AppendDevice(deviceId, proxySensor)
+		err = n.devStorage.AppendDevice(deviceId, proxySensor)
+		if err != nil {
+			logger.WithError(serviceError("%v", err)).Error("Failed to append device")
+			return err
+		}
 		logger.Infof("Registered sensor %s from WebSocket notification", sensor.Id)
 	}
 
@@ -86,7 +91,7 @@ func (n *NotificationProcessor) processSensorInfo(ctx context.Context, dataRaw j
 	return nil
 }
 
-func (n *NotificationProcessor) dynamicSensorInfo(ctx context.Context, dataRaw json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
+func (n *WsNotification) dynamicSensorInfo(ctx context.Context, dataRaw json.RawMessage, deviceId core.DeviceId) (*core.SensorInfoDynamic, error) {
 	logger := logging.WithCtxFields(ctx)
 
 	sensorInfoDynamic, err := mapping.ConvertToSensorInfoDynamic(dataRaw, deviceId)
@@ -98,7 +103,7 @@ func (n *NotificationProcessor) dynamicSensorInfo(ctx context.Context, dataRaw j
 	return sensorInfoDynamic, err
 }
 
-func (n *NotificationProcessor) processJammerInfo(ctx context.Context, dataRaw json.RawMessage) error {
+func (n *WsNotification) processJammerInfo(ctx context.Context, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
 	jammerInfo, err := parsers.ParseJammerInfo(dataRaw)
@@ -131,7 +136,7 @@ func (n *NotificationProcessor) processJammerInfo(ctx context.Context, dataRaw j
 	return nil
 }
 
-func (n *NotificationProcessor) dynamicJammerInfo(ctx context.Context, dataRaw json.RawMessage, deviceId core.DeviceId) (*core.JammerInfoDynamic, error) {
+func (n *WsNotification) dynamicJammerInfo(ctx context.Context, dataRaw json.RawMessage, deviceId core.DeviceId) (*core.JammerInfoDynamic, error) {
 	logger := logging.WithCtxFields(ctx)
 
 	jammerInfoDynamic, err := mapping.ConvertToJammerInfoDynamic(dataRaw, deviceId)
@@ -142,7 +147,7 @@ func (n *NotificationProcessor) dynamicJammerInfo(ctx context.Context, dataRaw j
 	return jammerInfoDynamic, err
 }
 
-func (n *NotificationProcessor) licenseStatusUpdate(ctx context.Context, dataRaw json.RawMessage) error {
+func (n *WsNotification) licenseStatusUpdate(ctx context.Context, dataRaw json.RawMessage) error {
 	logger := logging.WithCtxFields(ctx)
 
 	licenseStatus, err := parsers.ParseLicenseStatus(dataRaw)

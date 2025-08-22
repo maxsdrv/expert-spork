@@ -74,15 +74,15 @@ func (s *Controllers) SetJammerBands(
 
 	activeBandsList := core.BandList(bandsActive)
 
-	jammerInfoChan, cleanup, err := s.svcJammerNotifier.Stream(ctx, deviceId)
+	stream, closer, err := s.svcJammerNotifier.Stream(ctx, deviceId)
 	if err != nil {
 		logger.WithError(controllersError("%v", err)).Errorf("Failed to get jammer configuration: %v", err)
 		return err
 	}
-	defer cleanup()
+	defer closer()
 
 	select {
-	case jammerDynamic := <-jammerInfoChan:
+	case jammerDynamic := <-stream:
 		if jammerDynamic == nil {
 			return controllersError("No dynamic info available for jammer %s", deviceId)
 		}
@@ -119,13 +119,13 @@ func (s *Controllers) JammerInfoDynamic(
 
 	logger.Debug("JammerInfoDynamic request")
 
-	jammerInfoChan, closer, err := s.svcJammerNotifier.Stream(ctx, core.NewId(id))
+	stream, closer, err := s.svcJammerNotifier.Stream(ctx, core.NewId(id))
 	if err != nil {
 		return err
 	}
 	defer closer()
 
-	for jammer := range jammerInfoChan {
+	for jammer := range stream {
 		if err = sender(jammer.ToAPI()); err != nil {
 			break
 		}
@@ -139,8 +139,8 @@ func (s *Controllers) GetGroups(ctx context.Context) ([]*apiv1.JammerGroup, erro
 
 	logger.Debug("Getting Groups")
 
-	apiClient := s.svcTargetProvider.GetApiClient()
-	if apiClient == nil {
+	apiClient, err := s.svcTargetProvider.APIClient()
+	if err != nil {
 		return nil, controllersError("target provider is not configured")
 	}
 

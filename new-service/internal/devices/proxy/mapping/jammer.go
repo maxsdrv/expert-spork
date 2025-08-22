@@ -81,12 +81,9 @@ func ConvertToJammerInfo(jammerInfo provider_client.JammerInfo) *core.JammerInfo
 }
 
 func ConvertToJammerMode(jammerMode core.JammerMode) provider_client.JammerMode {
-	switch jammerMode {
-	case apiv1.JammerMode_JAMMER_AUTO:
+	if jammerMode == apiv1.JammerMode_JAMMER_AUTO {
 		return provider_client.JAMMERMODE_AUTO
-	case apiv1.JammerMode_JAMMER_MANUAL:
+	} else {
 		return provider_client.JAMMERMODE_MANUAL
-	default:
-		return provider_client.JAMMERMODE_UNDEFINED
 	}
 }
