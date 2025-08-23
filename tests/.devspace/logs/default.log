@@ -1,0 +1,2 @@
+{"level":"warning","msg":"Unable to create new kubectl client: kube config is invalid","time":"2025-08-22T19:48:09+03:00"}
+ensure_pull_secrets: Please make sure you have an existing valid kube config. You might want to check one of the following things:* Make sure you can use 'kubectl get namespaces' locally* If you are using Loft, you might want to run 'devspace create space' or 'loft create space'{"level":"error","msg":"exit status 1","time":"2025-08-22T19:48:09+03:00"}
