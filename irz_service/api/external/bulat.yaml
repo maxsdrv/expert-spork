@@ -1,0 +1,60 @@
+openapi: 3.1.0
+info:
+  title: IRZ Detector API
+  version: 0.1.0
+servers:
+  - url: https://online.3mx.ru
+paths:
+  /newloginfunc.php:
+    post:
+      summary: Login with token
+      operationId: loginWithToken
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                req_json:
+                  type: string
+                  description: JSON-encoded request parameters
+              required:
+                - req_json
+      responses:
+        '200':
+          description: Login response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+  /pegass_monitor.php:
+    post:
+      summary: Detector Monitor Actions
+      operationId: detectorMonitorActions
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                req_json:
+                  type: string
+                  description: JSON-encoded request parameters
+              required:
+                - req_json
+      responses:
+        '200':
+          description: Detector Monitor Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+components:
+  schemas:
+    Response:
+      type: object
+      additionalProperties: true
