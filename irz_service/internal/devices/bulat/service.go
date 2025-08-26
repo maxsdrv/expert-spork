@@ -4,9 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"strings"
 
-	"dds-provider/internal/generated/bulat"
+	 "dds-provider/internal/generated/bulat"
 )
 
 type Service struct {
@@ -14,7 +13,7 @@ type Service struct {
 	authToken   string
 	pspToken    string
 	userType    int32
-	permissions map[string]interface{}
+	permissions map[string]any
 }
 
 func New(ctx context.Context, client *api.APIClient, token string) (*Service, error) {
@@ -33,7 +32,7 @@ func New(ctx context.Context, client *api.APIClient, token string) (*Service, er
 	return svc, nil
 }
 
-func (s *Service) doRequest(ctx context.Context, payload map[string]interface{}) ([]byte, error) {
+func (s *Service) doRequest(ctx context.Context, payload map[string]any) ([]byte, error) {
 	logger := logging.WithCtxFields(ctx)
 
 	raw, err := json.Marshal(payload)
@@ -48,12 +47,6 @@ func (s *Service) doRequest(ctx context.Context, payload map[string]interface{})
 	body, err := io.ReadAll(httpResp.Body)
 	if err != nil {
 		logger.Errorf("Failed to read body: %v", err)
-		return nil, err
-	}
-
-	errorMessage := strings.Trim(string(body), `"`)
-	if err = ParseErrors(errorMessage); err != nil {
-		logger.Errorf("Edit object returned an error: %v", err)
 		return nil, err
 	}
 

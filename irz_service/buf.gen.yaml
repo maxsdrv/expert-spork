@@ -1,0 +1,32 @@
+version: v2
+managed:
+  enabled: true
+  disable:
+    - file_option: go_package
+      module: buf.build/bufbuild/protovalidate
+  override:
+    - file_option: go_package_prefix
+      value: dds-provider/internal/generated/api/proto
+
+plugins:
+  - local: protoc-gen-go
+    out: internal/generated/api/proto
+    opt: paths=source_relative
+  - local: protoc-gen-connect-go
+    out: internal/generated/api/proto
+    opt: paths=source_relative
+  - local: protoc-gen-connect-openapi
+    # strategy: all
+    out: docs
+    opt:
+      - with-streaming
+#    - base=api-openapi.yaml
+      # - path=docs/openapi.yaml
+
+# inputs:
+# - git_repo: https://github.com/bufbuild/protovalidate
+#   subdir: proto/protovalidate
+# - directory: api
+#   paths:
+#     - proto
+#     # - api/proto

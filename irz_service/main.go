@@ -17,9 +17,9 @@ import (
 	"dds-provider/internal/config"
 	"dds-provider/internal/controllers"
 	"dds-provider/internal/core"
-	"dds-provider/internal/devices/bulat"
 	"dds-provider/internal/generated/api/proto/apiv1connect"
 	"dds-provider/internal/generated/bulat"
+	"dds-provider/internal/devices/bulat"
 	"dds-provider/internal/handlers"
 	"dds-provider/internal/services/backend"
 	"dds-provider/internal/services/common"
@@ -92,12 +92,10 @@ func main() {
 	startDeID, err := svc.InitEventID(ctx)
 	if err != nil {
 		logger.Fatal(err)
-	}
-	go svc.PollEvents(ctx, startDeID, func(event bulat.EventListItem) {
-		logger.Infof("Event list: %v", event)
-	})
+	} 
+	go svc.PollEvents(ctx, startDeID, func(event api.EventListItem){})
 
-	err = svc.EditObject(ctx, 29194, "Стационарный объект - 1", 1, 60.191734, 30.9396)
+	err = svc.EditObject(ctx, startDeID, "Стационарный объект - 1", 1, 60.192034, 30.9796)
 	if err != nil {
 		logger.Errorf("Error editing object: %v", err)
 	} else {

@@ -11,13 +11,6 @@ import (
 
 var logging = ctx_log.GetLogger(nil)
 
-type LoginRequest struct {
-	Action string `json:"action"`
-	Token  string `json:"token"`
-	Capt   string `json:"capt"`
-	Lang   string `json:"lang"`
-}
-
 type Error struct {
 	Code            string
 	Message         string
@@ -33,17 +26,17 @@ func (s *Service) Authenticate(ctx context.Context) error {
 
 	logger.Debugf("Starting authentication")
 
-	// TODO: Implement validator or something else for auth token
 	if s.authToken == "" {
 		return fmt.Errorf("auth token is empty")
 	}
 
-	payload := &LoginRequest{
-		Action: "login",
-		Token:  s.authToken,
-		Capt:   "current_captcha",
-		Lang:   "ru",
+	payload := map[string]any{
+		"action": "login",
+		"token":  s.authToken,
+		"capt":   "current_captcha",
+		"lang":   "ru",
 	}
+
 	raw, err := json.Marshal(payload)
 	if err != nil {
 		logger.Errorf("Failed marshal login payload: %v", err)
@@ -54,7 +47,7 @@ func (s *Service) Authenticate(ctx context.Context) error {
 	body, _ := io.ReadAll(httpResp.Body)
 	defer httpResp.Body.Close()
 
-	var response []interface{}
+	var response []any
 	if err := json.Unmarshal(body, &response); err != nil {
 		logger.Errorf("Failed unmarshal login response: %v", err)
 		return err
@@ -72,11 +65,11 @@ func (s *Service) PSPToken() string {
 	return s.pspToken
 }
 
-func (s *Service) Permissions() map[string]interface{} {
+func (s *Service) Permissions() map[string]any {
 	return s.permissions
 }
 
-func (s *Service) handleSuccessResponse(response []interface{}) error {
+func (s *Service) handleSuccessResponse(response []any) error {
 	if userType, ok := response[1].(float64); ok {
 		s.userType = int32(userType)
 	}
@@ -84,8 +77,8 @@ func (s *Service) handleSuccessResponse(response []interface{}) error {
 	fmt.Printf("PSP token: %s", s.pspToken)
 	s.client.GetConfig().AddDefaultHeader("Cookie", fmt.Sprintf("psp=%s", s.pspToken))
 
-	if perms, ok := response[3].(map[string]interface{}); ok {
-		s.permissions = make(map[string]interface{})
+	if perms, ok := response[3].(map[string]any); ok {
+		s.permissions = make(map[string]any)
 		for key, value := range perms {
 			s.permissions[key] = value.(string)
 		}
@@ -93,13 +86,13 @@ func (s *Service) handleSuccessResponse(response []interface{}) error {
 	return nil
 }
 
-func (s *Service) handleErrorResponse(response []interface{}) error {
+func (s *Service) handleErrorResponse(response []any) error {
 	captchaRequired := false
 	if flag, ok := response[2].(float64); ok && flag == 1 {
 		captchaRequired = true
 	}
-	details := response[1].([]interface{})
-	fmt.Print(details)
+	details := response[1].([]any)
+
 	return &Error{
 		Code:            response[0].(string),
 		Message:         details[0].(string),

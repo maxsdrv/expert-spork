@@ -58,7 +58,7 @@ commands:
   gen: |-
     export CI_SERVER_HOST=
     devspace --silent run run-tools-cmd gen_go_connectrpc_server api/proto internal/generated dds-provider
-    devspace --silent run gen_go_openapi_client api/external/bulat.yaml internal/generated/bulat api
+    devspace --silent run run-tools-cmd gen_go_openapi_client api/external/bulat.yaml internal/generated/bulat api
 
   buf: |-
     export PATH="$(go env GOPATH)/bin:$PATH"

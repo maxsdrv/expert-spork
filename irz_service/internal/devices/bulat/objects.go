@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	api "dds-provider/internal/generated/bulat"
 )
 
 type DeviceState int
@@ -31,40 +33,12 @@ type ObjectStatus struct {
 	EffectiveStatus DeviceState
 }
 
-type ObjectResponse struct {
-	Status      int          `json:"status"`
-	ListObjects []ListObject `json:"car"`
-}
-
-type ListObject struct {
-	LcID          int                `json:"lc_id"`            // Object id
-	LcTitle       string             `json:"lc_title"`         // Object name
-	LcActive      int                `json:"lc_active"`        // Device active=1, inactive=0
-	LocCourse     int                `json:"loc_course"`       // Object course
-	LocCtrl       int                `json:"loc_ctrl"`         // Controller id which the data was received
-	LocLat        *float64           `json:"loc_lat"`          // Latitude
-	LocLon        *float64           `json:"loc_lon"`          // Longitude
-	LocOnlineFlag int                `json:"loc_online_flag"`  // Device online=1, offline=0
-	LocDTSecDelta int                `json:"loc_dt_sec_delta"` // Time in seconds from location data
-	LocDT         int64              `json:"loc_dt"`           // Location data time
-	LocSDT        int64              `json:"loc_sdt"`          // Time of communication with the tracker
-	LocAddress    string             `json:"loc_address"`      //
-	Group         int                `json:"group"`            // Group object id(0=without group)
-	Title         string             `json:"title"`            // Zone name
-	DevicesData   []DeviceDataObject `json:"devices_data"`
-}
-
-type DeviceDataObject struct {
-	Id   int    `json:"id"`
-	Imei string `json:"imei"`
-}
-
-func (s *Service) GetObjects(ctx context.Context) (*ObjectResponse, error) {
+func (s *Service) GetObjects(ctx context.Context) (*api.ObjectsResponse, error) {
 	logger := logging.WithCtxFields(ctx)
 
 	logger.Debugf("Fetching object list")
 
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"action":   "get_list_car",
 		"api_type": 0,
 	}
@@ -74,27 +48,27 @@ func (s *Service) GetObjects(ctx context.Context) (*ObjectResponse, error) {
 		return nil, err
 	}
 
-	var response ObjectResponse
+	var response api.ObjectsResponse
 	if err := json.Unmarshal(body, &response); err != nil {
 		logger.Errorf("Failed to unmarshal response: %v", err)
 		return nil, err
 	}
 
-	for _, device := range response.ListObjects {
+	for _, device := range response.Car {
 		status := s.updateDeviceStatus(ctx, device)
-		logger.Infof("Object %d status: %s\n", status.DeviceId, status.EffectiveStatus)
+		logger.Infof("Object %d status: %s", status.DeviceId, status.EffectiveStatus)
 	}
 
-	logger.Infof("Successfully fetched object list")
+	logger.Infof("Successfully fetched object list with %d objects", len(response.Car))
 	return &response, nil
 }
 
 func (s *Service) EditObject(ctx context.Context, objectId int, objTitle string, stationary int, objLat, objLon float64) error {
 	logger := logging.WithCtxFields(ctx)
 
-	logger.Debugf("Edit object")
+	logger.Debugf("Edit object %d", objectId)
 
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"action":            "p_edit_ts",
 		"lc_id":             objectId,
 		"lc_title":          objTitle,
@@ -112,13 +86,13 @@ func (s *Service) EditObject(ctx context.Context, objectId int, objTitle string,
 	return nil
 }
 
-func (s *Service) updateDeviceStatus(ctx context.Context, object ListObject) *ObjectStatus {
+func (s *Service) updateDeviceStatus(ctx context.Context, object api.ListObject) *ObjectStatus {
 	logger := logging.WithCtxFields(ctx)
 
-	logger.Debugf("Updating device status")
+	logger.Debugf("Updating device status for object %d", object.LcId)
 
 	status := &ObjectStatus{
-		DeviceId: object.LcID,
+		DeviceId: int(object.LcId),
 	}
 
 	isActive := object.LcActive == 1
@@ -132,5 +106,7 @@ func (s *Service) updateDeviceStatus(ctx context.Context, object ListObject) *Ob
 		status.EffectiveStatus = StateInactive
 	}
 
+	logger.Debugf("Object %d status set to: %s (active: %v, online: %v)",
+		status.DeviceId, status.EffectiveStatus, isActive, isOnline)
 	return status
 }
