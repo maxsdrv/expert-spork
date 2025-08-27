@@ -1,0 +1,10 @@
+- hosts: all
+  tasks:
+    - include_role: name=backup tasks_from=rollback-info
+    - include_role: name=backup tasks_from=rollback-images
+    - include_role: name=services tasks_from=update-self
+      vars:
+        rollback_image_tag: "{{ rollback_info.versions['dds-control-update'] }}"
+      when: rollback_info.versions["dds-control-update"] is defined
+  become: true
+  gather_facts: no

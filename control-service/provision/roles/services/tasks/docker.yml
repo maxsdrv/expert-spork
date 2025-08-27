@@ -1,0 +1,27 @@
+- name: Configure Docker log driver
+  copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "log-driver": "fluentd",
+        "log-opts": {
+          "fluentd-address": "unix://{{ paths.data_root_host }}/infra/fluent-bit/fluentd.sock",
+          "fluentd-async": "true",
+          "fluentd-sub-second-precision": "true"
+        }
+      }
+  notify: restart docker
+
+- name: Update Docker images prune cron job
+  vars:
+    sched: "{{ scheduled_tasks.docker_prune.split(' ') }}"
+  cron:
+    job: "docker system prune -a --volumes -f"
+    minute: "{{ sched[0] }}"
+    hour: "{{ sched[1] }}"
+    day: "{{ sched[2] }}"
+    month: "{{ sched[3] }}"
+    weekday: "{{ sched[4] }}"
+    name: prune images
+    cron_file: docker-prune
+    user: root

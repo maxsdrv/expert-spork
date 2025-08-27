@@ -1,0 +1,12 @@
+- name: Set systemd-timesyncd configuration
+  template:
+    src: timesyncd.conf.j2
+    dest: /etc/systemd/timesyncd.conf
+  register: timesyncd
+
+- name: Restart systemd-timesyncd
+  service:
+    name: systemd-timesyncd
+    state: restarted
+    enabled: yes
+  when: timesyncd.changed

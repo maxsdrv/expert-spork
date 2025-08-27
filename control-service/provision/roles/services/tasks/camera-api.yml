@@ -1,0 +1,19 @@
+- name: Deploy camera-api service
+  community.docker.docker_container:
+    name: dds-camera-api
+    image: "{{ registry }}/{{ registry_path }}/{{ services['dds-camera-api'].image }}:{{ rollback_image_tag | default(image_tag) }}"
+    ports:
+      - "8880:8880"
+    env:
+      LISTEN: 0.0.0.0:8880
+
+      LOG_LEVEL: "{{ log_level }}"
+      PROJECT_ENV: "{{ env }}"
+    env_file: "{{ data_root }}/configs/devices.env"
+    restart_policy: always
+    pull: "{{ online | ternary('always', 'never') }}"
+    comparisons:
+      env: strict
+    state: "{{ video_devices_present | ternary('started', 'stopped') }}"
+  tags:
+    - dds-camera-api

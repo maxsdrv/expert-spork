@@ -1,0 +1,11 @@
+- name: Read rollback info file
+  slurp:
+    src: "{{ paths.data_root_host }}/control/rollback/metadata.yaml"
+  register: rollback_info
+
+- name: Get rollback info
+  set_fact:
+    rollback_info: '{{ rollback_info.content | b64decode | from_yaml }}'
+
+- name: Print rollback info
+  debug: msg="{{ rollback_info }}"

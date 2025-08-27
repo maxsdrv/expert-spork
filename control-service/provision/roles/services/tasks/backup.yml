@@ -1,0 +1,18 @@
+- name: Update backup script
+  template:
+    src: duplicity_backup.sh.j2
+    dest: "{{ data_root }}/backup.sh"
+    mode: '0755'
+
+- name: Update system backup cron job
+  vars:
+    sched: "{{ scheduled_tasks.system_backup.split(' ') }}"
+  cron:
+    name: "Duplicity backup: Full, Rotate and Archive"
+    minute: "{{ sched[0] }}"
+    hour: "{{ sched[1] }}"
+    day: "{{ sched[2] }}"
+    month: "{{ sched[3] }}"
+    weekday: "{{ sched[4] }}"
+    user: root
+    job: "{{ data_root }}/backup.sh >> {{ data_root }}/logs/backup.log 2>&1"

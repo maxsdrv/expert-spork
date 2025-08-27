@@ -1,0 +1,73 @@
+brand: tamerlan
+
+registry: docker.support.3mx.ru
+registry_path: tamerlan
+
+services:
+  dds-ui:
+    image: "dds-ui/{{ brand }}"
+    critical: true
+  dds-target-provider:
+    image: "dds-target-provider"
+  dds-archive-api:
+    image: "dds-archive/api"
+  dds-camera-video:
+    image: "dds-camera/video"
+  dds-camera-api:
+    image: "dds-camera/api"
+  dds-control-proxy:
+    image: "dds-control/proxy"
+    critical: true
+  dds-control-api:
+    image: "dds-control/api"
+    critical: true
+  dds-control-update:
+    image: "dds-control/update"
+    critical: true
+  dds-infra-postgres:
+    image: "dds-infra/postgres"
+  dds-infra-node-exporter:
+    image: "dds-infra/node-exporter"
+  dds-infra-fluent-bit:
+    image: "dds-infra/fluent-bit"
+
+image_tag: local
+online: false
+
+net_if: eth0
+
+paths:
+  data_root_host: /var/opt/dds
+
+data_root: "{{ paths.data_root_host }}"
+
+db:
+  postgres:
+    databases: [provider, archive]
+    password: password
+
+log_level: DEBUG
+
+scheduled_tasks:
+  docker_prune: "0 22 * * 0" # Every Sunday at 22:00am UTC
+  logs_cleanup: "0 21 * * 5" # Every Friday at 21:00am UTC
+  logs_rotation: "0 0 * * *" # Every Day at 00:00am UTC
+  system_backup: "0 23 * * *" # Every Day at 23:00am UTC
+
+logs_retention: "181" # Days, keep logs for this long
+
+ntp_servers: "ru.pool.ntp.org pool.ntp.org ntp.ubuntu.com 2.debian.pool.ntp.org 3.debian.pool.ntp.org"
+ntp_servers_fallback: "south-america.pool.ntp.org fr.pool.ntp.org 0.debian.pool.ntp.org 1.debian.pool.ntp.org"
+
+backup:
+  dirs:
+    - /etc
+    - /var/lib/docker
+    - "{{ data_root }}/configs"
+    - "{{ data_root }}/infra"
+    - "{{ data_root }}/license"
+  excludes:
+    - "/var/lib/docker/tmp"
+    - "{{ data_root }}/backup.sh"
+
+backup_retention: 90

@@ -1,0 +1,38 @@
+- name: Install Netplan
+  apt:
+    name: netplan.io
+
+- name: Disable legacy network services
+  systemd_service:
+    name: "{{ item }}"
+    masked: true
+  loop:
+    - NetworkManager
+    - resolvconf
+
+- name: Check DNS service installed
+  service_facts:
+
+- block:
+    - name: Save DNS servers
+      command: netplan status -f yaml
+      register: netplan
+
+    - name: Install DNS service
+      apt:
+        name: systemd-resolved
+
+    - name: Restore DNS servers
+      copy:
+        dest: /etc/systemd/resolved.conf
+        content: |
+          [Resolve]
+          DNS={{ (netplan.stdout | from_yaml)['netplan-global-state']['nameservers']['addresses'] | join(' ') }}
+
+    - name: Enable DNS service
+      service:
+        name: systemd-resolved
+        enabled: true
+        state: restarted
+
+  when: "'systemd-resolved.service' not in ansible_facts.services"

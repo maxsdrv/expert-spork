@@ -1,0 +1,33 @@
+- name: Deploy target-provider service
+  community.docker.docker_container:
+    name: dds-target-provider
+    image: "{{ registry }}/{{ registry_path }}/{{ services['dds-target-provider'].image }}:{{ rollback_image_tag | default(image_tag) }}"
+    env:
+      LICENSE_FILE: /var/license/dds-provider.lic
+
+      HTTP_LISTEN: 0.0.0.0:19080
+      WS_LISTEN: 0.0.0.0:19081
+
+      DB_PG_NAME: provider
+      DB_PG_USER: provider
+      DB_PG_PASS: password
+      DB_PG_HOST: "host"
+      DB_PG_PORT: "5432"
+
+      LOG_LEVEL: "{{ log_level }}"
+      PROJECT_ENV: "{{ env }}"
+    env_file: "{{ data_root }}/configs/devices.env"
+    etc_hosts:
+      host: host-gateway
+#    ports: # for documenting purpose only
+#      - "19080:19080"
+#      - "19081:19081"
+    volumes:
+      - "{{ data_root }}/license:/var/license"
+    network_mode: host # for license identifier binding
+    restart_policy: always
+    pull: "{{ online | ternary('always', 'never') }}"
+    comparisons:
+      env: strict
+  tags:
+    - dds-target-provider

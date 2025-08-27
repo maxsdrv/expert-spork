@@ -1,0 +1,6 @@
+[production]
+tamerlan
+
+[all:vars]
+env=prod
+swapsize=4

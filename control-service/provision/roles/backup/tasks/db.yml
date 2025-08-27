@@ -1,0 +1,5 @@
+- name: Backup databases
+  shell: "set -o pipefail && docker exec dds-infra-postgres pg_dump -Fc {{ item }} -U postgres | xz > {{ paths.data_root_host }}/control/rollback/{{ item }}.dump.xz"
+  args:
+    executable: /bin/bash
+  loop: "{{ db.postgres.databases }}"

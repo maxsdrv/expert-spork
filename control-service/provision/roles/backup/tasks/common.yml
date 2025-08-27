@@ -1,0 +1,10 @@
+- name: Ensure rollback directory exists
+  file:
+    path: "{{ paths.data_root_host }}/control/rollback"
+    state: directory
+
+- name: Creating rollback info file
+  copy:
+    dest: "{{ paths.data_root_host }}/control/rollback/metadata.yaml"
+    content: |
+      versions:

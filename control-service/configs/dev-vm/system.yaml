@@ -1,0 +1,5 @@
+registry: registry.dev.mpksoft.ru
+registry_path: irz/tamerlan
+
+env: dev-vm
+net_if: eth1

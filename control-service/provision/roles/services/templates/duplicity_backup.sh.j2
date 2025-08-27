@@ -1,0 +1,44 @@
+#!/bin/bash
+# shellcheck disable=SC1083
+# shellcheck disable=SC2089
+# shellcheck disable=SC2090
+# shellcheck disable=SC2086
+
+backup_dirs="{{ backup.dirs | join(' ') }}"
+backup_excludes="{% for ex in backup.excludes %} --exclude {{ ex }} {% endfor %}"
+dest="{{ data_root }}/backups"
+retention={{ backup_retention }}
+name="backup"
+
+echo "[$(date)] Pruning duplicity backups older than $retention days"
+duplicity remove-older-than ${retention}D --no-encryption --force file://"$dest"
+
+if ! duplicity collection-status --no-encryption file://"$dest" | grep -q 'Full'; then
+  backup_mode="full"
+  echo "[$(date)] No full backup found; forcing full backup"
+else
+  backup_mode=""
+  echo "[$(date)] Previous full backup exist; using incremental"
+fi
+
+echo "[$(date)] Starting duplicity backup for directories: $backup_dirs"
+if ! duplicity $backup_mode --no-encryption --allow-source-mismatch $backup_excludes --exclude '**' "/" file://"$dest"; then
+  echo "[$(date)] Duplicity backup failed!"
+  exit 1
+fi
+echo "[$(date)] Duplicity backup completed successfully"
+
+day_num=$(date +%-d)
+
+if [ "$day_num" -eq  1 ]; then
+  echo "[$(date)] Cleaning up monthly snapshots older than $retention days"
+  ts=$(date +%Y-%m)
+  archive_file="$name-month-$ts.tar.xz"
+  find "$dest" -maxdepth 1 -type f -name "$name-*.tar.xz" ! -name "$archive_file" -mtime +$retention -delete
+else
+  archive_file="$name-latest.tar.xz"
+fi
+
+echo "[$(date)] Creating tar archive: $archive_file"
+tar --warning=no-file-changed --exclude="*.tar.xz" --exclude="restore" -cJf "$dest/$archive_file" -C "$dest" .
+echo "[$(date)] Tar archive $archive_file created successfully."

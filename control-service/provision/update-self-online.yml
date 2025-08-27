@@ -1,0 +1,5 @@
+- hosts: all
+  tasks:
+    - include_role: name=services tasks_from=update-self
+  become: true
+  gather_facts: no

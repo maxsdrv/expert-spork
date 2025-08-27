@@ -1,0 +1,17 @@
+- name: Get {{ service }} image
+  community.docker.docker_container_info:
+    name: "{{ service }}"
+  register: result
+
+- name: Backup {{ service }} image
+  community.docker.docker_image_export:
+    name: "{{ result.container.Config.Image }}"
+    path: "{{ paths.data_root_host }}/control/rollback/{{ service }}.tar"
+    timeout: 200
+  when: result.container.Config is defined
+
+- name: Add {{ service }} version to rollback info file
+  lineinfile:
+    path: "{{ paths.data_root_host }}/control/rollback/metadata.yaml"
+    line: "  {{ service }}: {{ result.container.Config.Image.split(':').1 }}"
+  when: result.container.Config is defined

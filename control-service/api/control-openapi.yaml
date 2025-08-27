@@ -1,0 +1,829 @@
+openapi: 3.1.0
+info:
+  title: DDS Control HTTP API
+  version: 0.1.0
+servers:
+- url: http://localhost:8080/api/v1
+
+tags:
+- name: upload
+  description: Files upload API
+- name: update
+  description: Services update API
+- name: services
+  description: Services control API
+- name: logs
+  description: Logs retrieval API
+- name: config
+  description: Configuration API
+- name: info
+  description: System info API
+- name: backups
+  description: System backups API
+- name: system
+  description: System management API
+
+- name: alpha
+  description: Unimplemented draft
+- name: beta
+  description: Unstable implementation
+
+paths:
+  /upload/firmware:
+    post:
+      tags:
+        - upload
+        - beta
+      summary: Upload firmware to the service
+      operationId: upload_firmware
+      parameters:
+        - $ref: '#/components/parameters/upload_session_id'
+        - $ref: '#/components/parameters/upload_content_range'
+        - $ref: '#/components/parameters/upload_content_disposition_dummy'
+      requestBody:
+        $ref: '#/components/requestBodies/segment_data'
+      responses:
+        "200":
+          $ref: '#/components/responses/last_segment_uploaded'
+        "201":
+          $ref: '#/components/responses/segment_uploaded'
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /upload/backup:
+    post:
+      tags:
+        - upload
+        - beta
+      summary: Upload a new backup
+      operationId: upload_backup
+      parameters:
+        - $ref: '#/components/parameters/upload_session_id'
+        - $ref: '#/components/parameters/upload_content_range'
+        - $ref: '#/components/parameters/upload_content_disposition_dummy'
+      requestBody:
+          $ref: '#/components/requestBodies/segment_data'
+      responses:
+        "200":
+          description: Successfully uploaded and processed the backup
+        "400":
+          $ref: '#/components/responses/bad_request'
+#      security:
+#      - bearer_auth: []
+
+  /update/firmware:
+    post:
+      tags:
+        - update
+        - beta
+      summary: Start update process of all services from uploaded firmware
+      operationId: update_firmware
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        "200":
+          description: All services update from the firmware process started successfully
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /update/online:
+    post:
+      tags:
+        - update
+        - beta
+      summary: Start update process of all services or a specific service from the public registry
+      operationId: update_online
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/service_update'
+      responses:
+        "200":
+          description: The service(s) online update process started successfully
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /update/rollback:
+    post:
+      tags:
+        - update
+        - beta
+      summary: Rollback last update
+      operationId: update_rollback
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        "200":
+          description: All services rolled back successfully
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /update/status:
+    get:
+      tags:
+        - update
+        - beta
+      summary: Get last started update process status
+      operationId: update_status
+      responses:
+        "200":
+          description: Status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/update_status_result'
+
+  /update/cancel:
+    post:
+      tags:
+        - update
+        - beta
+      summary: Cancel services updating process
+      operationId: update_cancel
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        "200":
+          description: Updating services cancelled successfully
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /services:
+    get:
+      tags:
+        - services
+        - beta
+      summary: Get services list
+      operationId: list_services
+      responses:
+        "200":
+          description: Services list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/service_info'
+
+  /services/set_state:
+    post:
+      tags:
+        - services
+        - beta
+      summary: Set state of a service
+      operationId: set_service_state
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - service
+                - state
+              properties:
+                service:
+                  type: string
+                state:
+                  $ref: '#/components/schemas/service_state'
+      responses:
+        "200":
+          description: The service state set successfully
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /services/get_versions:
+    get:
+      tags:
+        - services
+        - beta
+      summary: Get available services versions
+      operationId: get_services_versions
+      responses:
+        "200":
+          description: A list of versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/service_versions'
+        "204":
+          description: Versions unavailable
+
+  /logs_list:
+    get:
+      tags:
+        - logs
+        - beta
+      summary: Retrieve a list of log files within a date range
+      description: Retrieve a JSON list of log files within the specified date range.
+      operationId: list_logs
+      parameters:
+        - in: query
+          name: start
+          required: true
+          description: The start date for log retrieval (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end
+          required: true
+          description: The end date for log retrieval (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: A list of log file within the specified date range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/logs_list'
+        "204":
+          description: Logs not found for the specified range
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /logs:
+    get:
+      tags:
+        - logs
+        - beta
+      description: Download the log files archive by theirs names
+      operationId: get_logs
+      parameters:
+        - in: query
+          name: logs_list
+          required: true
+          description: List of the log files to download (file names separated by ',')
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved the log files archive
+          content:
+            application/octet-stream: {}
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /time/get_ntp_servers:
+    get:
+      tags:
+        - config
+        - beta
+      summary: Get current NTP servers
+      operationId: get_ntp_servers
+      responses:
+        "200":
+          description: NTP servers retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ntp_servers'
+
+  /time/set_ntp_servers:
+    post:
+      tags:
+        - config
+        - beta
+      summary: Set NTP servers
+      operationId: set_ntp_servers
+      requestBody:
+        description: List of NTP server addresses to configure
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ntp_servers'
+      responses:
+        "200":
+          description: NTP servers configuration applied successfully
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /time/get_ntp_sync:
+    get:
+      tags:
+        - config
+        - beta
+      summary: Get current NTP synchronization state
+      operationId: get_ntp_sync
+      responses:
+        "200":
+          description: NTP sync state retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ntp_sync_state'
+
+  /time/set_ntp_sync:
+    post:
+      tags:
+        - config
+        - beta
+      summary: Set NTP synchronization on/off
+      operationId: set_ntp_sync
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ntp_sync_state'
+      responses:
+        "200":
+          description: NTP sync configuration applied successfully
+
+  /time/set_time:
+    post:
+      tags:
+        - config
+        - beta
+      summary: Set system time
+      operationId: set_system_time
+      requestBody:
+        description: Timestamp to set the system time
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/system_time'
+
+      responses:
+        "200":
+          description: Time setting triggered successfully
+        "400":
+          $ref: '#/components/responses/bad_request'
+        "422":
+          description: Cannot set time time becase time synchronization is enabled
+
+  /time/get_time:
+    get:
+      tags:
+        - config
+        - beta
+      summary: Get current system time
+      operationId: get_system_time
+      responses:
+        "200":
+          description: Current system time retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/system_time'
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /network/get_settings:
+    get:
+      tags:
+        - config
+        - beta
+      summary: Get network settings
+      operationId: get_network_settings
+      responses:
+        "200":
+          description: Network settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/network_settings'
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /network/set_settings:
+    post:
+      tags:
+        - config
+        - beta
+      summary: Set network settings
+      operationId: set_network_settings
+      requestBody:
+        description: Network settings to set
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/network_settings'
+      responses:
+        "200":
+          description: Network settings applied successfully
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /config/get_config:
+    get:
+      tags:
+      - config 
+      - beta
+      summary: Get configuration
+      operationId: get_config
+      parameters:
+        - name: type
+          in: query
+          description: Type of configuration to get
+          required: true
+          schema:
+            $ref: '#/components/schemas/config_type'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/config_file_data'
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /config/set_config:
+    post:
+      tags:
+      - config
+      - beta
+      summary: Set configuration
+      operationId: set_config
+      parameters:
+        - name: type
+          in: query
+          description: Type of configuration to get
+          required: true
+          schema:
+            $ref: '#/components/schemas/config_type'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/config_file_data'
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /info/metrics:
+    get:
+      tags:
+        - info
+        - beta
+      summary: Get system metrics
+      operationId: metrics
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/system_metrics'
+
+  /backups:
+    get:
+      tags:
+        - backups
+        - beta
+      summary: List all backups
+      operationId: list_backups
+      responses:
+        "200":
+          description: A list of backup archives
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - name
+                    - day
+                  properties:
+                    name:
+                      type: string
+                      description: The name of the backup archive
+                    day:
+                      type: string
+                      format: date
+                      description: The date (day) of backup
+
+  /backups/{name}:
+    get:
+      tags:
+        - backups
+        - beta
+      summary: Download a specific backup
+      operationId: get_backup_archive
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+          description: The name of the backup archive to download
+      responses:
+        "200":
+          description: Successfully retrieved the specified file or archive
+          content:
+            application/octet-stream: {}
+        "404":
+          description: File or archive not found
+#      security:
+#      - bearer_auth: []
+
+  /system/reboot:
+    post:
+      tags:
+        - system
+        - beta
+      summary: System reboot
+      operationId: reboot
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        "200":
+          description: Reboot initiated successfully
+          content:
+            application/json: {}
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+  /system/reboot_status:
+    get:
+      tags:
+        - system
+        - beta
+      summary: Get the current reboot status
+      operationId: get_reboot_status
+      responses:
+        "200":
+          description: Current reboot status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/system_reboot_status'
+
+  /system/shutdown:
+    post:
+      tags:
+        - system
+        - beta
+      summary: Shutdown the system
+      operationId: shutdown_system
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        "200":
+          description: System shutdown started successfully
+        "400":
+          $ref: '#/components/responses/bad_request'
+
+components:
+  parameters:
+    upload_session_id:
+      in: header
+      name: X-Session-ID
+      required: true
+      description: Unique identifier of a session of a file being uploaded
+      schema:
+        type: string
+        format: uuid
+    upload_content_range:
+      in: header
+      name: X-Content-Range
+      required: true
+      description: Byte range of a segment being uploaded
+      schema:
+        type: string
+      examples:
+        first:
+          summary: First segment
+          value: "bytes 0-4/15"
+        intermediate:
+          summary: Intermediate segment
+          value: "bytes 5-9/15"
+        last:
+          summary: Last segment
+          value: "bytes 10-14/15"
+    upload_content_disposition_dummy:
+      in: header
+      name: Content-Disposition
+      required: true
+      description: Service header (for nginx upload)
+      schema:
+        enum:
+          - attachment
+
+  requestBodies:
+    segment_data:
+      description: Data of a segment being uploaded
+      required: true
+      content:
+        application/octet-stream: {}
+
+  responses:
+    bad_request:
+      description: Invalid request parameters
+    segment_uploaded:
+      description: All bytes of the intermediate segment were successfully saved
+    last_segment_uploaded:
+      description: All bytes of the last segment were successfully saved and the file was successfully processed
+
+  schemas:
+    service_update:
+      summary: Service name and image tag
+      description: Absent field 'service' treats as all services
+      type: object
+      required:
+        - version
+      properties:
+        version:
+          type: string
+        service:
+          type: string
+
+    log_property:
+      description: Error log in case of 'error' status
+      type: string
+
+    update_status_result:
+      description: Update process status
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/update_status'
+        log:
+          $ref: '#/components/schemas/log_property'
+
+    update_status:
+      description: Update process status
+      enum:
+        - idle
+        - backup
+        - preparing
+        - active
+        - done
+        - error
+
+    logs_list:
+      description: List of the log files to download
+      type: array
+      items:
+        type: string
+        description: The filename of the log
+
+    system_reboot_status:
+      description: System reboot status
+      required:
+        - status
+      properties:
+        status:
+          enum:
+            - idle
+            - done
+            - error
+        log:
+          $ref: '#/components/schemas/log_property'
+
+    service_state:
+      description: Service state
+      enum:
+        - running
+        - restarting
+        - exited
+
+    service_info:
+      description: Service info
+      required:
+        - service
+      properties:
+        service:
+          type: string
+        info:
+          description: The field is absent in case of the service absense
+          type: object
+          required:
+            - critical
+            - state
+            - version
+            - revision
+          properties:
+            critical:
+              type: boolean
+            state:
+              $ref: '#/components/schemas/service_state'
+            version:
+              type: string
+            revision:
+              type: string
+            since:
+              description: The field is absent in case of the state is exited
+              type: string
+              format: date-time
+            failures:
+              description: The field is absent in case of the state is exited
+              type: integer
+
+    service_versions:
+      description: Service versions
+      type: object
+      required:
+        - name
+        - versions
+      properties:
+        name:
+          type: string
+        versions:
+          type: array
+          items:
+            type: string
+
+    ntp_servers:
+      description: List of NTP server addresses
+      type: object
+      required:
+        - servers
+      properties:
+        servers:
+          type: array
+          items:
+            type: string
+
+    network_settings:
+      description: Network configuration
+      type: object
+      required:
+        - address
+        - prefix
+        - dns_nameservers
+      properties:
+        address:
+          type: string
+        prefix:
+          type: integer
+        gateway:
+          type: string
+        dns_nameservers:
+          type: array
+          items:
+            type: string
+
+    system_metrics:
+      description: Some host system metrics values
+      type: object
+      required:
+        - cpu
+        - disk
+        - memory
+      properties:
+        cpu:
+          type: integer
+        disk:
+          type: integer
+          format: int64
+        memory:
+          type: integer
+          format: int64
+
+    ntp_sync_state:
+      description: State of NTP synchronization
+      type: object
+      # HACK: If this field is requred, 'false' values will not be accepted
+      #required:
+      #  - enabled
+      properties:
+        enabled:
+          type: boolean
+
+    system_time:
+      description: System time
+      type: object
+      required:
+        - timestamp
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+
+    config_type:
+      type: string
+      enum:
+      - DEVICES
+      - SYSTEM
+
+    config_file_data:
+      required:
+        - data
+      properties:
+        data:
+          type: string
+          description: Configuration file content
+
+#  securitySchemes:
+#    bearer_auth:
+#      type: http
+#      scheme: bearer
+#      bearerFormat: JWT

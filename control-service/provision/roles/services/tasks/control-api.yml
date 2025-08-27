@@ -1,0 +1,34 @@
+- name: Deploy control-api service
+  community.docker.docker_container:
+    name: dds-control-api
+    image: "{{ registry }}/{{ registry_path }}/{{ services['dds-control-api'].image }}:{{ rollback_image_tag | default(image_tag) }}"
+    env:
+      LISTEN_HOST: "0.0.0.0"
+      LISTEN_PORT: "8081"
+
+      NODE_EXPORTER_HOST: "host"
+
+      TRIGGERS_DIR: /var/triggers
+      UPLOAD_DIR: /var/upload
+      LICENSE_DIR: /var/license
+      FIRMWARE_DIR: /var/firmware
+      BACKUPS_DIR: /var/backups
+      LOGS_DIR: /var/logs
+
+      LOG_LEVEL: "{{ log_level }}"
+      PROJECT_ENV: "{{ env }}"
+    etc_hosts:
+      host: host-gateway
+    ports:
+      - "8081:8081"
+    volumes:
+      - "{{ data_root }}/control/triggers:/var/triggers"
+      - "{{ data_root }}/control/upload:/var/upload"
+      - "{{ data_root }}/control/firmware:/var/firmware"
+      - "{{ data_root }}/backups:/var/backups"
+      - "{{ data_root }}/logs:/var/logs"
+    restart_policy: always
+    pull: "{{ online | ternary('always', 'never') }}"
+#    recreate: true
+  tags:
+    - dds-control-api

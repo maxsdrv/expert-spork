@@ -1,0 +1,60 @@
+services:
+
+  proxy:
+    container_name: dds-control-proxy
+    image: ${CI_REGISTRY_IMAGE}/proxy:${IMAGE_TAG}
+    environment:
+      - LISTEN_UPLOAD
+      - LISTEN_PORT
+      - UPLOAD_DIR=/var/upload
+      - BACKUPS_DIR=/var/backups
+
+      - APP_ID=dds-control-proxy
+      - PROJECT_ENV
+    extra_hosts:
+      - "host:host-gateway"
+    ports:
+      - "8080:8080"
+    volumes:
+      - "${UPLOAD_DIR}:/var/upload"
+      - "${BACKUPS_DIR}:/var/backups"
+
+  api:
+    container_name: dds-control-api
+    image: ${CI_REGISTRY_IMAGE}/api:${IMAGE_TAG}
+    command: [./dds-control-api, -debug]
+    environment:
+      - LISTEN_HOST
+      - LISTEN_PORT
+      - NODE_EXPORTER_HOST=host
+      - TRIGGERS_DIR=/var/triggers
+      - UPLOAD_DIR=/var/upload
+      - FIRMWARE_DIR=/var/firmware
+      - LOGS_DIR=/var/logs
+      - BACKUPS_DIR=/var/backups
+
+      - LOG_LEVEL
+      - PROJECT_ENV
+    extra_hosts:
+      - "host:host-gateway"
+    ports:
+      - "8081:8081"
+    volumes:
+      - "${TRIGGERS_DIR}:/var/triggers"
+      - "${UPLOAD_DIR}:/var/upload"
+      - "${FIRMWARE_DIR}:/var/firmware"
+      - "${LOGS_DIR}:/var/logs"
+      - "${BACKUPS_DIR}:/var/backups"
+
+  update:
+    container_name: dds-control-update
+    image: ${CI_REGISTRY_IMAGE}/update:${IMAGE_TAG}
+    environment:
+      - ANSIBLE_ARGS=-e data_root='${DATA_ROOT}'
+      - CONFIGS_DIR=/var/configs
+      - TRIGGERS_DIR=/var/triggers
+    volumes:
+      - "${CONFIGS_DIR}:/var/configs"
+      - "${TRIGGERS_DIR}:/var/triggers"
+    privileged: true
+    pid: host
