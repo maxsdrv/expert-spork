@@ -60,7 +60,7 @@ func (s *Handlers) SetJammerBands(
 		ctx,
 		*req.Msg.JammerId,
 		req.Msg.BandsActive,
-		*req.Msg.Duration,
+		uint(*req.Msg.Duration),
 	)
 	if err != nil {
 		return nil, err

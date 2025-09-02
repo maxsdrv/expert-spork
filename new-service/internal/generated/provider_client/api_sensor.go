@@ -22,19 +22,19 @@ import (
 // SensorAPIService SensorAPI service
 type SensorAPIService service
 
-type ApiGetJammerModeRequest struct {
+type SensorAPIGetJammerModeRequest struct {
 	ctx context.Context
 	ApiService *SensorAPIService
 	id *string
 }
 
 // ID of sensor to request
-func (r ApiGetJammerModeRequest) Id(id string) ApiGetJammerModeRequest {
+func (r SensorAPIGetJammerModeRequest) Id(id string) SensorAPIGetJammerModeRequest {
 	r.id = &id
 	return r
 }
 
-func (r ApiGetJammerModeRequest) Execute() (*GetJammerMode200Response, *http.Response, error) {
+func (r SensorAPIGetJammerModeRequest) Execute() (*GetJammerMode200Response, *http.Response, error) {
 	return r.ApiService.GetJammerModeExecute(r)
 }
 
@@ -44,10 +44,10 @@ GetJammerMode Get jammer mode
 Gets current jammer mode - automatic or manual
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetJammerModeRequest
+ @return SensorAPIGetJammerModeRequest
 */
-func (a *SensorAPIService) GetJammerMode(ctx context.Context) ApiGetJammerModeRequest {
-	return ApiGetJammerModeRequest{
+func (a *SensorAPIService) GetJammerMode(ctx context.Context) SensorAPIGetJammerModeRequest {
+	return SensorAPIGetJammerModeRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -55,7 +55,7 @@ func (a *SensorAPIService) GetJammerMode(ctx context.Context) ApiGetJammerModeRe
 
 // Execute executes the request
 //  @return GetJammerMode200Response
-func (a *SensorAPIService) GetJammerModeExecute(r ApiGetJammerModeRequest) (*GetJammerMode200Response, *http.Response, error) {
+func (a *SensorAPIService) GetJammerModeExecute(r SensorAPIGetJammerModeRequest) (*GetJammerMode200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -142,19 +142,19 @@ func (a *SensorAPIService) GetJammerModeExecute(r ApiGetJammerModeRequest) (*Get
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetSensorInfoRequest struct {
+type SensorAPIGetSensorInfoRequest struct {
 	ctx context.Context
 	ApiService *SensorAPIService
 	id *string
 }
 
 // ID of sensor to request
-func (r ApiGetSensorInfoRequest) Id(id string) ApiGetSensorInfoRequest {
+func (r SensorAPIGetSensorInfoRequest) Id(id string) SensorAPIGetSensorInfoRequest {
 	r.id = &id
 	return r
 }
 
-func (r ApiGetSensorInfoRequest) Execute() (*GetSensorInfo200Response, *http.Response, error) {
+func (r SensorAPIGetSensorInfoRequest) Execute() (*GetSensorInfo200Response, *http.Response, error) {
 	return r.ApiService.GetSensorInfoExecute(r)
 }
 
@@ -164,10 +164,10 @@ GetSensorInfo Get sensor info by ID
 Returns a single sensor info
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetSensorInfoRequest
+ @return SensorAPIGetSensorInfoRequest
 */
-func (a *SensorAPIService) GetSensorInfo(ctx context.Context) ApiGetSensorInfoRequest {
-	return ApiGetSensorInfoRequest{
+func (a *SensorAPIService) GetSensorInfo(ctx context.Context) SensorAPIGetSensorInfoRequest {
+	return SensorAPIGetSensorInfoRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -175,7 +175,7 @@ func (a *SensorAPIService) GetSensorInfo(ctx context.Context) ApiGetSensorInfoRe
 
 // Execute executes the request
 //  @return GetSensorInfo200Response
-func (a *SensorAPIService) GetSensorInfoExecute(r ApiGetSensorInfoRequest) (*GetSensorInfo200Response, *http.Response, error) {
+func (a *SensorAPIService) GetSensorInfoExecute(r SensorAPIGetSensorInfoRequest) (*GetSensorInfo200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -262,12 +262,12 @@ func (a *SensorAPIService) GetSensorInfoExecute(r ApiGetSensorInfoRequest) (*Get
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetSensorsRequest struct {
+type SensorAPIGetSensorsRequest struct {
 	ctx context.Context
 	ApiService *SensorAPIService
 }
 
-func (r ApiGetSensorsRequest) Execute() (*SensorList, *http.Response, error) {
+func (r SensorAPIGetSensorsRequest) Execute() (*SensorList, *http.Response, error) {
 	return r.ApiService.GetSensorsExecute(r)
 }
 
@@ -275,10 +275,10 @@ func (r ApiGetSensorsRequest) Execute() (*SensorList, *http.Response, error) {
 GetSensors Get a list of configured sensors
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetSensorsRequest
+ @return SensorAPIGetSensorsRequest
 */
-func (a *SensorAPIService) GetSensors(ctx context.Context) ApiGetSensorsRequest {
-	return ApiGetSensorsRequest{
+func (a *SensorAPIService) GetSensors(ctx context.Context) SensorAPIGetSensorsRequest {
+	return SensorAPIGetSensorsRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -286,7 +286,7 @@ func (a *SensorAPIService) GetSensors(ctx context.Context) ApiGetSensorsRequest 
 
 // Execute executes the request
 //  @return SensorList
-func (a *SensorAPIService) GetSensorsExecute(r ApiGetSensorsRequest) (*SensorList, *http.Response, error) {
+func (a *SensorAPIService) GetSensorsExecute(r SensorAPIGetSensorsRequest) (*SensorList, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -369,18 +369,18 @@ func (a *SensorAPIService) GetSensorsExecute(r ApiGetSensorsRequest) (*SensorLis
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiSetJammerModeRequest struct {
+type SensorAPISetJammerModeRequest struct {
 	ctx context.Context
 	ApiService *SensorAPIService
 	setJammerModeRequest *SetJammerModeRequest
 }
 
-func (r ApiSetJammerModeRequest) SetJammerModeRequest(setJammerModeRequest SetJammerModeRequest) ApiSetJammerModeRequest {
+func (r SensorAPISetJammerModeRequest) SetJammerModeRequest(setJammerModeRequest SetJammerModeRequest) SensorAPISetJammerModeRequest {
 	r.setJammerModeRequest = &setJammerModeRequest
 	return r
 }
 
-func (r ApiSetJammerModeRequest) Execute() (*http.Response, error) {
+func (r SensorAPISetJammerModeRequest) Execute() (*http.Response, error) {
 	return r.ApiService.SetJammerModeExecute(r)
 }
 
@@ -400,17 +400,17 @@ Switching:
 
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetJammerModeRequest
+ @return SensorAPISetJammerModeRequest
 */
-func (a *SensorAPIService) SetJammerMode(ctx context.Context) ApiSetJammerModeRequest {
-	return ApiSetJammerModeRequest{
+func (a *SensorAPIService) SetJammerMode(ctx context.Context) SensorAPISetJammerModeRequest {
+	return SensorAPISetJammerModeRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *SensorAPIService) SetJammerModeExecute(r ApiSetJammerModeRequest) (*http.Response, error) {
+func (a *SensorAPIService) SetJammerModeExecute(r SensorAPISetJammerModeRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}

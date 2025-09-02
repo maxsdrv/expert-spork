@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"context"
+	"time"
 
 	"dds-provider/internal/core"
 	"dds-provider/internal/devices/proxy/mapping"
@@ -16,26 +17,22 @@ type Sensor struct {
 	info       *provider_client.SensorInfo
 }
 
-func NewSensor(sensorId string, api *provider_client.APIClient, info *provider_client.SensorInfo) (*Sensor, error) {
-	if sensorId == "" {
-		return nil, proxyError("sensor id required")
-	}
-
+func NewSensor(sensorId string, api *provider_client.APIClient, info *provider_client.SensorInfo) *Sensor {
 	return &Sensor{
 		id:         sensorId,
 		serviceAPI: api.SensorAPI,
 		deviceAPI:  api.DeviceAPI,
 		info:       info,
-	}, nil
+	}
 }
 
-func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
+func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout time.Duration) error {
 	dssMode := mapping.ConvertToJammerMode(mode)
 
 	setJammerModeReq := provider_client.SetJammerModeRequest{
 		Id:         s.id,
 		JammerMode: dssMode,
-		Timeout:    timeout,
+		Timeout:    int32(timeout.Seconds()),
 	}
 
 	_, err := s.serviceAPI.SetJammerMode(context.Background()).
@@ -46,7 +43,8 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout int32) error {
 }
 
 func (s *Sensor) SensorInfo() apiv1.SensorInfo {
-	sensorCoreInfo := mapping.ConvertToSensorInfo(*s.info)
+	sensorCoreInfo, _ := mapping.ConvertToSensorInfo(*s.info)
+
 	return *sensorCoreInfo.ToAPI()
 }
 
@@ -63,12 +61,8 @@ func (s *Sensor) SetDisabled(disabled bool) error {
 	return handleSensorError("SetDisabled", s.id, err)
 }
 
-func (s *Sensor) SetPosition(position *core.GeoPosition) error {
-	if position == nil {
-		return proxyError("position is required")
-	}
-
-	dssPosition := mapping.ConvertToDSSGeoPosition(*position)
+func (s *Sensor) SetPosition(position core.GeoPosition) error {
+	dssPosition := mapping.ConvertToDSSGeoPosition(position)
 	setPositionReq := provider_client.SetPositionRequest{
 		Id:       s.id,
 		Position: dssPosition,

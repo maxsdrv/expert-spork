@@ -17,22 +17,14 @@ type DevicePositionReader interface {
 }
 
 type DevicePositionWriter interface {
-	SetPosition(position *GeoPosition) error
+	SetPosition(position GeoPosition) error
 	SetPositionMode(mode GeoPositionMode) error
-}
-
-type DeviceDisabledReader interface {
-	Disabled() bool
-}
-
-type DeviceDisabledWriter interface {
-	SetDisabled(disabled bool) error
 }
 
 type SensorJammerReader interface {
 	JammerIds() []DeviceId
 	JammerMode() JammerMode
-	JammerAutoTimeout() int32 //?seconds
+	JammerAutoTimeout() uint //?seconds
 }
 
 type SensorJammerWriter interface {
@@ -44,7 +36,7 @@ type SensorInfoReader interface {
 }
 
 type JammerBandsWriter interface {
-	SetJammerBands(bands JammerBands, duration int32) error
+	SetJammerBands(bands JammerBands, duration uint) error
 }
 
 type JammerInfoReader interface {
@@ -53,18 +45,13 @@ type JammerInfoReader interface {
 
 type DeviceReader interface {
 	DeviceDataReader
-	DeviceDisabledReader
 	DevicePositionReader
 }
 
-type DeviceWriter interface {
-	DeviceDisabledWriter
+type DeviceBase interface {
 	DevicePositionWriter
 }
 
-type DeviceBase interface {
-	DeviceWriter
-}
 type SensorBase interface {
 	DeviceBase
 	SensorJammerWriter

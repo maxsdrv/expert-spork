@@ -19,65 +19,173 @@ import (
 )
 
 
-// TrackAPIService TrackAPI service
-type TrackAPIService service
+// BetaAPIService BetaAPI service
+type BetaAPIService service
 
-type TrackAPIGetTrackRequest struct {
+type BetaAPIGetIdRequest struct {
 	ctx context.Context
-	ApiService *TrackAPIService
-	trackId *string
+	ApiService *BetaAPIService
+	id *string
 }
 
-// ID of track to return
-func (r TrackAPIGetTrackRequest) TrackId(trackId string) TrackAPIGetTrackRequest {
-	r.trackId = &trackId
+// ID of sensor to request
+func (r BetaAPIGetIdRequest) Id(id string) BetaAPIGetIdRequest {
+	r.id = &id
 	return r
 }
 
-func (r TrackAPIGetTrackRequest) Execute() (*TrackData, *http.Response, error) {
-	return r.ApiService.GetTrackExecute(r)
+func (r BetaAPIGetIdRequest) Execute() (*CameraId, *http.Response, error) {
+	return r.ApiService.GetIdExecute(r)
 }
 
 /*
-GetTrack Find target by ID
+GetId Get ID for the camera in camera service
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return BetaAPIGetIdRequest
+*/
+func (a *BetaAPIService) GetId(ctx context.Context) BetaAPIGetIdRequest {
+	return BetaAPIGetIdRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return CameraId
+func (a *BetaAPIService) GetIdExecute(r BetaAPIGetIdRequest) (*CameraId, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *CameraId
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BetaAPIService.GetId")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/camera/get_id"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.id == nil {
+		return localVarReturnValue, nil, reportError("id is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "id", r.id, "form", "")
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type BetaAPIGetTargetRequest struct {
+	ctx context.Context
+	ApiService *BetaAPIService
+	targetId *string
+}
+
+// ID of target to return
+func (r BetaAPIGetTargetRequest) TargetId(targetId string) BetaAPIGetTargetRequest {
+	r.targetId = &targetId
+	return r
+}
+
+func (r BetaAPIGetTargetRequest) Execute() (*TargetData, *http.Response, error) {
+	return r.ApiService.GetTargetExecute(r)
+}
+
+/*
+GetTarget Find target by ID
 
 Returns a single target
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrackAPIGetTrackRequest
+ @return BetaAPIGetTargetRequest
 */
-func (a *TrackAPIService) GetTrack(ctx context.Context) TrackAPIGetTrackRequest {
-	return TrackAPIGetTrackRequest{
+func (a *BetaAPIService) GetTarget(ctx context.Context) BetaAPIGetTargetRequest {
+	return BetaAPIGetTargetRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TrackData
-func (a *TrackAPIService) GetTrackExecute(r TrackAPIGetTrackRequest) (*TrackData, *http.Response, error) {
+//  @return TargetData
+func (a *BetaAPIService) GetTargetExecute(r BetaAPIGetTargetRequest) (*TargetData, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *TrackData
+		localVarReturnValue  *TargetData
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrackAPIService.GetTrack")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BetaAPIService.GetTarget")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/target/get_track"
+	localVarPath := localBasePath + "/target/get_target_data"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.trackId == nil {
-		return localVarReturnValue, nil, reportError("trackId is required and must be specified")
+	if r.targetId == nil {
+		return localVarReturnValue, nil, reportError("targetId is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "track_id", r.trackId, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "target_id", r.targetId, "form", "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -142,46 +250,46 @@ func (a *TrackAPIService) GetTrackExecute(r TrackAPIGetTrackRequest) (*TrackData
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type TrackAPIGetTracksRequest struct {
+type BetaAPIGetTargetsRequest struct {
 	ctx context.Context
-	ApiService *TrackAPIService
+	ApiService *BetaAPIService
 }
 
-func (r TrackAPIGetTracksRequest) Execute() (*TrackList, *http.Response, error) {
-	return r.ApiService.GetTracksExecute(r)
+func (r BetaAPIGetTargetsRequest) Execute() (*TargetList, *http.Response, error) {
+	return r.ApiService.GetTargetsExecute(r)
 }
 
 /*
-GetTracks Get tracks list
+GetTargets Get targets list
 
-Get summary of all active tracks
+Get summary of all active targets
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrackAPIGetTracksRequest
+ @return BetaAPIGetTargetsRequest
 */
-func (a *TrackAPIService) GetTracks(ctx context.Context) TrackAPIGetTracksRequest {
-	return TrackAPIGetTracksRequest{
+func (a *BetaAPIService) GetTargets(ctx context.Context) BetaAPIGetTargetsRequest {
+	return BetaAPIGetTargetsRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TrackList
-func (a *TrackAPIService) GetTracksExecute(r TrackAPIGetTracksRequest) (*TrackList, *http.Response, error) {
+//  @return TargetList
+func (a *BetaAPIService) GetTargetsExecute(r BetaAPIGetTargetsRequest) (*TargetList, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *TrackList
+		localVarReturnValue  *TargetList
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrackAPIService.GetTracks")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BetaAPIService.GetTargets")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/track/get_tracks"
+	localVarPath := localBasePath + "/target/get_targets"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -249,200 +357,4 @@ func (a *TrackAPIService) GetTracksExecute(r TrackAPIGetTracksRequest) (*TrackLi
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type TrackAPITrackSubscribeRequest struct {
-	ctx context.Context
-	ApiService *TrackAPIService
-}
-
-func (r TrackAPITrackSubscribeRequest) Execute() (*http.Response, error) {
-	return r.ApiService.TrackSubscribeExecute(r)
-}
-
-/*
-TrackSubscribe Enable subscription on track changes
-
-Subscribe for receiveing notifications for following events - track_started, track_updated, track_finished
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrackAPITrackSubscribeRequest
-*/
-func (a *TrackAPIService) TrackSubscribe(ctx context.Context) TrackAPITrackSubscribeRequest {
-	return TrackAPITrackSubscribeRequest{
-		ApiService: a,
-		ctx: ctx,
-	}
-}
-
-// Execute executes the request
-func (a *TrackAPIService) TrackSubscribeExecute(r TrackAPITrackSubscribeRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrackAPIService.TrackSubscribe")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/track/subscribe"
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		if localVarHTTPResponse.StatusCode == 500 {
-			var v ModelError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
-}
-
-type TrackAPITrackUnsubscribeRequest struct {
-	ctx context.Context
-	ApiService *TrackAPIService
-}
-
-func (r TrackAPITrackUnsubscribeRequest) Execute() (*http.Response, error) {
-	return r.ApiService.TrackUnsubscribeExecute(r)
-}
-
-/*
-TrackUnsubscribe Disable subscription on track changes
-
-Unsubscribe from receiveing all track notifications
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrackAPITrackUnsubscribeRequest
-*/
-func (a *TrackAPIService) TrackUnsubscribe(ctx context.Context) TrackAPITrackUnsubscribeRequest {
-	return TrackAPITrackUnsubscribeRequest{
-		ApiService: a,
-		ctx: ctx,
-	}
-}
-
-// Execute executes the request
-func (a *TrackAPIService) TrackUnsubscribeExecute(r TrackAPITrackUnsubscribeRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrackAPIService.TrackUnsubscribe")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/track/unsubscribe"
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		if localVarHTTPResponse.StatusCode == 500 {
-			var v ModelError
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
 }

@@ -9,20 +9,6 @@ import (
 
 type GeoPositionMode = apiv1.GeoPositionMode
 
-/*func TestJammerInfo(id DeviceId) *apiv1.JammerInfo {
-	sensorId := NewId("9f86d081-884c-4d63-a159-f35e7e5b72a0")
-	deviceIdStr := id.String()
-	sensorIdStr := sensorId.String()
-	return &apiv1.JammerInfo{
-		JammerId:  &deviceIdStr,
-		Model:     proto.String("JM-4000"),
-		Serial:    proto.String("SN12345678"),
-		SwVersion: proto.String("1.2.3"),
-		SensorId:  &sensorIdStr,
-		GroupId:   proto.String("group1"),
-	}
-}*/
-
 type JammerInfo struct {
 	JammerId  DeviceId
 	Model     string

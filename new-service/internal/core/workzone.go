@@ -1,12 +1,13 @@
 package core
 
 import (
-	apiv1 "dds-provider/internal/generated/api/proto"
 	"google.golang.org/protobuf/proto"
+
+	apiv1 "dds-provider/internal/generated/api/proto"
 )
 
 type WorkzoneSector struct {
-	Number   uint32
+	Number   uint
 	Distance DistanceType
 	MinAngle AngleType
 	MaxAngle AngleType
@@ -14,7 +15,7 @@ type WorkzoneSector struct {
 
 func (w *WorkzoneSector) ToAPI() *apiv1.WorkzoneSector {
 	return &apiv1.WorkzoneSector{
-		Number:   proto.Uint32(w.Number),
+		Number:   proto.Uint32(uint32(w.Number)),
 		Distance: proto.Float32(float32(w.Distance)),
 		MinAngle: proto.Float32(float32(w.MinAngle)),
 		MaxAngle: proto.Float32(float32(w.MaxAngle)),

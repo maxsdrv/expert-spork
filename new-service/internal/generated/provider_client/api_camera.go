@@ -22,19 +22,19 @@ import (
 // CameraAPIService CameraAPI service
 type CameraAPIService service
 
-type ApiGetIdRequest struct {
+type CameraAPIGetIdRequest struct {
 	ctx context.Context
 	ApiService *CameraAPIService
 	id *string
 }
 
 // ID of sensor to request
-func (r ApiGetIdRequest) Id(id string) ApiGetIdRequest {
+func (r CameraAPIGetIdRequest) Id(id string) CameraAPIGetIdRequest {
 	r.id = &id
 	return r
 }
 
-func (r ApiGetIdRequest) Execute() (*CameraId, *http.Response, error) {
+func (r CameraAPIGetIdRequest) Execute() (*CameraId, *http.Response, error) {
 	return r.ApiService.GetIdExecute(r)
 }
 
@@ -42,10 +42,10 @@ func (r ApiGetIdRequest) Execute() (*CameraId, *http.Response, error) {
 GetId Get ID for the camera in camera service
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetIdRequest
+ @return CameraAPIGetIdRequest
 */
-func (a *CameraAPIService) GetId(ctx context.Context) ApiGetIdRequest {
-	return ApiGetIdRequest{
+func (a *CameraAPIService) GetId(ctx context.Context) CameraAPIGetIdRequest {
+	return CameraAPIGetIdRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -53,7 +53,7 @@ func (a *CameraAPIService) GetId(ctx context.Context) ApiGetIdRequest {
 
 // Execute executes the request
 //  @return CameraId
-func (a *CameraAPIService) GetIdExecute(r ApiGetIdRequest) (*CameraId, *http.Response, error) {
+func (a *CameraAPIService) GetIdExecute(r CameraAPIGetIdRequest) (*CameraId, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}

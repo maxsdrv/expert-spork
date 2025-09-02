@@ -22,7 +22,6 @@ type JammerMode string
 const (
 	JAMMERMODE_AUTO JammerMode = "AUTO"
 	JAMMERMODE_MANUAL JammerMode = "MANUAL"
-	JAMMERMODE_UNDEFINED JammerMode = "UNDEFINED"
 	JAMMERMODE_UNKNOWN_DEFAULT_OPEN_API JammerMode = "11184809"
 )
 
@@ -30,7 +29,6 @@ const (
 var AllowedJammerModeEnumValues = []JammerMode{
 	"AUTO",
 	"MANUAL",
-	"UNDEFINED",
 	"11184809",
 }
 

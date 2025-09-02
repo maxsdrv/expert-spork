@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"connectrpc.com/connect"
@@ -30,7 +29,7 @@ func (s *Controllers) GetSensors(
 			continue
 		}
 
-		sensorInfo := (*sensorBase).SensorInfo()
+		sensorInfo := sensorBase.SensorInfo()
 		sensorInfos = append(sensorInfos, &sensorInfo)
 	}
 
@@ -82,14 +81,6 @@ func (s *Controllers) SetJammerMode(ctx context.Context,
 
 	logger.Debugf("Set jammer mode for sensor %s to %s", sensorId, jammerMode)
 
-	if sensorId == "" {
-		return controllersError("sensor id is required")
-	}
-
-	if timeout < 0 {
-		return controllersError("timeout must be non-negative, got: %d", timeout)
-	}
-
 	deviceId := core.NewId(sensorId)
 
 	sensorBase, err := s.svcDevStorage.Sensor(deviceId)
@@ -98,18 +89,14 @@ func (s *Controllers) SetJammerMode(ctx context.Context,
 		return err
 	}
 
-	if jammerWriter, ok := (*sensorBase).(core.SensorJammerWriter); ok {
-		err = jammerWriter.SetJammerMode(jammerMode, timeout)
-		if err != nil {
-			logger.WithError(controllersError("%v", err)).Errorf("Failed to set jammer mode for sensor %s", sensorId)
-			return err
-		}
-
-		logger.Infof("Successfully set jammer mode for sensor %s to %s", sensorId, jammerMode)
-		return nil
+	err = sensorBase.SetJammerMode(jammerMode, timeout)
+	if err != nil {
+		logger.WithError(controllersError("%v", err)).Errorf("Failed to set jammer mode for sensor %s", sensorId)
+		return err
 	}
 
-	return connect.NewError(connect.CodeInternal, fmt.Errorf("sensor does not support jammer mode"))
+	logger.Infof("Successfully set jammer mode for sensor %s to %s", sensorId, jammerMode)
+	return nil
 }
 
 func (s *Controllers) SetPositionMode(
@@ -132,12 +119,10 @@ func (s *Controllers) SetPositionMode(
 		return nil, err
 	}
 
-	if positionWriter, ok := (*deviceBase).(core.DevicePositionWriter); ok {
-		err = positionWriter.SetPositionMode(positionMode)
-		if err != nil {
-			logger.WithError(controllersError("%v", err)).Errorf("Failed to set position mode for device %s", deviceId)
-			return nil, err
-		}
+	err = deviceBase.SetPositionMode(positionMode)
+	if err != nil {
+		logger.WithError(controllersError("%v", err)).Errorf("Failed to set position mode for device %s", deviceId)
+		return nil, err
 	}
 
 	logger.Infof("Successfully set position mode for device %s", deviceId)
@@ -170,12 +155,10 @@ func (s *Controllers) SetPosition(
 		return nil, err
 	}
 
-	if positionWriter, ok := (*deviceBase).(core.DevicePositionWriter); ok {
-		err = positionWriter.SetPosition(&corePosition)
-		if err != nil {
-			logger.WithError(controllersError("%v", err)).Errorf("Failed to set position for device %s", deviceId)
-			return nil, err
-		}
+	err = deviceBase.SetPosition(corePosition)
+	if err != nil {
+		logger.WithError(controllersError("%v", err)).Errorf("Failed to set position for device %s", deviceId)
+		return nil, err
 	}
 
 	logger.Infof("Successfully set position for device %s", deviceId)
@@ -190,24 +173,18 @@ func (s *Controllers) SetDisabled(
 	logger.Debugf("Request data: %s", req.Msg)
 
 	deviceId := req.Msg.GetDeviceId()
-	if deviceId == "" {
-		return nil, controllersError("device id is required")
-	}
 
-	deviceIdCore := core.NewId(deviceId)
-	deviceBase, err := s.svcDevStorage.Device(deviceIdCore)
-	if err != nil {
-		logger.WithError(controllersError("%v", err)).Errorf("Failed to get device %s", deviceId)
-		return nil, err
-	}
+	//deviceIdCore := core.NewId(deviceId)
+	//deviceBase, err := s.svcDevStorage.Device(deviceIdCore)
+	//if err != nil {
+	//	logger.WithError(controllersError("%v", err)).Errorf("Failed to get device %s", deviceId)
+	//	return nil, err
+	//}
+	//
+	//deviceBase.SetDisabled(req.Msg.GetDisabled())
 
-	if disabledWriter, ok := (*deviceBase).(core.DeviceDisabledWriter); ok {
-		disabledWriter.SetDisabled(req.Msg.GetDisabled())
+	logger.Infof("Successfully set disabled for device %s", deviceId)
 
-		logger.Infof("Successfully set disabled for device %s", deviceId)
+	return connect.NewResponse(&emptypb.Empty{}), nil
 
-		return connect.NewResponse(&emptypb.Empty{}), nil
-	}
-
-	return nil, controllersError("device does not support disabled setting")
 }

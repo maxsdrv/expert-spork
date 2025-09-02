@@ -1,10 +1,11 @@
 package core
 
-type DeviceState int32
+type DeviceState uint
 
 const (
 	DeviceStateUnavailable DeviceState = iota
 	DeviceStateOffDuty
 	DeviceStateOk
 	DeviceStateFailure
+	DeviceStateDisabled
 )

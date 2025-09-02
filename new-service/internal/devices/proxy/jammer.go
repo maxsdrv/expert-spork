@@ -16,16 +16,13 @@ type Jammer struct {
 	info       *provider_client.JammerInfo
 }
 
-func NewJammer(jammerId string, api *provider_client.APIClient, info *provider_client.JammerInfo) (*Jammer, error) {
-	if jammerId == "" {
-		return nil, proxyError("jammer id is required")
-	}
+func NewJammer(jammerId string, api *provider_client.APIClient, info *provider_client.JammerInfo) *Jammer {
 	return &Jammer{
 		id:         jammerId,
 		serviceApi: api.JammerAPI,
 		deviceApi:  api.DeviceAPI,
 		info:       info,
-	}, nil
+	}
 }
 
 func (j *Jammer) JammerInfo() apiv1.JammerInfo {
@@ -46,12 +43,8 @@ func (j *Jammer) SetDisabled(disabled bool) error {
 	return handleJammerError("SetDisabled", j.id, err)
 }
 
-func (j *Jammer) SetPosition(position *core.GeoPosition) error {
-	if position == nil {
-		return proxyError("position is required")
-	}
-
-	dssPosition := mapping.ConvertToDSSGeoPosition(*position)
+func (j *Jammer) SetPosition(position core.GeoPosition) error {
+	dssPosition := mapping.ConvertToDSSGeoPosition(position)
 	setPositionReq := provider_client.SetPositionRequest{
 		Id:       j.id,
 		Position: dssPosition,
@@ -78,14 +71,14 @@ func (j *Jammer) SetPositionMode(mode core.GeoPositionMode) error {
 	return handleJammerError("SetPositionMode", j.id, err)
 }
 
-func (j *Jammer) SetJammerBands(bands core.JammerBands, duration int32) error {
+func (j *Jammer) SetJammerBands(bands core.JammerBands, duration uint) error {
 
 	activeBands := bands.GetActive()
 
 	setJammerBandsReq := provider_client.SetJammerBandsRequest{
 		Id:          j.id,
 		BandsActive: activeBands,
-		Duration:    duration,
+		Duration:    int32(duration),
 	}
 
 	_, err := j.serviceApi.SetJammerBands(context.Background()).

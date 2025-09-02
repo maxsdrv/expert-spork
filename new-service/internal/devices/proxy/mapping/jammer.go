@@ -10,9 +10,16 @@ import (
 )
 
 func ConvertToJammerInfoDynamic(dataRaw json.RawMessage, deviceId core.DeviceId) (*core.JammerInfoDynamic, error) {
+	var jammerErr = core.ProviderErrorFn("mapping: to jammer info dynamic")
+
 	var jammerData provider_client.JammerInfo
 	if err := json.Unmarshal(dataRaw, &jammerData); err != nil {
-		return nil, mappingError("to jammer info dynamic: %v", err)
+		return nil, jammerErr("%v", err)
+	}
+
+	positionMode, err := convertToPositionMode(jammerData.PositionMode)
+	if err != nil {
+		return nil, jammerErr("%v", err)
 	}
 
 	jammerInfo := &core.JammerInfoDynamic{
@@ -20,7 +27,7 @@ func ConvertToJammerInfoDynamic(dataRaw json.RawMessage, deviceId core.DeviceId)
 		Disabled:     jammerData.Disabled,
 		State:        string(jammerData.State),
 		Position:     convertToPosition(jammerData.Position),
-		PositionMode: convertToPositionMode(jammerData.PositionMode),
+		PositionMode: positionMode,
 		Workzone:     convertToWorkZone(jammerData.Workzone),
 		HwInfo:       convertToHwInfo(jammerData.HwInfo),
 	}
@@ -41,7 +48,7 @@ func ConvertToJammerInfoDynamic(dataRaw json.RawMessage, deviceId core.DeviceId)
 		if bands, err := core.NewBands(allBands, activeBands); err == nil {
 			jammerInfo.Bands = bands
 		} else {
-			return nil, mappingError("to jammer info dynamic: %v", err)
+			return nil, jammerErr("%v", err)
 		}
 
 		if bandOptions, ok := jammerData.GetBandOptionsOk(); ok && bandOptions != nil {

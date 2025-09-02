@@ -1,5 +1,4 @@
 docs/
-dds-provider
 
 # Ignore DevSpace cache and log folder
 .devspace/
@@ -11,7 +10,8 @@ go.work.sum
 .idea
 .vscode
 
-# Vim
+# remove after firing @sergeys
+dds-provider
 *.swp
 *.swo
 

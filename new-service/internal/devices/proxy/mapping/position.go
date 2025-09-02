@@ -25,16 +25,16 @@ func convertToPosition(pos provider_client.GeoPosition) core.GeoPosition {
 	}
 }
 
-func convertToPositionMode(posMode provider_client.GeoPositionMode) core.GeoPositionMode {
+func convertToPositionMode(posMode provider_client.GeoPositionMode) (core.GeoPositionMode, error) {
 	switch posMode {
 	case provider_client.GEOPOSITIONMODE_AUTO:
-		return apiv1.GeoPositionMode_GEO_AUTO
+		return apiv1.GeoPositionMode_GEO_AUTO, nil
 	case provider_client.GEOPOSITIONMODE_MANUAL:
-		return apiv1.GeoPositionMode_GEO_MANUAL
+		return apiv1.GeoPositionMode_GEO_MANUAL, nil
 	case provider_client.GEOPOSITIONMODE_ALWAYS_MANUAL:
-		return apiv1.GeoPositionMode_GEO_ALWAYS_MANUAL
+		return apiv1.GeoPositionMode_GEO_ALWAYS_MANUAL, nil
 	default:
-		return apiv1.GeoPositionMode_GEO_AUTO
+		return apiv1.GeoPositionMode_GEO_AUTO, nil
 	}
 }
 
@@ -46,7 +46,7 @@ func convertToWorkZone(dssWorkZone []provider_client.WorkzoneSector) core.Workzo
 	var workZones []core.WorkzoneSector
 	for _, sector := range dssWorkZone {
 		workZoneSector := core.WorkzoneSector{
-			Number:   uint32(sector.Number),
+			Number:   uint(sector.Number),
 			Distance: core.DistanceType(sector.Distance),
 			MinAngle: core.AngleType(sector.MinAngle),
 			MaxAngle: core.AngleType(sector.MaxAngle),

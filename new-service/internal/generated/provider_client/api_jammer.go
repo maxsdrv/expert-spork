@@ -22,19 +22,19 @@ import (
 // JammerAPIService JammerAPI service
 type JammerAPIService service
 
-type ApiGetJammerRequest struct {
+type JammerAPIGetJammerRequest struct {
 	ctx context.Context
 	ApiService *JammerAPIService
 	id *string
 }
 
 // ID of jammer to return
-func (r ApiGetJammerRequest) Id(id string) ApiGetJammerRequest {
+func (r JammerAPIGetJammerRequest) Id(id string) JammerAPIGetJammerRequest {
 	r.id = &id
 	return r
 }
 
-func (r ApiGetJammerRequest) Execute() (*GetJammer200Response, *http.Response, error) {
+func (r JammerAPIGetJammerRequest) Execute() (*GetJammer200Response, *http.Response, error) {
 	return r.ApiService.GetJammerExecute(r)
 }
 
@@ -44,10 +44,10 @@ GetJammer Find jammer by ID
 Returns a single jammer
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetJammerRequest
+ @return JammerAPIGetJammerRequest
 */
-func (a *JammerAPIService) GetJammer(ctx context.Context) ApiGetJammerRequest {
-	return ApiGetJammerRequest{
+func (a *JammerAPIService) GetJammer(ctx context.Context) JammerAPIGetJammerRequest {
+	return JammerAPIGetJammerRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -55,7 +55,7 @@ func (a *JammerAPIService) GetJammer(ctx context.Context) ApiGetJammerRequest {
 
 // Execute executes the request
 //  @return GetJammer200Response
-func (a *JammerAPIService) GetJammerExecute(r ApiGetJammerRequest) (*GetJammer200Response, *http.Response, error) {
+func (a *JammerAPIService) GetJammerExecute(r JammerAPIGetJammerRequest) (*GetJammer200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -142,12 +142,12 @@ func (a *JammerAPIService) GetJammerExecute(r ApiGetJammerRequest) (*GetJammer20
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetJammerGroupsRequest struct {
+type JammerAPIGetJammerGroupsRequest struct {
 	ctx context.Context
 	ApiService *JammerAPIService
 }
 
-func (r ApiGetJammerGroupsRequest) Execute() (*GetJammerGroups200Response, *http.Response, error) {
+func (r JammerAPIGetJammerGroupsRequest) Execute() (*GetJammerGroups200Response, *http.Response, error) {
 	return r.ApiService.GetJammerGroupsExecute(r)
 }
 
@@ -157,10 +157,10 @@ GetJammerGroups Get jammer groups list
 Returns list of jammer groups
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetJammerGroupsRequest
+ @return JammerAPIGetJammerGroupsRequest
 */
-func (a *JammerAPIService) GetJammerGroups(ctx context.Context) ApiGetJammerGroupsRequest {
-	return ApiGetJammerGroupsRequest{
+func (a *JammerAPIService) GetJammerGroups(ctx context.Context) JammerAPIGetJammerGroupsRequest {
+	return JammerAPIGetJammerGroupsRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -168,7 +168,7 @@ func (a *JammerAPIService) GetJammerGroups(ctx context.Context) ApiGetJammerGrou
 
 // Execute executes the request
 //  @return GetJammerGroups200Response
-func (a *JammerAPIService) GetJammerGroupsExecute(r ApiGetJammerGroupsRequest) (*GetJammerGroups200Response, *http.Response, error) {
+func (a *JammerAPIService) GetJammerGroupsExecute(r JammerAPIGetJammerGroupsRequest) (*GetJammerGroups200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -251,12 +251,12 @@ func (a *JammerAPIService) GetJammerGroupsExecute(r ApiGetJammerGroupsRequest) (
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetJammersRequest struct {
+type JammerAPIGetJammersRequest struct {
 	ctx context.Context
 	ApiService *JammerAPIService
 }
 
-func (r ApiGetJammersRequest) Execute() (*JammerList, *http.Response, error) {
+func (r JammerAPIGetJammersRequest) Execute() (*JammerList, *http.Response, error) {
 	return r.ApiService.GetJammersExecute(r)
 }
 
@@ -266,10 +266,10 @@ GetJammers Get jammers list
 Get summary of all jammers
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetJammersRequest
+ @return JammerAPIGetJammersRequest
 */
-func (a *JammerAPIService) GetJammers(ctx context.Context) ApiGetJammersRequest {
-	return ApiGetJammersRequest{
+func (a *JammerAPIService) GetJammers(ctx context.Context) JammerAPIGetJammersRequest {
+	return JammerAPIGetJammersRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -277,7 +277,7 @@ func (a *JammerAPIService) GetJammers(ctx context.Context) ApiGetJammersRequest 
 
 // Execute executes the request
 //  @return JammerList
-func (a *JammerAPIService) GetJammersExecute(r ApiGetJammersRequest) (*JammerList, *http.Response, error) {
+func (a *JammerAPIService) GetJammersExecute(r JammerAPIGetJammersRequest) (*JammerList, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -360,18 +360,18 @@ func (a *JammerAPIService) GetJammersExecute(r ApiGetJammersRequest) (*JammerLis
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiSetJammerBandsRequest struct {
+type JammerAPISetJammerBandsRequest struct {
 	ctx context.Context
 	ApiService *JammerAPIService
 	setJammerBandsRequest *SetJammerBandsRequest
 }
 
-func (r ApiSetJammerBandsRequest) SetJammerBandsRequest(setJammerBandsRequest SetJammerBandsRequest) ApiSetJammerBandsRequest {
+func (r JammerAPISetJammerBandsRequest) SetJammerBandsRequest(setJammerBandsRequest SetJammerBandsRequest) JammerAPISetJammerBandsRequest {
 	r.setJammerBandsRequest = &setJammerBandsRequest
 	return r
 }
 
-func (r ApiSetJammerBandsRequest) Execute() (*http.Response, error) {
+func (r JammerAPISetJammerBandsRequest) Execute() (*http.Response, error) {
 	return r.ApiService.SetJammerBandsExecute(r)
 }
 
@@ -386,17 +386,17 @@ SetJammerBands Sets jammer's per-band activity for manual mode
 
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetJammerBandsRequest
+ @return JammerAPISetJammerBandsRequest
 */
-func (a *JammerAPIService) SetJammerBands(ctx context.Context) ApiSetJammerBandsRequest {
-	return ApiSetJammerBandsRequest{
+func (a *JammerAPIService) SetJammerBands(ctx context.Context) JammerAPISetJammerBandsRequest {
+	return JammerAPISetJammerBandsRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *JammerAPIService) SetJammerBandsExecute(r ApiSetJammerBandsRequest) (*http.Response, error) {
+func (a *JammerAPIService) SetJammerBandsExecute(r JammerAPISetJammerBandsRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}

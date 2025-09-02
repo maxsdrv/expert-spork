@@ -22,19 +22,19 @@ import (
 // DeviceAPIService DeviceAPI service
 type DeviceAPIService service
 
-type ApiGetPositionModeRequest struct {
+type DeviceAPIGetPositionModeRequest struct {
 	ctx context.Context
 	ApiService *DeviceAPIService
 	id *string
 }
 
 // ID of device to request
-func (r ApiGetPositionModeRequest) Id(id string) ApiGetPositionModeRequest {
+func (r DeviceAPIGetPositionModeRequest) Id(id string) DeviceAPIGetPositionModeRequest {
 	r.id = &id
 	return r
 }
 
-func (r ApiGetPositionModeRequest) Execute() (*GetPositionMode200Response, *http.Response, error) {
+func (r DeviceAPIGetPositionModeRequest) Execute() (*GetPositionMode200Response, *http.Response, error) {
 	return r.ApiService.GetPositionModeExecute(r)
 }
 
@@ -44,10 +44,10 @@ GetPositionMode Get device position mode
 Returns position mode
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetPositionModeRequest
+ @return DeviceAPIGetPositionModeRequest
 */
-func (a *DeviceAPIService) GetPositionMode(ctx context.Context) ApiGetPositionModeRequest {
-	return ApiGetPositionModeRequest{
+func (a *DeviceAPIService) GetPositionMode(ctx context.Context) DeviceAPIGetPositionModeRequest {
+	return DeviceAPIGetPositionModeRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -55,7 +55,7 @@ func (a *DeviceAPIService) GetPositionMode(ctx context.Context) ApiGetPositionMo
 
 // Execute executes the request
 //  @return GetPositionMode200Response
-func (a *DeviceAPIService) GetPositionModeExecute(r ApiGetPositionModeRequest) (*GetPositionMode200Response, *http.Response, error) {
+func (a *DeviceAPIService) GetPositionModeExecute(r DeviceAPIGetPositionModeRequest) (*GetPositionMode200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -132,18 +132,18 @@ func (a *DeviceAPIService) GetPositionModeExecute(r ApiGetPositionModeRequest) (
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiSetDisabledRequest struct {
+type DeviceAPISetDisabledRequest struct {
 	ctx context.Context
 	ApiService *DeviceAPIService
 	setDisabledRequest *SetDisabledRequest
 }
 
-func (r ApiSetDisabledRequest) SetDisabledRequest(setDisabledRequest SetDisabledRequest) ApiSetDisabledRequest {
+func (r DeviceAPISetDisabledRequest) SetDisabledRequest(setDisabledRequest SetDisabledRequest) DeviceAPISetDisabledRequest {
 	r.setDisabledRequest = &setDisabledRequest
 	return r
 }
 
-func (r ApiSetDisabledRequest) Execute() (*http.Response, error) {
+func (r DeviceAPISetDisabledRequest) Execute() (*http.Response, error) {
 	return r.ApiService.SetDisabledExecute(r)
 }
 
@@ -153,17 +153,17 @@ SetDisabled Set device disabled
 Manually switch device on/off
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetDisabledRequest
+ @return DeviceAPISetDisabledRequest
 */
-func (a *DeviceAPIService) SetDisabled(ctx context.Context) ApiSetDisabledRequest {
-	return ApiSetDisabledRequest{
+func (a *DeviceAPIService) SetDisabled(ctx context.Context) DeviceAPISetDisabledRequest {
+	return DeviceAPISetDisabledRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *DeviceAPIService) SetDisabledExecute(r ApiSetDisabledRequest) (*http.Response, error) {
+func (a *DeviceAPIService) SetDisabledExecute(r DeviceAPISetDisabledRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -238,18 +238,18 @@ func (a *DeviceAPIService) SetDisabledExecute(r ApiSetDisabledRequest) (*http.Re
 	return localVarHTTPResponse, nil
 }
 
-type ApiSetPositionRequest struct {
+type DeviceAPISetPositionRequest struct {
 	ctx context.Context
 	ApiService *DeviceAPIService
 	setPositionRequest *SetPositionRequest
 }
 
-func (r ApiSetPositionRequest) SetPositionRequest(setPositionRequest SetPositionRequest) ApiSetPositionRequest {
+func (r DeviceAPISetPositionRequest) SetPositionRequest(setPositionRequest SetPositionRequest) DeviceAPISetPositionRequest {
 	r.setPositionRequest = &setPositionRequest
 	return r
 }
 
-func (r ApiSetPositionRequest) Execute() (*http.Response, error) {
+func (r DeviceAPISetPositionRequest) Execute() (*http.Response, error) {
 	return r.ApiService.SetPositionExecute(r)
 }
 
@@ -259,17 +259,17 @@ SetPosition Set device position
 Manually set device position
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetPositionRequest
+ @return DeviceAPISetPositionRequest
 */
-func (a *DeviceAPIService) SetPosition(ctx context.Context) ApiSetPositionRequest {
-	return ApiSetPositionRequest{
+func (a *DeviceAPIService) SetPosition(ctx context.Context) DeviceAPISetPositionRequest {
+	return DeviceAPISetPositionRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *DeviceAPIService) SetPositionExecute(r ApiSetPositionRequest) (*http.Response, error) {
+func (a *DeviceAPIService) SetPositionExecute(r DeviceAPISetPositionRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -344,18 +344,18 @@ func (a *DeviceAPIService) SetPositionExecute(r ApiSetPositionRequest) (*http.Re
 	return localVarHTTPResponse, nil
 }
 
-type ApiSetPositionModeRequest struct {
+type DeviceAPISetPositionModeRequest struct {
 	ctx context.Context
 	ApiService *DeviceAPIService
 	setPositionModeRequest *SetPositionModeRequest
 }
 
-func (r ApiSetPositionModeRequest) SetPositionModeRequest(setPositionModeRequest SetPositionModeRequest) ApiSetPositionModeRequest {
+func (r DeviceAPISetPositionModeRequest) SetPositionModeRequest(setPositionModeRequest SetPositionModeRequest) DeviceAPISetPositionModeRequest {
 	r.setPositionModeRequest = &setPositionModeRequest
 	return r
 }
 
-func (r ApiSetPositionModeRequest) Execute() (*http.Response, error) {
+func (r DeviceAPISetPositionModeRequest) Execute() (*http.Response, error) {
 	return r.ApiService.SetPositionModeExecute(r)
 }
 
@@ -365,17 +365,17 @@ SetPositionMode Set device position mode
 Manually set device position mode (automatic or manual)
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetPositionModeRequest
+ @return DeviceAPISetPositionModeRequest
 */
-func (a *DeviceAPIService) SetPositionMode(ctx context.Context) ApiSetPositionModeRequest {
-	return ApiSetPositionModeRequest{
+func (a *DeviceAPIService) SetPositionMode(ctx context.Context) DeviceAPISetPositionModeRequest {
+	return DeviceAPISetPositionModeRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *DeviceAPIService) SetPositionModeExecute(r ApiSetPositionModeRequest) (*http.Response, error) {
+func (a *DeviceAPIService) SetPositionModeExecute(r DeviceAPISetPositionModeRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}

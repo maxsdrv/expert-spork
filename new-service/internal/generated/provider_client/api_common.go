@@ -22,12 +22,12 @@ import (
 // CommonAPIService CommonAPI service
 type CommonAPIService service
 
-type ApiGetApiVersionRequest struct {
+type CommonAPIGetApiVersionRequest struct {
 	ctx context.Context
 	ApiService *CommonAPIService
 }
 
-func (r ApiGetApiVersionRequest) Execute() (*GetApiVersion200Response, *http.Response, error) {
+func (r CommonAPIGetApiVersionRequest) Execute() (*GetApiVersion200Response, *http.Response, error) {
 	return r.ApiService.GetApiVersionExecute(r)
 }
 
@@ -35,10 +35,10 @@ func (r ApiGetApiVersionRequest) Execute() (*GetApiVersion200Response, *http.Res
 GetApiVersion Get current supported API version
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetApiVersionRequest
+ @return CommonAPIGetApiVersionRequest
 */
-func (a *CommonAPIService) GetApiVersion(ctx context.Context) ApiGetApiVersionRequest {
-	return ApiGetApiVersionRequest{
+func (a *CommonAPIService) GetApiVersion(ctx context.Context) CommonAPIGetApiVersionRequest {
+	return CommonAPIGetApiVersionRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -46,7 +46,7 @@ func (a *CommonAPIService) GetApiVersion(ctx context.Context) ApiGetApiVersionRe
 
 // Execute executes the request
 //  @return GetApiVersion200Response
-func (a *CommonAPIService) GetApiVersionExecute(r ApiGetApiVersionRequest) (*GetApiVersion200Response, *http.Response, error) {
+func (a *CommonAPIService) GetApiVersionExecute(r CommonAPIGetApiVersionRequest) (*GetApiVersion200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -129,12 +129,12 @@ func (a *CommonAPIService) GetApiVersionExecute(r ApiGetApiVersionRequest) (*Get
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetLicenseStatusRequest struct {
+type CommonAPIGetLicenseStatusRequest struct {
 	ctx context.Context
 	ApiService *CommonAPIService
 }
 
-func (r ApiGetLicenseStatusRequest) Execute() (*LicenseStatus, *http.Response, error) {
+func (r CommonAPIGetLicenseStatusRequest) Execute() (*LicenseStatus, *http.Response, error) {
 	return r.ApiService.GetLicenseStatusExecute(r)
 }
 
@@ -142,10 +142,10 @@ func (r ApiGetLicenseStatusRequest) Execute() (*LicenseStatus, *http.Response, e
 GetLicenseStatus Get current status of license checking
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetLicenseStatusRequest
+ @return CommonAPIGetLicenseStatusRequest
 */
-func (a *CommonAPIService) GetLicenseStatus(ctx context.Context) ApiGetLicenseStatusRequest {
-	return ApiGetLicenseStatusRequest{
+func (a *CommonAPIService) GetLicenseStatus(ctx context.Context) CommonAPIGetLicenseStatusRequest {
+	return CommonAPIGetLicenseStatusRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -153,7 +153,7 @@ func (a *CommonAPIService) GetLicenseStatus(ctx context.Context) ApiGetLicenseSt
 
 // Execute executes the request
 //  @return LicenseStatus
-func (a *CommonAPIService) GetLicenseStatusExecute(r ApiGetLicenseStatusRequest) (*LicenseStatus, *http.Response, error) {
+func (a *CommonAPIService) GetLicenseStatusExecute(r CommonAPIGetLicenseStatusRequest) (*LicenseStatus, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -236,12 +236,12 @@ func (a *CommonAPIService) GetLicenseStatusExecute(r ApiGetLicenseStatusRequest)
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetSettingsRequest struct {
+type CommonAPIGetSettingsRequest struct {
 	ctx context.Context
 	ApiService *CommonAPIService
 }
 
-func (r ApiGetSettingsRequest) Execute() (*Settings, *http.Response, error) {
+func (r CommonAPIGetSettingsRequest) Execute() (*Settings, *http.Response, error) {
 	return r.ApiService.GetSettingsExecute(r)
 }
 
@@ -249,10 +249,10 @@ func (r ApiGetSettingsRequest) Execute() (*Settings, *http.Response, error) {
 GetSettings Get devices settings
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetSettingsRequest
+ @return CommonAPIGetSettingsRequest
 */
-func (a *CommonAPIService) GetSettings(ctx context.Context) ApiGetSettingsRequest {
-	return ApiGetSettingsRequest{
+func (a *CommonAPIService) GetSettings(ctx context.Context) CommonAPIGetSettingsRequest {
+	return CommonAPIGetSettingsRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -260,7 +260,7 @@ func (a *CommonAPIService) GetSettings(ctx context.Context) ApiGetSettingsReques
 
 // Execute executes the request
 //  @return Settings
-func (a *CommonAPIService) GetSettingsExecute(r ApiGetSettingsRequest) (*Settings, *http.Response, error) {
+func (a *CommonAPIService) GetSettingsExecute(r CommonAPIGetSettingsRequest) (*Settings, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -343,18 +343,18 @@ func (a *CommonAPIService) GetSettingsExecute(r ApiGetSettingsRequest) (*Setting
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiSetSettingsRequest struct {
+type CommonAPISetSettingsRequest struct {
 	ctx context.Context
 	ApiService *CommonAPIService
 	settings *Settings
 }
 
-func (r ApiSetSettingsRequest) Settings(settings Settings) ApiSetSettingsRequest {
+func (r CommonAPISetSettingsRequest) Settings(settings Settings) CommonAPISetSettingsRequest {
 	r.settings = &settings
 	return r
 }
 
-func (r ApiSetSettingsRequest) Execute() (*http.Response, error) {
+func (r CommonAPISetSettingsRequest) Execute() (*http.Response, error) {
 	return r.ApiService.SetSettingsExecute(r)
 }
 
@@ -362,17 +362,17 @@ func (r ApiSetSettingsRequest) Execute() (*http.Response, error) {
 SetSettings Set devices settings
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetSettingsRequest
+ @return CommonAPISetSettingsRequest
 */
-func (a *CommonAPIService) SetSettings(ctx context.Context) ApiSetSettingsRequest {
-	return ApiSetSettingsRequest{
+func (a *CommonAPIService) SetSettings(ctx context.Context) CommonAPISetSettingsRequest {
+	return CommonAPISetSettingsRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *CommonAPIService) SetSettingsExecute(r ApiSetSettingsRequest) (*http.Response, error) {
+func (a *CommonAPIService) SetSettingsExecute(r CommonAPISetSettingsRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -447,18 +447,18 @@ func (a *CommonAPIService) SetSettingsExecute(r ApiSetSettingsRequest) (*http.Re
 	return localVarHTTPResponse, nil
 }
 
-type ApiUploadLicenseRequest struct {
+type CommonAPIUploadLicenseRequest struct {
 	ctx context.Context
 	ApiService *CommonAPIService
 	uploadLicenseRequest *UploadLicenseRequest
 }
 
-func (r ApiUploadLicenseRequest) UploadLicenseRequest(uploadLicenseRequest UploadLicenseRequest) ApiUploadLicenseRequest {
+func (r CommonAPIUploadLicenseRequest) UploadLicenseRequest(uploadLicenseRequest UploadLicenseRequest) CommonAPIUploadLicenseRequest {
 	r.uploadLicenseRequest = &uploadLicenseRequest
 	return r
 }
 
-func (r ApiUploadLicenseRequest) Execute() (*http.Response, error) {
+func (r CommonAPIUploadLicenseRequest) Execute() (*http.Response, error) {
 	return r.ApiService.UploadLicenseExecute(r)
 }
 
@@ -466,17 +466,17 @@ func (r ApiUploadLicenseRequest) Execute() (*http.Response, error) {
 UploadLicense Upload license file
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiUploadLicenseRequest
+ @return CommonAPIUploadLicenseRequest
 */
-func (a *CommonAPIService) UploadLicense(ctx context.Context) ApiUploadLicenseRequest {
-	return ApiUploadLicenseRequest{
+func (a *CommonAPIService) UploadLicense(ctx context.Context) CommonAPIUploadLicenseRequest {
+	return CommonAPIUploadLicenseRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *CommonAPIService) UploadLicenseExecute(r ApiUploadLicenseRequest) (*http.Response, error) {
+func (a *CommonAPIService) UploadLicenseExecute(r CommonAPIUploadLicenseRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}

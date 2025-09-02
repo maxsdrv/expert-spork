@@ -17,5 +17,3 @@ func (g *GeoPosition) ToAPI() *apiv1.GeoPosition {
 		Coordinate: g.Coordinate.ToAPI(),
 	}
 }
-
-//func NewDevicePosition(jsonStr string) DevicePosition {}

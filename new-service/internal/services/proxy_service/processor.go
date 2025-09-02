@@ -2,29 +2,30 @@ package proxy_service
 
 import (
 	"context"
-
-	"dds-provider/internal/devices/proxy"
-	"dds-provider/internal/generated/provider_client"
-	"dds-provider/internal/services/device_storage"
 	"encoding/json"
 
 	"dds-provider/internal/core"
 	"dds-provider/internal/core/components"
+	"dds-provider/internal/devices/proxy"
 	"dds-provider/internal/devices/proxy/mapping"
+	"dds-provider/internal/generated/provider_client"
+	"dds-provider/internal/services/device_container"
 	"dds-provider/internal/services/parsers"
 )
+
+var serviceError = core.ProviderError()
 
 type WsNotification struct {
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic]
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic]
-	devStorage     device_storage.DeviceStorageService
+	devStorage     device_container.DeviceContainerService
 	apiClient      *provider_client.APIClient
 }
 
 func NewWsNotification(
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
-	devStorage device_storage.DeviceStorageService,
+	devStorage device_container.DeviceContainerService,
 	apiClient *provider_client.APIClient,
 ) *WsNotification {
 	return &WsNotification{
@@ -65,11 +66,8 @@ func (n *WsNotification) processSensorInfo(ctx context.Context, dataRaw json.Raw
 	deviceId := core.NewId(sensor.Id)
 
 	if _, err := n.devStorage.Sensor(deviceId); err != nil {
-		proxySensor, err := proxy.NewSensor(sensor.Id, n.apiClient, sensor)
-		if err != nil {
-			logger.WithError(serviceError("%v", err)).Error("Failed to create proxy sensor")
-			return err
-		}
+		proxySensor := proxy.NewSensor(sensor.Id, n.apiClient, sensor)
+
 		err = n.devStorage.AppendDevice(deviceId, proxySensor)
 		if err != nil {
 			logger.WithError(serviceError("%v", err)).Error("Failed to append device")
@@ -114,12 +112,13 @@ func (n *WsNotification) processJammerInfo(ctx context.Context, dataRaw json.Raw
 	deviceId := core.NewId(jammerInfo.Id)
 
 	if _, err := n.devStorage.Jammer(deviceId); err != nil {
-		proxyJammer, err := proxy.NewJammer(jammerInfo.Id, n.apiClient, jammerInfo)
+		proxyJammer := proxy.NewJammer(jammerInfo.Id, n.apiClient, jammerInfo)
+		err = n.devStorage.AppendDevice(deviceId, proxyJammer)
 		if err != nil {
-			logger.WithError(serviceError("%v", err)).Error("Failed to create proxy jammer")
+			logger.WithError(serviceError("%v", err)).Error("Failed to append device")
 			return err
 		}
-		n.devStorage.AppendDevice(deviceId, proxyJammer)
+
 		logger.Infof("Registered jammer %s from WebSocket notification", jammerInfo.Id)
 	}
 

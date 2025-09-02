@@ -13,13 +13,11 @@ import (
 	"dds-provider/internal/core/components"
 	"dds-provider/internal/enums"
 	"dds-provider/internal/generated/provider_client"
-	"dds-provider/internal/services/device_storage"
+	"dds-provider/internal/services/device_container"
 	"dds-provider/internal/services/wsclient"
 )
 
 var logging = ctx_log.GetLogger(nil)
-
-var serviceError = core.ProviderError()
 
 var (
 	ErrHTTPTimeout           = serviceError("http timeout")
@@ -43,7 +41,7 @@ type Connection struct {
 }
 
 type Service struct {
-	devStorage            device_storage.DeviceStorageService
+	devStorage            device_container.DeviceContainerService
 	httpClient            *http.Client
 	notificationClient    *wsclient.WSNotificationClient
 	notificationProcessor *WsNotification
@@ -55,7 +53,7 @@ func New(ctx context.Context,
 	connection Connection,
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
 	jammerNotifier *components.Notifier[*core.JammerInfoDynamic],
-	devStorage device_storage.DeviceStorageService,
+	devStorage device_container.DeviceContainerService,
 ) *Service {
 	httpClient := &http.Client{
 		Timeout: 30 * time.Second,

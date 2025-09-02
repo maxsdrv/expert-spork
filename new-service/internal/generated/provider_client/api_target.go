@@ -22,19 +22,19 @@ import (
 // TargetAPIService TargetAPI service
 type TargetAPIService service
 
-type ApiGetTargetRequest struct {
+type TargetAPIGetTargetRequest struct {
 	ctx context.Context
 	ApiService *TargetAPIService
 	targetId *string
 }
 
 // ID of target to return
-func (r ApiGetTargetRequest) TargetId(targetId string) ApiGetTargetRequest {
+func (r TargetAPIGetTargetRequest) TargetId(targetId string) TargetAPIGetTargetRequest {
 	r.targetId = &targetId
 	return r
 }
 
-func (r ApiGetTargetRequest) Execute() (*TargetData, *http.Response, error) {
+func (r TargetAPIGetTargetRequest) Execute() (*TargetData, *http.Response, error) {
 	return r.ApiService.GetTargetExecute(r)
 }
 
@@ -44,10 +44,10 @@ GetTarget Find target by ID
 Returns a single target
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetTargetRequest
+ @return TargetAPIGetTargetRequest
 */
-func (a *TargetAPIService) GetTarget(ctx context.Context) ApiGetTargetRequest {
-	return ApiGetTargetRequest{
+func (a *TargetAPIService) GetTarget(ctx context.Context) TargetAPIGetTargetRequest {
+	return TargetAPIGetTargetRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -55,7 +55,7 @@ func (a *TargetAPIService) GetTarget(ctx context.Context) ApiGetTargetRequest {
 
 // Execute executes the request
 //  @return TargetData
-func (a *TargetAPIService) GetTargetExecute(r ApiGetTargetRequest) (*TargetData, *http.Response, error) {
+func (a *TargetAPIService) GetTargetExecute(r TargetAPIGetTargetRequest) (*TargetData, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -142,12 +142,12 @@ func (a *TargetAPIService) GetTargetExecute(r ApiGetTargetRequest) (*TargetData,
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetTargetsRequest struct {
+type TargetAPIGetTargetsRequest struct {
 	ctx context.Context
 	ApiService *TargetAPIService
 }
 
-func (r ApiGetTargetsRequest) Execute() (*TargetList, *http.Response, error) {
+func (r TargetAPIGetTargetsRequest) Execute() (*TargetList, *http.Response, error) {
 	return r.ApiService.GetTargetsExecute(r)
 }
 
@@ -157,10 +157,10 @@ GetTargets Get targets list
 Get summary of all active targets
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetTargetsRequest
+ @return TargetAPIGetTargetsRequest
 */
-func (a *TargetAPIService) GetTargets(ctx context.Context) ApiGetTargetsRequest {
-	return ApiGetTargetsRequest{
+func (a *TargetAPIService) GetTargets(ctx context.Context) TargetAPIGetTargetsRequest {
+	return TargetAPIGetTargetsRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -168,7 +168,7 @@ func (a *TargetAPIService) GetTargets(ctx context.Context) ApiGetTargetsRequest 
 
 // Execute executes the request
 //  @return TargetList
-func (a *TargetAPIService) GetTargetsExecute(r ApiGetTargetsRequest) (*TargetList, *http.Response, error) {
+func (a *TargetAPIService) GetTargetsExecute(r TargetAPIGetTargetsRequest) (*TargetList, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -251,12 +251,12 @@ func (a *TargetAPIService) GetTargetsExecute(r ApiGetTargetsRequest) (*TargetLis
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiTargetSubscribeRequest struct {
+type TargetAPITargetSubscribeRequest struct {
 	ctx context.Context
 	ApiService *TargetAPIService
 }
 
-func (r ApiTargetSubscribeRequest) Execute() (*http.Response, error) {
+func (r TargetAPITargetSubscribeRequest) Execute() (*http.Response, error) {
 	return r.ApiService.TargetSubscribeExecute(r)
 }
 
@@ -266,17 +266,17 @@ TargetSubscribe Enable subscription on target changes
 Subscribe for receiveing notifications for following events - target_detected, target_data_updated, target_lost
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiTargetSubscribeRequest
+ @return TargetAPITargetSubscribeRequest
 */
-func (a *TargetAPIService) TargetSubscribe(ctx context.Context) ApiTargetSubscribeRequest {
-	return ApiTargetSubscribeRequest{
+func (a *TargetAPIService) TargetSubscribe(ctx context.Context) TargetAPITargetSubscribeRequest {
+	return TargetAPITargetSubscribeRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *TargetAPIService) TargetSubscribeExecute(r ApiTargetSubscribeRequest) (*http.Response, error) {
+func (a *TargetAPIService) TargetSubscribeExecute(r TargetAPITargetSubscribeRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -349,12 +349,12 @@ func (a *TargetAPIService) TargetSubscribeExecute(r ApiTargetSubscribeRequest) (
 	return localVarHTTPResponse, nil
 }
 
-type ApiTargetUnsubscribeRequest struct {
+type TargetAPITargetUnsubscribeRequest struct {
 	ctx context.Context
 	ApiService *TargetAPIService
 }
 
-func (r ApiTargetUnsubscribeRequest) Execute() (*http.Response, error) {
+func (r TargetAPITargetUnsubscribeRequest) Execute() (*http.Response, error) {
 	return r.ApiService.TargetUnsubscribeExecute(r)
 }
 
@@ -364,17 +364,17 @@ TargetUnsubscribe Disable subscription on target changes
 Unsubscribe from receiveing all target notifications
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiTargetUnsubscribeRequest
+ @return TargetAPITargetUnsubscribeRequest
 */
-func (a *TargetAPIService) TargetUnsubscribe(ctx context.Context) ApiTargetUnsubscribeRequest {
-	return ApiTargetUnsubscribeRequest{
+func (a *TargetAPIService) TargetUnsubscribe(ctx context.Context) TargetAPITargetUnsubscribeRequest {
+	return TargetAPITargetUnsubscribeRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *TargetAPIService) TargetUnsubscribeExecute(r ApiTargetUnsubscribeRequest) (*http.Response, error) {
+func (a *TargetAPIService) TargetUnsubscribeExecute(r TargetAPITargetUnsubscribeRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}

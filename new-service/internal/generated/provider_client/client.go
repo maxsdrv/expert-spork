@@ -49,6 +49,10 @@ type APIClient struct {
 
 	// API Services
 
+	AlphaAPI *AlphaAPIService
+
+	BetaAPI *BetaAPIService
+
 	CameraAPI *CameraAPIService
 
 	CommonAPI *CommonAPIService
@@ -80,6 +84,8 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
+	c.AlphaAPI = (*AlphaAPIService)(&c.common)
+	c.BetaAPI = (*BetaAPIService)(&c.common)
 	c.CameraAPI = (*CameraAPIService)(&c.common)
 	c.CommonAPI = (*CommonAPIService)(&c.common)
 	c.DeviceAPI = (*DeviceAPIService)(&c.common)

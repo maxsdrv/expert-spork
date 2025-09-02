@@ -17,8 +17,8 @@ import (
 	"dds-provider/internal/controllers"
 	"dds-provider/internal/generated/api/proto/apiv1connect"
 	"dds-provider/internal/handlers"
-	"dds-provider/internal/services/common"
-	"dds-provider/internal/services/device_storage"
+	"dds-provider/internal/services"
+	"dds-provider/internal/services/device_container"
 	"dds-provider/internal/services/proxy_service"
 )
 
@@ -38,13 +38,13 @@ func main() {
 
 	ctx := context.Background()
 
-	svcCommon := common.NewCommonService(ctx)
-	svcDevStorage := device_storage.NewDeviceStorageService(ctx)
+	svcCommon := common.New(ctx)
+	svcDevStorage := device_container.New(ctx)
 	svcSensorNotifier, svcJammerNotifier := proxy_service.NewNotifiers(ctx)
 	svcTargetProvider := proxy_service.New(ctx, config.Proxy, svcSensorNotifier, svcJammerNotifier, svcDevStorage)
 
 	controllers := controllers.NewControllers(svcCommon, svcDevStorage, svcSensorNotifier, svcJammerNotifier, svcTargetProvider)
-	handlers := handlers.NewHandlers(controllers)
+	handlers := handlers.New(controllers)
 	interceptors := connect.WithInterceptors(
 		middleware.NewLoggingInterceptor(),
 		middleware.NewValidateInterceptor(),

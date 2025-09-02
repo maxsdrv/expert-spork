@@ -19,22 +19,22 @@ import (
 )
 
 
-// TrackAPIService TrackAPI service
-type TrackAPIService service
+// AlphaAPIService AlphaAPI service
+type AlphaAPIService service
 
-type TrackAPIGetTrackRequest struct {
+type AlphaAPIGetTrackRequest struct {
 	ctx context.Context
-	ApiService *TrackAPIService
+	ApiService *AlphaAPIService
 	trackId *string
 }
 
 // ID of track to return
-func (r TrackAPIGetTrackRequest) TrackId(trackId string) TrackAPIGetTrackRequest {
+func (r AlphaAPIGetTrackRequest) TrackId(trackId string) AlphaAPIGetTrackRequest {
 	r.trackId = &trackId
 	return r
 }
 
-func (r TrackAPIGetTrackRequest) Execute() (*TrackData, *http.Response, error) {
+func (r AlphaAPIGetTrackRequest) Execute() (*TrackData, *http.Response, error) {
 	return r.ApiService.GetTrackExecute(r)
 }
 
@@ -44,10 +44,10 @@ GetTrack Find target by ID
 Returns a single target
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrackAPIGetTrackRequest
+ @return AlphaAPIGetTrackRequest
 */
-func (a *TrackAPIService) GetTrack(ctx context.Context) TrackAPIGetTrackRequest {
-	return TrackAPIGetTrackRequest{
+func (a *AlphaAPIService) GetTrack(ctx context.Context) AlphaAPIGetTrackRequest {
+	return AlphaAPIGetTrackRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -55,7 +55,7 @@ func (a *TrackAPIService) GetTrack(ctx context.Context) TrackAPIGetTrackRequest 
 
 // Execute executes the request
 //  @return TrackData
-func (a *TrackAPIService) GetTrackExecute(r TrackAPIGetTrackRequest) (*TrackData, *http.Response, error) {
+func (a *AlphaAPIService) GetTrackExecute(r AlphaAPIGetTrackRequest) (*TrackData, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -63,7 +63,7 @@ func (a *TrackAPIService) GetTrackExecute(r TrackAPIGetTrackRequest) (*TrackData
 		localVarReturnValue  *TrackData
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrackAPIService.GetTrack")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AlphaAPIService.GetTrack")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -142,12 +142,12 @@ func (a *TrackAPIService) GetTrackExecute(r TrackAPIGetTrackRequest) (*TrackData
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type TrackAPIGetTracksRequest struct {
+type AlphaAPIGetTracksRequest struct {
 	ctx context.Context
-	ApiService *TrackAPIService
+	ApiService *AlphaAPIService
 }
 
-func (r TrackAPIGetTracksRequest) Execute() (*TrackList, *http.Response, error) {
+func (r AlphaAPIGetTracksRequest) Execute() (*TrackList, *http.Response, error) {
 	return r.ApiService.GetTracksExecute(r)
 }
 
@@ -157,10 +157,10 @@ GetTracks Get tracks list
 Get summary of all active tracks
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrackAPIGetTracksRequest
+ @return AlphaAPIGetTracksRequest
 */
-func (a *TrackAPIService) GetTracks(ctx context.Context) TrackAPIGetTracksRequest {
-	return TrackAPIGetTracksRequest{
+func (a *AlphaAPIService) GetTracks(ctx context.Context) AlphaAPIGetTracksRequest {
+	return AlphaAPIGetTracksRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -168,7 +168,7 @@ func (a *TrackAPIService) GetTracks(ctx context.Context) TrackAPIGetTracksReques
 
 // Execute executes the request
 //  @return TrackList
-func (a *TrackAPIService) GetTracksExecute(r TrackAPIGetTracksRequest) (*TrackList, *http.Response, error) {
+func (a *AlphaAPIService) GetTracksExecute(r AlphaAPIGetTracksRequest) (*TrackList, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -176,7 +176,7 @@ func (a *TrackAPIService) GetTracksExecute(r TrackAPIGetTracksRequest) (*TrackLi
 		localVarReturnValue  *TrackList
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrackAPIService.GetTracks")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AlphaAPIService.GetTracks")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -251,12 +251,208 @@ func (a *TrackAPIService) GetTracksExecute(r TrackAPIGetTracksRequest) (*TrackLi
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type TrackAPITrackSubscribeRequest struct {
+type AlphaAPITargetSubscribeRequest struct {
 	ctx context.Context
-	ApiService *TrackAPIService
+	ApiService *AlphaAPIService
 }
 
-func (r TrackAPITrackSubscribeRequest) Execute() (*http.Response, error) {
+func (r AlphaAPITargetSubscribeRequest) Execute() (*http.Response, error) {
+	return r.ApiService.TargetSubscribeExecute(r)
+}
+
+/*
+TargetSubscribe Enable subscription on target changes
+
+Subscribe for receiveing notifications for following events - target_detected, target_data_updated, target_lost
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return AlphaAPITargetSubscribeRequest
+*/
+func (a *AlphaAPIService) TargetSubscribe(ctx context.Context) AlphaAPITargetSubscribeRequest {
+	return AlphaAPITargetSubscribeRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+func (a *AlphaAPIService) TargetSubscribeExecute(r AlphaAPITargetSubscribeRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AlphaAPIService.TargetSubscribe")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/target/subscribe"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ModelError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type AlphaAPITargetUnsubscribeRequest struct {
+	ctx context.Context
+	ApiService *AlphaAPIService
+}
+
+func (r AlphaAPITargetUnsubscribeRequest) Execute() (*http.Response, error) {
+	return r.ApiService.TargetUnsubscribeExecute(r)
+}
+
+/*
+TargetUnsubscribe Disable subscription on target changes
+
+Unsubscribe from receiveing all target notifications
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return AlphaAPITargetUnsubscribeRequest
+*/
+func (a *AlphaAPIService) TargetUnsubscribe(ctx context.Context) AlphaAPITargetUnsubscribeRequest {
+	return AlphaAPITargetUnsubscribeRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+func (a *AlphaAPIService) TargetUnsubscribeExecute(r AlphaAPITargetUnsubscribeRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AlphaAPIService.TargetUnsubscribe")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/target/unsubscribe"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ModelError
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type AlphaAPITrackSubscribeRequest struct {
+	ctx context.Context
+	ApiService *AlphaAPIService
+}
+
+func (r AlphaAPITrackSubscribeRequest) Execute() (*http.Response, error) {
 	return r.ApiService.TrackSubscribeExecute(r)
 }
 
@@ -266,24 +462,24 @@ TrackSubscribe Enable subscription on track changes
 Subscribe for receiveing notifications for following events - track_started, track_updated, track_finished
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrackAPITrackSubscribeRequest
+ @return AlphaAPITrackSubscribeRequest
 */
-func (a *TrackAPIService) TrackSubscribe(ctx context.Context) TrackAPITrackSubscribeRequest {
-	return TrackAPITrackSubscribeRequest{
+func (a *AlphaAPIService) TrackSubscribe(ctx context.Context) AlphaAPITrackSubscribeRequest {
+	return AlphaAPITrackSubscribeRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *TrackAPIService) TrackSubscribeExecute(r TrackAPITrackSubscribeRequest) (*http.Response, error) {
+func (a *AlphaAPIService) TrackSubscribeExecute(r AlphaAPITrackSubscribeRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrackAPIService.TrackSubscribe")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AlphaAPIService.TrackSubscribe")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -349,12 +545,12 @@ func (a *TrackAPIService) TrackSubscribeExecute(r TrackAPITrackSubscribeRequest)
 	return localVarHTTPResponse, nil
 }
 
-type TrackAPITrackUnsubscribeRequest struct {
+type AlphaAPITrackUnsubscribeRequest struct {
 	ctx context.Context
-	ApiService *TrackAPIService
+	ApiService *AlphaAPIService
 }
 
-func (r TrackAPITrackUnsubscribeRequest) Execute() (*http.Response, error) {
+func (r AlphaAPITrackUnsubscribeRequest) Execute() (*http.Response, error) {
 	return r.ApiService.TrackUnsubscribeExecute(r)
 }
 
@@ -364,24 +560,24 @@ TrackUnsubscribe Disable subscription on track changes
 Unsubscribe from receiveing all track notifications
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrackAPITrackUnsubscribeRequest
+ @return AlphaAPITrackUnsubscribeRequest
 */
-func (a *TrackAPIService) TrackUnsubscribe(ctx context.Context) TrackAPITrackUnsubscribeRequest {
-	return TrackAPITrackUnsubscribeRequest{
+func (a *AlphaAPIService) TrackUnsubscribe(ctx context.Context) AlphaAPITrackUnsubscribeRequest {
+	return AlphaAPITrackUnsubscribeRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *TrackAPIService) TrackUnsubscribeExecute(r TrackAPITrackUnsubscribeRequest) (*http.Response, error) {
+func (a *AlphaAPIService) TrackUnsubscribeExecute(r AlphaAPITrackUnsubscribeRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrackAPIService.TrackUnsubscribe")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AlphaAPIService.TrackUnsubscribe")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}

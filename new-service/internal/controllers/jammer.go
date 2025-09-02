@@ -31,7 +31,7 @@ func (s *Controllers) GetJammers(ctx context.Context) (*connect.Response[apiv1.J
 			continue
 		}
 
-		jammerInfo := (*sensorBase).JammerInfo()
+		jammerInfo := sensorBase.JammerInfo()
 		jammerInfos = append(jammerInfos, &jammerInfo)
 	}
 
@@ -45,7 +45,7 @@ func (s *Controllers) SetJammerBands(
 	ctx context.Context,
 	jammerId string,
 	bandsActive []string,
-	duration int32,
+	duration uint,
 ) error {
 	logger := logging.WithCtxFields(ctx)
 
@@ -67,7 +67,7 @@ func (s *Controllers) SetJammerBands(
 		return err
 	}
 
-	jammerBandsWriter, ok := (*jammerBase).(core.JammerBandsWriter)
+	jammerBandsWriter, ok := jammerBase.(core.JammerBandsWriter)
 	if !ok {
 		return controllersError("jammer does not support bands setting: %s", deviceId)
 	}
