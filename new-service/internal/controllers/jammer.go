@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	"github.com/golang/protobuf/proto"
 	"github.com/opticoder/ctx-log/go/ctx_log"
 
 	"dds-provider/internal/core"
@@ -15,7 +14,7 @@ var logging = ctx_log.GetLogger(nil)
 
 var controllersError = core.ProviderError()
 
-func (s *Controllers) GetJammers(ctx context.Context) (*connect.Response[apiv1.JammersResponse], error) {
+func (s *Controllers) Jammers(ctx context.Context) (*connect.Response[apiv1.JammersResponse], error) {
 	logger := logging.WithCtxFields(ctx)
 
 	logger.Debug("Getting Jammers")
@@ -51,14 +50,6 @@ func (s *Controllers) SetJammerBands(
 
 	logger.Debug("SetJammerBands request")
 
-	if jammerId == "" {
-		return controllersError("jammer id is required")
-	}
-
-	if duration < 0 {
-		return controllersError("duration must be non-negative, got: %d", duration)
-	}
-
 	deviceId := core.NewId(jammerId)
 
 	jammerBase, err := s.svcDevStorage.Jammer(deviceId)
@@ -87,7 +78,7 @@ func (s *Controllers) SetJammerBands(
 			return controllersError("No dynamic info available for jammer %s", deviceId)
 		}
 
-		allSupportedBands := jammerDynamic.Bands.GetAll()
+		allSupportedBands := jammerDynamic.Bands.All()
 
 		jammerBands, err := core.NewBands(allSupportedBands, activeBandsList)
 		if err != nil {
@@ -139,28 +130,9 @@ func (s *Controllers) GetGroups(ctx context.Context) ([]*apiv1.JammerGroup, erro
 
 	logger.Debug("Getting Groups")
 
-	apiClient, err := s.svcTargetProvider.APIClient()
+	groups, err := s.svcProvider.GetJammerGroups(ctx)
 	if err != nil {
-		return nil, controllersError("target provider is not configured")
-	}
-
-	response, _, err := apiClient.JammerAPI.GetJammerGroups(ctx).Execute()
-	if err != nil {
-		logger.WithError(controllersError("%v", err)).Error("Failed to get jammer groups")
-		return nil, err
-	}
-
-	if response == nil || response.JammerGroups == nil {
-		return nil, controllersError("jammer groups are not found")
-	}
-
-	var groups []*apiv1.JammerGroup
-	for _, group := range response.JammerGroups {
-		jammerGroup := &apiv1.JammerGroup{
-			GroupId: proto.String(group.GetId()),
-			Name:    proto.String(group.GetName()),
-		}
-		groups = append(groups, jammerGroup)
+		return nil, controllersError("%v", err)
 	}
 
 	return groups, nil

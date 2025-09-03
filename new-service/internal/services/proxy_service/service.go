@@ -34,6 +34,7 @@ const (
 	msgTypeSensorInfo    = "sensor_info"
 	msgTypeJammerInfo    = "jammer_info"
 	msgTypeLicenseStatus = "license_status"
+	msgTypeTargetInfo    = "target_info"
 )
 
 type Connection struct {
@@ -86,13 +87,6 @@ func (s *Service) start(ctx context.Context,
 	logger.Debug("Starting proxy")
 
 	s.connect(ctx, jammerNotifier, sensorNotifier)
-}
-
-func (s *Service) APIClient() (*provider_client.APIClient, error) {
-	if s.apiClient == nil {
-		return nil, serviceError("api client is not initialized")
-	}
-	return s.apiClient, nil
 }
 
 func (s *Service) connect(ctx context.Context,

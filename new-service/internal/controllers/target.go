@@ -2,9 +2,6 @@ package controllers
 
 import (
 	"context"
-	"time"
-
-	"dds-provider/internal/devices/proxy/mapping"
 	apiv1 "dds-provider/internal/generated/api/proto"
 )
 
@@ -16,43 +13,17 @@ func (s *Controllers) Targets(
 
 	logger.Debug("Start targets streaming")
 
-	apiClient, err := s.svcTargetProvider.APIClient()
+	targets, err := s.svcProvider.GetTargets(ctx)
 	if err != nil {
-		return controllersError("target provider is not configured")
+		return err
 	}
 
-	targetApi := apiClient.TargetAPI
-
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-ticker.C:
-			targetList, _, err := targetApi.GetTargets(ctx).Execute()
-			if err != nil {
-				logger.WithError(controllersError("%v", err)).Error("Failed to get targets")
-				continue
-			}
-
-			if targetList == nil || targetList.Targets == nil {
-				continue
-			}
-
-			for _, target := range targetList.Targets {
-				targetResponse, err := mapping.ConvertToTargetsResponse(&target)
-				if err != nil {
-					logger.WithError(controllersError("%v", err)).Error("Failed to convert target")
-					continue
-				}
-
-				if err = sendFunc(targetResponse); err != nil {
-					logger.WithError(controllersError("%v", err)).Error("Failed to send target")
-					return err
-				}
-			}
+	for _, target := range targets {
+		err := sendFunc(target)
+		if err != nil {
+			return err
 		}
 	}
+
+	return nil
 }

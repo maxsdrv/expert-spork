@@ -12,7 +12,7 @@ import (
 	apiv1 "dds-provider/internal/generated/api/proto"
 )
 
-func (s *Controllers) GetSensors(
+func (s *Controllers) Sensors(
 	ctx context.Context,
 ) (*connect.Response[apiv1.SensorsResponse], error) {
 	logger := logging.WithCtxFields(ctx)
@@ -104,14 +104,11 @@ func (s *Controllers) SetPositionMode(
 	req *connect.Request[apiv1.SetPositionModeRequest],
 ) (*connect.Response[emptypb.Empty], error) {
 	logger := logging.WithCtxFields(ctx)
+
 	logger.Debugf("Request data: %s", req.Msg)
 
 	deviceId := req.Msg.GetDeviceId()
-	if deviceId == "" {
-		return nil, controllersError("device id is required")
-	}
 	positionMode := req.Msg.GetPositionMode()
-
 	deviceIdCore := core.NewId(deviceId)
 	deviceBase, err := s.svcDevStorage.Device(deviceIdCore)
 	if err != nil {
@@ -134,13 +131,10 @@ func (s *Controllers) SetPosition(
 	req *connect.Request[apiv1.SetPositionRequest],
 ) (*connect.Response[emptypb.Empty], error) {
 	logger := logging.WithCtxFields(ctx)
+
 	logger.Debugf("Request data: %s", req.Msg)
 
 	deviceId := req.Msg.GetDeviceId()
-	if deviceId == "" {
-		return nil, controllersError("device id is required")
-	}
-
 	position := req.Msg.GetPosition()
 	if position == nil {
 		return nil, controllersError("position is required")

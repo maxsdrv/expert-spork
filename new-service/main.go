@@ -41,9 +41,9 @@ func main() {
 	svcCommon := common.New(ctx)
 	svcDevStorage := device_container.New(ctx)
 	svcSensorNotifier, svcJammerNotifier := proxy_service.NewNotifiers(ctx)
-	svcTargetProvider := proxy_service.New(ctx, config.Proxy, svcSensorNotifier, svcJammerNotifier, svcDevStorage)
+	svcProvider := proxy_service.New(ctx, config.Proxy, svcSensorNotifier, svcJammerNotifier, svcDevStorage)
 
-	controllers := controllers.NewControllers(svcCommon, svcDevStorage, svcSensorNotifier, svcJammerNotifier, svcTargetProvider)
+	controllers := controllers.NewControllers(svcCommon, svcDevStorage, svcSensorNotifier, svcJammerNotifier, svcProvider)
 	handlers := handlers.New(controllers)
 	interceptors := connect.WithInterceptors(
 		middleware.NewLoggingInterceptor(),

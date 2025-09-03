@@ -75,8 +75,8 @@ func (j *JammerInfoDynamic) ToAPI() *apiv1.JammerInfoDynamicResponse {
 	}
 
 	var apiBands []*apiv1.Band
-	activeBands := j.Bands.GetActive()
-	for _, band := range j.Bands.GetAll() {
+	activeBands := j.Bands.Active()
+	for _, band := range j.Bands.All() {
 		isActive := false
 		for _, activeBand := range activeBands {
 			if band == activeBand {

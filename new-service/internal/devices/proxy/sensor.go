@@ -62,7 +62,7 @@ func (s *Sensor) SetDisabled(disabled bool) error {
 }
 
 func (s *Sensor) SetPosition(position core.GeoPosition) error {
-	dssPosition := mapping.ConvertToDSSGeoPosition(position)
+	dssPosition := mapping.ConvertToProviderGeoPosition(position)
 	setPositionReq := provider_client.SetPositionRequest{
 		Id:       s.id,
 		Position: dssPosition,
@@ -76,7 +76,7 @@ func (s *Sensor) SetPosition(position core.GeoPosition) error {
 }
 
 func (s *Sensor) SetPositionMode(mode core.GeoPositionMode) error {
-	dssMode := mapping.ConvertToDSSGeoPositionMode(mode)
+	dssMode := mapping.ConvertToProviderGeoPositionMode(mode)
 
 	setPositionModeReq := provider_client.SetPositionModeRequest{
 		Id:           s.id,

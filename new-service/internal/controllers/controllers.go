@@ -13,20 +13,20 @@ type Controllers struct {
 	svcDevStorage     device_container.DeviceContainerService
 	svcSensorNotifier *components.Notifier[*core.SensorInfoDynamic]
 	svcJammerNotifier *components.Notifier[*core.JammerInfoDynamic]
-	svcTargetProvider *proxy_service.Service
+	svcProvider       *proxy_service.Service
 }
 
 func NewControllers(svcCommon *common.CommonService,
 	svcDevStorage device_container.DeviceContainerService,
 	svcSensorNotifier *components.Notifier[*core.SensorInfoDynamic],
 	svcJammerNotifier *components.Notifier[*core.JammerInfoDynamic],
-	svcTargetProvider *proxy_service.Service,
+	svcProvider *proxy_service.Service,
 ) *Controllers {
 	return &Controllers{
 		svcCommon:         svcCommon,
 		svcDevStorage:     svcDevStorage,
 		svcSensorNotifier: svcSensorNotifier,
 		svcJammerNotifier: svcJammerNotifier,
-		svcTargetProvider: svcTargetProvider,
+		svcProvider:       svcProvider,
 	}
 }

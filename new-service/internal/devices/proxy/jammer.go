@@ -44,7 +44,7 @@ func (j *Jammer) SetDisabled(disabled bool) error {
 }
 
 func (j *Jammer) SetPosition(position core.GeoPosition) error {
-	dssPosition := mapping.ConvertToDSSGeoPosition(position)
+	dssPosition := mapping.ConvertToProviderGeoPosition(position)
 	setPositionReq := provider_client.SetPositionRequest{
 		Id:       j.id,
 		Position: dssPosition,
@@ -58,7 +58,7 @@ func (j *Jammer) SetPosition(position core.GeoPosition) error {
 }
 
 func (j *Jammer) SetPositionMode(mode core.GeoPositionMode) error {
-	dssMode := mapping.ConvertToDSSGeoPositionMode(mode)
+	dssMode := mapping.ConvertToProviderGeoPositionMode(mode)
 	setPositionModeReq := provider_client.SetPositionModeRequest{
 		Id:           j.id,
 		PositionMode: dssMode,
@@ -73,7 +73,7 @@ func (j *Jammer) SetPositionMode(mode core.GeoPositionMode) error {
 
 func (j *Jammer) SetJammerBands(bands core.JammerBands, duration uint) error {
 
-	activeBands := bands.GetActive()
+	activeBands := bands.Active()
 
 	setJammerBandsReq := provider_client.SetJammerBandsRequest{
 		Id:          j.id,

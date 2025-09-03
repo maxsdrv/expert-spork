@@ -17,7 +17,7 @@ func (s *Handlers) Sensors(
 	logger := logging.WithCtxFields(ctx)
 	logger.Debugf("Request data: %s", req.Msg)
 
-	return s.controllers.GetSensors(ctx)
+	return s.controllers.Sensors(ctx)
 }
 
 func (s *Handlers) SensorInfoDynamic(

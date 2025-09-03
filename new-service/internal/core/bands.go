@@ -8,8 +8,8 @@ type BandList []string
 
 type JammerBands interface {
 	Set(bands BandList) (JammerBands, error)
-	GetActive() BandList
-	GetAll() BandList
+	Active() BandList
+	All() BandList
 }
 
 type bandsImpl struct {
@@ -39,10 +39,10 @@ func (b *bandsImpl) Set(bands BandList) (JammerBands, error) {
 	return NewBands(b.all, bands)
 }
 
-func (b *bandsImpl) GetActive() BandList {
+func (b *bandsImpl) Active() BandList {
 	return b.active
 }
 
-func (b *bandsImpl) GetAll() BandList {
+func (b *bandsImpl) All() BandList {
 	return b.all
 }

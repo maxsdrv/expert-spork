@@ -16,7 +16,7 @@ func (s *Handlers) Jammers(
 	logger := logging.WithCtxFields(ctx)
 	logger.Debugf("Request data: %s", req.Msg)
 
-	return s.controllers.GetJammers(ctx)
+	return s.controllers.Jammers(ctx)
 }
 
 func (s *Handlers) JammerInfoDynamic(

@@ -6,7 +6,7 @@ import (
 	"dds-provider/internal/generated/provider_client"
 )
 
-func ConvertToDSSGeoPosition(position core.GeoPosition) provider_client.GeoPosition {
+func ConvertToProviderGeoPosition(position core.GeoPosition) provider_client.GeoPosition {
 	coordinate := provider_client.GeoCoordinate{
 		Latitude:  position.Coordinate.Lat,
 		Longitude: position.Coordinate.Lon,
@@ -23,7 +23,7 @@ func ConvertToDSSGeoPosition(position core.GeoPosition) provider_client.GeoPosit
 	}
 }
 
-func ConvertToDSSGeoPositionMode(positionMode core.GeoPositionMode) provider_client.GeoPositionMode {
+func ConvertToProviderGeoPositionMode(positionMode core.GeoPositionMode) provider_client.GeoPositionMode {
 	switch positionMode {
 	case apiv1.GeoPositionMode_GEO_AUTO:
 		return provider_client.GEOPOSITIONMODE_AUTO

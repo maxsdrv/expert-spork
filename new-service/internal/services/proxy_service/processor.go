@@ -48,6 +48,8 @@ func (n *WsNotification) HandleNotification(ctx context.Context, message string,
 		return n.licenseStatusUpdate(ctx, data)
 	case msgTypeJammerInfo:
 		return n.processJammerInfo(ctx, data)
+	case msgTypeTargetInfo:
+		return n.processTargetInfo(ctx, data)
 	default:
 		logger.Tracef("Unknown message type: %s", message)
 		return nil
@@ -158,6 +160,12 @@ func (n *WsNotification) licenseStatusUpdate(ctx context.Context, dataRaw json.R
 	logger.Debugf("License status is: %v %s", licenseStatus.Valid, licenseStatus.Description)
 
 	// TODO: Implement logic for sending license status
+
+	return nil
+}
+
+func (n *WsNotification) processTargetInfo(ctx context.Context, dataRaw json.RawMessage) error {
+	// TODO: Implement target info process
 
 	return nil
 }
