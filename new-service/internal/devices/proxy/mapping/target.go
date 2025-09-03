@@ -9,10 +9,15 @@ import (
 )
 
 func ConvertToTargetsResponse(target *provider_client.TargetData) (*apiv1.TargetsResponse, error) {
+	alarmStatus, err := convertToAlarmStatus(target.AlarmStatus)
+	if err != nil {
+		return nil, mappingError("failed to convert to alarm status: %v", err)
+	}
+
 	response := &apiv1.TargetsResponse{
 		TargetId:    &target.TargetId,
-		ClassName:   convertToTargetClass(string(target.ClassName)).Enum(),
-		AlarmStatus: convertToAlarmStatus(target.AlarmStatus),
+		ClassName:   convertToTargetClass(target.ClassName).Enum(),
+		AlarmStatus: alarmStatus,
 		LastUpdated: timestamppb.New(target.LastUpdated),
 		SensorId:    target.SensorId,
 		TrackId:     target.TrackId,
@@ -35,59 +40,63 @@ func ConvertToTargetsResponse(target *provider_client.TargetData) (*apiv1.Target
 	return response, nil
 }
 
-func convertToTargetClass(className string) apiv1.TargetClass {
+func convertToTargetClass(className provider_client.ClassName) apiv1.TargetClass {
 	switch className {
-	case "DRONE":
+	case provider_client.CLASSNAME_DRONE:
 		return apiv1.TargetClass_TARGET_DRONE
-	case "CAR":
+	case provider_client.CLASSNAME_CAR:
 		return apiv1.TargetClass_TARGET_CAR
-	case "TRUCK":
+	case provider_client.CLASSNAME_TRUCK:
 		return apiv1.TargetClass_TARGET_TRUCK
-	case "HUMAN":
+	case provider_client.CLASSNAME_HUMAN:
 		return apiv1.TargetClass_TARGET_HUMAN
-	case "TREE":
+	case provider_client.CLASSNAME_TREE:
 		return apiv1.TargetClass_TARGET_TREE
-	case "PEOPLE_GROUP":
+	case provider_client.CLASSNAME_PEOPLE_GROUP:
 		return apiv1.TargetClass_TARGET_PEOPLE_GROUP
-	case "MOTORCYCLE":
+	case provider_client.CLASSNAME_MOTORCYCLE:
 		return apiv1.TargetClass_TARGET_MOTORCYCLE
-	case "JET_SKI":
+	case provider_client.CLASSNAME_JET_SKI:
 		return apiv1.TargetClass_TARGET_JET_SKI
-	case "BOAT":
+	case provider_client.CLASSNAME_BOAT:
 		return apiv1.TargetClass_TARGET_BOAT
-	case "SHIP":
+	case provider_client.CLASSNAME_SHIP:
 		return apiv1.TargetClass_TARGET_SHIP
-	case "REMOTE_CONSOLE":
+	case provider_client.CLASSNAME_REMOTE_CONSOLE:
 		return apiv1.TargetClass_TARGET_REMOTE_CONSOLE
 	default:
 		return apiv1.TargetClass_TARGET_UNDEFINED
 	}
 }
 
-func convertToAlarmStatus(alarmStatus provider_client.AlarmStatus) *apiv1.AlarmStatus {
+func convertToAlarmStatus(alarmStatus provider_client.AlarmStatus) (*apiv1.AlarmStatus, error) {
+	alarmLevel, err := convertToAlarmLevel(alarmStatus.Level)
+	if err != nil {
+		return nil, err
+	}
 	result := &apiv1.AlarmStatus{
-		Level: convertToAlarmLevel(alarmStatus.Level).Enum(),
+		Level: alarmLevel.Enum(),
 	}
 
 	if alarmStatus.Score != nil {
 		result.Score = proto.Float64(*alarmStatus.Score)
 	}
 
-	return result
+	return result, nil
 }
 
-func convertToAlarmLevel(level string) apiv1.AlarmLevel {
+func convertToAlarmLevel(level string) (apiv1.AlarmLevel, error) {
 	switch level {
 	case "NONE":
-		return apiv1.AlarmLevel_ALARM_NONE
+		return apiv1.AlarmLevel_ALARM_NONE, nil
 	case "MEDIUM":
-		return apiv1.AlarmLevel_ALARM_MEDIUM
+		return apiv1.AlarmLevel_ALARM_MEDIUM, nil
 	case "HIGH":
-		return apiv1.AlarmLevel_ALARM_HIGH
+		return apiv1.AlarmLevel_ALARM_HIGH, nil
 	case "CRITICAL":
-		return apiv1.AlarmLevel_ALARM_CRITICAL
+		return apiv1.AlarmLevel_ALARM_CRITICAL, nil
 	default:
-		return apiv1.AlarmLevel_ALARM_NONE
+		return apiv1.AlarmLevel_ALARM_NONE, mappingError("unknown AlarmLevel: %v", level)
 	}
 }
 

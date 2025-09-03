@@ -128,11 +128,30 @@ func (s *Controllers) JammerInfoDynamic(
 func (s *Controllers) GetGroups(ctx context.Context) ([]*apiv1.JammerGroup, error) {
 	logger := logging.WithCtxFields(ctx)
 
-	logger.Debug("Getting Groups")
+	logger.Debug("Getting Groups (decoupled)")
 
-	groups, err := s.svcProvider.GetJammerGroups(ctx)
-	if err != nil {
-		return nil, controllersError("%v", err)
+	ids := s.svcDevStorage.ListJammers()
+	unique := make(map[string]struct{})
+	var groups []*apiv1.JammerGroup
+
+	for _, jammerId := range ids {
+		jammerBase, err := s.svcDevStorage.Jammer(jammerId)
+		if err != nil {
+			logger.WithError(controllersError("%v", err)).Errorf("Jammer %s not found", jammerId)
+			continue
+		}
+		ji := jammerBase.JammerInfo()
+		gid := ji.GetGroupId()
+		if gid == "" {
+			continue
+		}
+		if _, ok := unique[gid]; ok {
+			continue
+		}
+		unique[gid] = struct{}{}
+		gidCopy := gid
+		name := gid
+		groups = append(groups, &apiv1.JammerGroup{GroupId: &gidCopy, Name: &name})
 	}
 
 	return groups, nil

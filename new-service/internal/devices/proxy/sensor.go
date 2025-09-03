@@ -14,6 +14,7 @@ type Sensor struct {
 	id         string
 	serviceAPI *provider_client.SensorAPIService
 	deviceAPI  *provider_client.DeviceAPIService
+	cameraAPI  *provider_client.CameraAPIService
 	info       *provider_client.SensorInfo
 }
 
@@ -22,12 +23,16 @@ func NewSensor(sensorId string, api *provider_client.APIClient, info *provider_c
 		id:         sensorId,
 		serviceAPI: api.SensorAPI,
 		deviceAPI:  api.DeviceAPI,
+		cameraAPI:  api.CameraAPI,
 		info:       info,
 	}
 }
 
 func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout time.Duration) error {
-	dssMode := mapping.ConvertToJammerMode(mode)
+	dssMode, err := mapping.ConvertToJammerMode(mode)
+	if err != nil {
+		return err
+	}
 
 	setJammerModeReq := provider_client.SetJammerModeRequest{
 		Id:         s.id,
@@ -35,11 +40,15 @@ func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout time.Duration) erro
 		Timeout:    int32(timeout.Seconds()),
 	}
 
-	_, err := s.serviceAPI.SetJammerMode(context.Background()).
+	_, err = s.serviceAPI.SetJammerMode(context.Background()).
 		SetJammerModeRequest(setJammerModeReq).
 		Execute()
 
-	return handleSensorError("SetJammerMode", s.id, err)
+	if err != nil {
+		return proxyError("SetJammerMode: %s, %v", s.id, err)
+	}
+
+	return nil
 }
 
 func (s *Sensor) SensorInfo() apiv1.SensorInfo {
@@ -58,7 +67,11 @@ func (s *Sensor) SetDisabled(disabled bool) error {
 		SetDisabledRequest(setDisabledReq).
 		Execute()
 
-	return handleSensorError("SetDisabled", s.id, err)
+	if err != nil {
+		return proxyError("SetDisabled: %s, %v", s.id, err)
+	}
+
+	return nil
 }
 
 func (s *Sensor) SetPosition(position core.GeoPosition) error {
@@ -72,20 +85,41 @@ func (s *Sensor) SetPosition(position core.GeoPosition) error {
 		SetPositionRequest(setPositionReq).
 		Execute()
 
-	return handleSensorError("SetPosition", s.id, err)
+	if err != nil {
+		return proxyError("SetPosition: %s, %v", s.id, err)
+	}
+	return nil
 }
 
 func (s *Sensor) SetPositionMode(mode core.GeoPositionMode) error {
-	dssMode := mapping.ConvertToProviderGeoPositionMode(mode)
+	dssMode, err := mapping.ConvertToProviderGeoPositionMode(mode)
+	if err != nil {
+		return err
+	}
 
 	setPositionModeReq := provider_client.SetPositionModeRequest{
 		Id:           s.id,
 		PositionMode: dssMode,
 	}
 
-	_, err := s.deviceAPI.SetPositionMode(context.Background()).
+	_, err = s.deviceAPI.SetPositionMode(context.Background()).
 		SetPositionModeRequest(setPositionModeReq).
 		Execute()
 
-	return handleSensorError("SetPositionMode", s.id, err)
+	if err != nil {
+		return proxyError("SetPositionMode: %s, %v", s.id, err)
+	}
+
+	return nil
+}
+
+func (s *Sensor) GetCameraId() (string, error) {
+	resp, _, err := s.cameraAPI.GetId(context.Background()).Id(s.id).Execute()
+	if err != nil {
+		return "", proxyError("GetCameraId: %s, %v", s.id, err)
+	}
+	if resp == nil || resp.CameraId == "" {
+		return "", proxyError("GetCameraId: camera id not found for sensor %s", s.id)
+	}
+	return resp.CameraId, nil
 }

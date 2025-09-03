@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"context"
+
+	"dds-provider/internal/core"
 )
 
 func (s *Controllers) GetCameraId(
@@ -12,10 +14,18 @@ func (s *Controllers) GetCameraId(
 
 	logger.Debug("GetCameraId request")
 
-	cameraId, err := s.svcProvider.GetCamera(ctx, sensorId)
+	deviceId := core.NewId(sensorId)
+	sensorBase, err := s.svcDevStorage.Sensor(deviceId)
 	if err != nil {
+		logger.WithError(controllersError("%v", err)).Errorf("Failed to get sensor %s", sensorId)
 		return "", err
 	}
+
+	cameraCapable, ok := sensorBase.(core.CameraReader)
+	if !ok {
+		return "", controllersError("sensor %s does not support camera id retrieval", sensorId)
+	}
+	cameraId := cameraCapable.GetCameraId()
 
 	logger.Infof("Successfully get camera id for sensor %s to %s", sensorId, cameraId)
 

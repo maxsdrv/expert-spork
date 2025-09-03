@@ -3,7 +3,6 @@ package parsers
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"dds-provider/internal/generated/provider_client"
 )
@@ -15,10 +14,7 @@ const (
 func ParseSensorInfo(dataRaw json.RawMessage) (*provider_client.SensorInfo, error) {
 	var sensor provider_client.SensorInfo
 	if err := json.Unmarshal(dataRaw, &sensor); err != nil {
-		if strings.Contains(err.Error(), UndefinedJammerMode) {
-			return skippingUndefinedJammerMode(dataRaw)
-		}
-		return nil, err
+		return skippingUndefinedJammerMode(dataRaw)
 	}
 
 	return &sensor, nil
@@ -71,4 +67,9 @@ func ParseLicenseStatus(dataRaw json.RawMessage) (*provider_client.LicenseStatus
 	}
 
 	return &licenseStatus, nil
+}
+
+func ParseTargetInfo(dataRaw json.RawMessage) (*provider_client.TargetData, error) {
+
+	return nil, nil
 }

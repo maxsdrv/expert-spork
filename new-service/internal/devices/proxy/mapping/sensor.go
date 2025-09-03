@@ -1,15 +1,13 @@
 package mapping
 
 import (
-	"encoding/json"
-	"strconv"
-	"strings"
-	"unicode"
-
 	"dds-provider/internal/core"
 	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/provider_client"
 	"dds-provider/internal/services/parsers"
+	"encoding/json"
+	"strconv"
+	"strings"
 )
 
 var mappingError = core.ProviderError()
@@ -88,19 +86,22 @@ func convertToHwInfo(dssHwInfo *provider_client.HwInfo) *core.HwInfo {
 	hwInfo := &core.HwInfo{}
 
 	if dssHwInfo.Temperature != nil {
-		cleanTemp := strings.TrimFunc(*dssHwInfo.Temperature, func(r rune) bool {
-			return !unicode.IsDigit(r) && r != '.' && r != '-'
-		})
-		if temp, err := strconv.ParseFloat(cleanTemp, 32); err == nil {
-			tempFloat := float32(temp)
-			hwInfo.Temperature = &tempFloat
+		fields := strings.Fields(*dssHwInfo.Temperature)
+		if len(fields) > 0 {
+			if temp, err := strconv.ParseFloat(fields[0], 32); err == nil {
+				tempFloat := float32(temp)
+				hwInfo.Temperature = &tempFloat
+			}
 		}
 	}
 
 	if dssHwInfo.Voltage != nil {
-		if voltage, err := strconv.ParseFloat(*dssHwInfo.Voltage, 32); err == nil {
-			voltageFloat := float32(voltage)
-			hwInfo.Voltage = &voltageFloat
+		fields := strings.Fields(*dssHwInfo.Voltage)
+		if len(fields) > 0 {
+			if vol, err := strconv.ParseFloat(fields[0], 32); err == nil {
+				volFloat := float32(vol)
+				hwInfo.Voltage = &volFloat
+			}
 		}
 	}
 

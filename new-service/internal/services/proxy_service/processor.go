@@ -165,7 +165,7 @@ func (n *WsNotification) licenseStatusUpdate(ctx context.Context, dataRaw json.R
 }
 
 func (n *WsNotification) processTargetInfo(ctx context.Context, dataRaw json.RawMessage) error {
-	// TODO: Implement target info process
+	//logger := logging.WithCtxFields(ctx)
 
 	return nil
 }

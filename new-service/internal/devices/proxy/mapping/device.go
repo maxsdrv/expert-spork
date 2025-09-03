@@ -23,16 +23,16 @@ func ConvertToProviderGeoPosition(position core.GeoPosition) provider_client.Geo
 	}
 }
 
-func ConvertToProviderGeoPositionMode(positionMode core.GeoPositionMode) provider_client.GeoPositionMode {
+func ConvertToProviderGeoPositionMode(positionMode core.GeoPositionMode) (provider_client.GeoPositionMode, error) {
 	switch positionMode {
 	case apiv1.GeoPositionMode_GEO_AUTO:
-		return provider_client.GEOPOSITIONMODE_AUTO
+		return provider_client.GEOPOSITIONMODE_AUTO, nil
 	case apiv1.GeoPositionMode_GEO_MANUAL:
-		return provider_client.GEOPOSITIONMODE_MANUAL
+		return provider_client.GEOPOSITIONMODE_MANUAL, nil
 	case apiv1.GeoPositionMode_GEO_ALWAYS_MANUAL:
-		return provider_client.GEOPOSITIONMODE_ALWAYS_MANUAL
+		return provider_client.GEOPOSITIONMODE_ALWAYS_MANUAL, nil
 	default:
-		return provider_client.GEOPOSITIONMODE_AUTO
+		return provider_client.GEOPOSITIONMODE_UNKNOWN_DEFAULT_OPEN_API, mappingError("to provider geo position mode: %v", positionMode)
 	}
 }
 

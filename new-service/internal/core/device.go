@@ -48,6 +48,14 @@ type DeviceReader interface {
 	DevicePositionReader
 }
 
+type CameraReader interface {
+	GetCameraId() string
+}
+
+type CameraBase interface {
+	CameraReader
+}
+
 type DeviceBase interface {
 	DevicePositionWriter
 }

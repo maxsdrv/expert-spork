@@ -87,10 +87,13 @@ func ConvertToJammerInfo(jammerInfo provider_client.JammerInfo) *core.JammerInfo
 	}
 }
 
-func ConvertToJammerMode(jammerMode core.JammerMode) provider_client.JammerMode {
-	if jammerMode == apiv1.JammerMode_JAMMER_AUTO {
-		return provider_client.JAMMERMODE_AUTO
-	} else {
-		return provider_client.JAMMERMODE_MANUAL
+func ConvertToJammerMode(jammerMode core.JammerMode) (provider_client.JammerMode, error) {
+	switch jammerMode {
+	case apiv1.JammerMode_JAMMER_AUTO:
+		return provider_client.JAMMERMODE_AUTO, nil
+	case apiv1.JammerMode_JAMMER_MANUAL:
+		return provider_client.JAMMERMODE_MANUAL, nil
+	default:
+		return provider_client.JAMMERMODE_UNKNOWN_DEFAULT_OPEN_API, mappingError("to jammer mode: unknown jammer mode %v", jammerMode)
 	}
 }

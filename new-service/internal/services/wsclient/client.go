@@ -43,8 +43,7 @@ func (c *WSNotificationClient) Start(ctx context.Context) {
 		logger.Infof("Connecting to websocket %s", c.url)
 		conn, _, err := websocket.Dial(ctx, c.url, nil)
 		if err != nil {
-			wsErr := handleWebsocketError("dial", c.url, err)
-			logger.WithError(wsErr).Errorf("Failed to connect to DDS target service at %s", c.url)
+			logger.WithError(err).Errorf("Failed to connect to DDS target service at %s", c.url)
 			time.Sleep(delay)
 			delay = nextBackoffDelay(delay)
 			continue
@@ -70,8 +69,7 @@ func (c *WSNotificationClient) updateLoop(ctx context.Context, conn *websocket.C
 	for {
 		_, data, err := conn.Read(ctx)
 		if err != nil {
-			wsErr := handleReadError("read", c.url, err)
-			logger.WithError(wsErr).Warn("Failed to read data from DDS target service")
+			logger.WithError(err).Warn("Failed to read data from DDS target service")
 			break
 		}
 

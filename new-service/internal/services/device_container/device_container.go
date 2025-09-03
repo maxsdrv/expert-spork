@@ -15,9 +15,11 @@ var logging = ctx_log.GetLogger(nil)
 type DeviceContainerService interface {
 	ListJammers() []core.DeviceId
 	ListSensors() []core.DeviceId
+	ListCameras() []core.DeviceId
 	ListDevices() []core.DeviceId
 	Jammer(id core.DeviceId) (core.JammerBase, error)
 	Sensor(id core.DeviceId) (core.SensorBase, error)
+	Camera(id core.DeviceId) (core.CameraBase, error)
 	Device(id core.DeviceId) (core.DeviceBase, error)
 	AppendDevice(id core.DeviceId, device core.DeviceBase) error
 }
@@ -25,6 +27,7 @@ type DeviceContainerService interface {
 type deviceContainer struct {
 	sensors map[core.DeviceId]core.SensorBase
 	jammers map[core.DeviceId]core.JammerBase
+	cameras map[core.DeviceId]core.CameraBase
 	devices map[core.DeviceId]core.DeviceBase
 }
 
@@ -32,6 +35,7 @@ func New(ctx context.Context) DeviceContainerService {
 	return &deviceContainer{
 		sensors: map[core.DeviceId]core.SensorBase{},
 		jammers: map[core.DeviceId]core.JammerBase{},
+		cameras: map[core.DeviceId]core.CameraBase{},
 		devices: map[core.DeviceId]core.DeviceBase{},
 	}
 }
@@ -74,6 +78,10 @@ func (s *deviceContainer) ListSensors() []core.DeviceId {
 	return getKeys(s.sensors)
 }
 
+func (s *deviceContainer) ListCameras() []core.DeviceId {
+	return getKeys(s.cameras)
+}
+
 func (s *deviceContainer) ListDevices() []core.DeviceId {
 	return getKeys(s.devices)
 }
@@ -92,6 +100,17 @@ func (s *deviceContainer) Sensor(id core.DeviceId) (core.SensorBase, error) {
 		return sensor, nil
 	}
 	return nil, contErr("sensor not found, id: %s", id)
+}
+
+func (s *deviceContainer) Camera(id core.DeviceId) (core.CameraBase, error) {
+	logger := logging.WithCtxFields(context.Background())
+
+	logger.Debugf("Camera(): %v", id)
+
+	if camera, ok := s.cameras[id]; ok {
+		return camera, nil
+	}
+	return nil, contErr("camera not found, id: %s", id)
 }
 
 func (s *deviceContainer) Device(id core.DeviceId) (core.DeviceBase, error) {

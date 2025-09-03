@@ -9,6 +9,8 @@ import (
 	"dds-provider/internal/generated/provider_client"
 )
 
+var proxyError = core.ProviderError()
+
 type Jammer struct {
 	id         string
 	serviceApi *provider_client.JammerAPIService
@@ -40,7 +42,11 @@ func (j *Jammer) SetDisabled(disabled bool) error {
 		SetDisabledRequest(setDisabledReq).
 		Execute()
 
-	return handleJammerError("SetDisabled", j.id, err)
+	if err != nil {
+		return proxyError("SetDisabled: %s, %v", j.id, err)
+	}
+
+	return nil
 }
 
 func (j *Jammer) SetPosition(position core.GeoPosition) error {
@@ -54,21 +60,32 @@ func (j *Jammer) SetPosition(position core.GeoPosition) error {
 		SetPositionRequest(setPositionReq).
 		Execute()
 
-	return handleJammerError("SetPosition", j.id, err)
+	if err != nil {
+		return proxyError("SetPosition: %s, %v", j.id, err)
+	}
+
+	return nil
 }
 
 func (j *Jammer) SetPositionMode(mode core.GeoPositionMode) error {
-	dssMode := mapping.ConvertToProviderGeoPositionMode(mode)
+	dssMode, err := mapping.ConvertToProviderGeoPositionMode(mode)
+	if err != nil {
+		return err
+	}
 	setPositionModeReq := provider_client.SetPositionModeRequest{
 		Id:           j.id,
 		PositionMode: dssMode,
 	}
 
-	_, err := j.deviceApi.SetPositionMode(context.Background()).
+	_, err = j.deviceApi.SetPositionMode(context.Background()).
 		SetPositionModeRequest(setPositionModeReq).
 		Execute()
 
-	return handleJammerError("SetPositionMode", j.id, err)
+	if err != nil {
+		return proxyError("SetPositionMode: %s, %v", j.id, err)
+	}
+
+	return nil
 }
 
 func (j *Jammer) SetJammerBands(bands core.JammerBands, duration uint) error {
@@ -85,5 +102,9 @@ func (j *Jammer) SetJammerBands(bands core.JammerBands, duration uint) error {
 		SetJammerBandsRequest(setJammerBandsReq).
 		Execute()
 
-	return handleJammerError("SetJammerBands", j.id, err)
+	if err != nil {
+		return proxyError("SetJammerBands: %s, %v", j.id, err)
+	}
+
+	return nil
 }

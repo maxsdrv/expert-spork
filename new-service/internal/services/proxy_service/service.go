@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/opticoder/ctx-log/go/ctx_log"
@@ -18,12 +17,6 @@ import (
 )
 
 var logging = ctx_log.GetLogger(nil)
-
-var (
-	ErrHTTPTimeout           = serviceError("http timeout")
-	ErrHTTPConnectionRefused = serviceError("http connection refused")
-	ErrHTTPHostNotFound      = serviceError("host not found")
-)
 
 const (
 	DefaultPortHttp = 19080
@@ -110,18 +103,7 @@ func (s *Service) connect(ctx context.Context,
 
 		_, _, err := apiClient.CommonAPI.GetApiVersion(ctx).Execute()
 		if err != nil {
-			var connectionErr error
-			if strings.Contains(err.Error(), "connection refused") {
-				connectionErr = ErrHTTPConnectionRefused
-			} else if strings.Contains(err.Error(), "timeout") {
-				connectionErr = ErrHTTPTimeout
-			} else if strings.Contains(err.Error(), "no such host") {
-				connectionErr = ErrHTTPHostNotFound
-			} else {
-				connectionErr = serviceError("failed to connect to %s: %v", urlRest, err)
-			}
-
-			logger.WithError(connectionErr).Errorf("Failed to connect to DDS target service at %s", urlRest)
+			logger.WithError(err).Errorf("Failed to connect to DDS target service at %s", urlRest)
 
 			timer := time.NewTimer(retryDelay)
 			select {
@@ -153,15 +135,8 @@ func (s *Service) connect(ctx context.Context,
 					_, _, err := apiClient.CommonAPI.GetApiVersion(ctx).Execute()
 					logger.Tracef("Health check started")
 					if err != nil {
-						var healthErr error
-						if strings.Contains(err.Error(), "connection refused") {
-							healthErr = ErrHTTPConnectionRefused
-						} else if strings.Contains(err.Error(), "timeout") {
-							healthErr = ErrHTTPTimeout
-						} else {
-							healthErr = serviceError("failed to health check for %s: %v", urlRest, err)
-						}
-						logger.WithError(healthErr).Errorf("Failed to health check, retrying in %v", healthRetryDelay)
+						logger.WithError(err).Errorf("Failed to health check, retrying in %v", healthRetryDelay)
+
 						healthRetryDelay = healthRetryDelay * 2
 						if healthRetryDelay > healthCheckInterval {
 							healthRetryDelay = healthCheckInterval
