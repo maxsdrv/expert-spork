@@ -131,27 +131,33 @@ func (s *Controllers) GetGroups(ctx context.Context) ([]*apiv1.JammerGroup, erro
 	logger.Debug("Getting Groups")
 
 	ids := s.svcDevStorage.ListJammers()
-	unique := make(map[string]struct{})
 	var groups []*apiv1.JammerGroup
 
 	for _, jammerId := range ids {
-		jammerBase, err := s.svcDevStorage.Jammer(jammerId)
+		jammer, err := s.svcDevStorage.Jammer(jammerId)
 		if err != nil {
 			logger.WithError(controllersError("%v", err)).Errorf("Jammer %s not found", jammerId)
 			continue
 		}
-		ji := jammerBase.JammerInfo()
-		gid := ji.GetGroupId()
-		if gid == "" {
+
+		groupId := jammer.JammerInfo().GroupId
+		if *groupId == "" {
 			continue
 		}
-		if _, ok := unique[gid]; ok {
-			continue
+
+		exist := false
+		for _, existingGroup := range groups {
+			if existingGroup.GroupId == groupId {
+				exist = true
+				break
+			}
 		}
-		unique[gid] = struct{}{}
-		gidCopy := gid
-		name := gid
-		groups = append(groups, &apiv1.JammerGroup{GroupId: &gidCopy, Name: &name})
+		if !exist {
+			groups = append(groups, &apiv1.JammerGroup{
+				GroupId: groupId,
+				Name:    groupId,
+			})
+		}
 	}
 
 	return groups, nil

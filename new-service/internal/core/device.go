@@ -49,7 +49,7 @@ type DeviceReader interface {
 }
 
 type CameraReader interface {
-	GetCameraId() (string, error)
+	GetCamera() (string, error)
 }
 
 type CameraBase interface {

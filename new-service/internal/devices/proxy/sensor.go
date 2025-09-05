@@ -18,14 +18,17 @@ type Sensor struct {
 	info       *provider_client.SensorInfo
 }
 
-func NewSensor(sensorId string, api *provider_client.APIClient, info *provider_client.SensorInfo) *Sensor {
+func NewSensor(sensorId string, api *provider_client.APIClient, info *provider_client.SensorInfo) (*Sensor, error) {
+	if sensorId == "" {
+		return nil, proxyError("sensor id is empty")
+	}
 	return &Sensor{
 		id:         sensorId,
 		serviceAPI: api.SensorAPI,
 		deviceAPI:  api.DeviceAPI,
 		cameraAPI:  api.CameraAPI,
 		info:       info,
-	}
+	}, nil
 }
 
 func (s *Sensor) SetJammerMode(mode core.JammerMode, timeout time.Duration) error {
@@ -113,7 +116,7 @@ func (s *Sensor) SetPositionMode(mode core.GeoPositionMode) error {
 	return nil
 }
 
-func (s *Sensor) GetCameraId() (string, error) {
+func (s *Sensor) GetCamera() (string, error) {
 	resp, _, err := s.cameraAPI.GetId(context.Background()).Id(s.id).Execute()
 	if err != nil {
 		return "", proxyError("GetCameraId: %s, %v", s.id, err)

@@ -74,7 +74,10 @@ func (n *WsNotification) processSensorInfo(ctx context.Context, dataRaw json.Raw
 	deviceId := core.NewId(sensor.Id)
 
 	if _, err := n.devStorage.Sensor(deviceId); err != nil {
-		proxySensor := proxy.NewSensor(sensor.Id, n.apiClient, sensor)
+		proxySensor, err := proxy.NewSensor(sensor.Id, n.apiClient, sensor)
+		if err != nil {
+			return err
+		}
 
 		err = n.devStorage.AppendDevice(deviceId, proxySensor)
 		if err != nil {
@@ -120,7 +123,11 @@ func (n *WsNotification) processJammerInfo(ctx context.Context, dataRaw json.Raw
 	deviceId := core.NewId(jammerInfo.Id)
 
 	if _, err := n.devStorage.Jammer(deviceId); err != nil {
-		proxyJammer := proxy.NewJammer(jammerInfo.Id, n.apiClient, jammerInfo)
+		proxyJammer, err := proxy.NewJammer(jammerInfo.Id, n.apiClient, jammerInfo)
+		if err != nil {
+			return err
+		}
+
 		err = n.devStorage.AppendDevice(deviceId, proxyJammer)
 		if err != nil {
 			logger.WithError(serviceError("%v", err)).Error("Failed to append device")

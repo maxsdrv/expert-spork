@@ -14,8 +14,7 @@ const (
 func ParseSensorInfo(dataRaw json.RawMessage) (*provider_client.SensorInfo, error) {
 	var sensor provider_client.SensorInfo
 	if err := json.Unmarshal(dataRaw, &sensor); err != nil {
-		return nil, err
-		//return skippingUndefinedJammerMode(dataRaw)
+		return skippingUndefinedJammerMode(dataRaw)
 	}
 
 	return &sensor, nil

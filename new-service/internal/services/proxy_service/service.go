@@ -22,7 +22,7 @@ var logging = ctx_log.GetLogger(nil)
 
 const (
 	DefaultPortHttp = 19080
-	DefaultPortWs   = 19081
+	DefaultPortWs   = 19082
 )
 
 const (

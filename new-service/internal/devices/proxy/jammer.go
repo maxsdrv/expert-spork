@@ -18,13 +18,16 @@ type Jammer struct {
 	info       *provider_client.JammerInfo
 }
 
-func NewJammer(jammerId string, api *provider_client.APIClient, info *provider_client.JammerInfo) *Jammer {
+func NewJammer(jammerId string, api *provider_client.APIClient, info *provider_client.JammerInfo) (*Jammer, error) {
+	if jammerId == "" {
+		return nil, proxyError("jammer id is empty")
+	}
 	return &Jammer{
 		id:         jammerId,
 		serviceApi: api.JammerAPI,
 		deviceApi:  api.DeviceAPI,
 		info:       info,
-	}
+	}, nil
 }
 
 func (j *Jammer) JammerInfo() apiv1.JammerInfo {
