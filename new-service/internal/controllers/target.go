@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+
 	apiv1 "dds-provider/internal/generated/api/proto"
 )
 
@@ -17,13 +18,30 @@ func (s *Controllers) Targets(
 	if err != nil {
 		return err
 	}
-
 	for _, target := range targets {
-		err := sendFunc(target)
-		if err != nil {
+		if target == nil {
+			continue
+		}
+		if err := sendFunc(target); err != nil {
 			return err
 		}
 	}
 
-	return nil
+	stream, closer := s.svcProvider.SubscribeTargets()
+	defer closer()
+
+	for {
+		select {
+		case <-ctx.Done():
+			logger.Debug("Targets streaming stopped: context done")
+			return ctx.Err()
+		case upd := <-stream:
+			if upd == nil {
+				continue
+			}
+			if err := sendFunc(upd); err != nil {
+				return err
+			}
+		}
+	}
 }

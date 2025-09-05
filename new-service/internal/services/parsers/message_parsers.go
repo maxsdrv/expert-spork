@@ -14,7 +14,8 @@ const (
 func ParseSensorInfo(dataRaw json.RawMessage) (*provider_client.SensorInfo, error) {
 	var sensor provider_client.SensorInfo
 	if err := json.Unmarshal(dataRaw, &sensor); err != nil {
-		return skippingUndefinedJammerMode(dataRaw)
+		return nil, err
+		//return skippingUndefinedJammerMode(dataRaw)
 	}
 
 	return &sensor, nil
@@ -57,6 +58,7 @@ func ParseJammerInfo(dataRaw json.RawMessage) (*provider_client.JammerInfo, erro
 	if err := json.Unmarshal(dataRaw, &jammer); err != nil {
 		return nil, err
 	}
+
 	return &jammer, nil
 }
 
@@ -70,6 +72,10 @@ func ParseLicenseStatus(dataRaw json.RawMessage) (*provider_client.LicenseStatus
 }
 
 func ParseTargetInfo(dataRaw json.RawMessage) (*provider_client.TargetData, error) {
+	var target provider_client.TargetData
+	if err := json.Unmarshal(dataRaw, &target); err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	return &target, nil
 }

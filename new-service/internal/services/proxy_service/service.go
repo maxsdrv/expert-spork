@@ -7,10 +7,12 @@ import (
 	"time"
 
 	"github.com/opticoder/ctx-log/go/ctx_log"
+	"github.com/teivah/broadcast"
 
 	"dds-provider/internal/core"
 	"dds-provider/internal/core/components"
 	"dds-provider/internal/enums"
+	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/provider_client"
 	"dds-provider/internal/services/device_container"
 	"dds-provider/internal/services/wsclient"
@@ -27,7 +29,7 @@ const (
 	msgTypeSensorInfo    = "sensor_info"
 	msgTypeJammerInfo    = "jammer_info"
 	msgTypeLicenseStatus = "license_status"
-	msgTypeTargetInfo    = "target_info"
+	msgTypeTargetUpdated = "target_data_updated"
 )
 
 type Connection struct {
@@ -41,6 +43,7 @@ type Service struct {
 	notificationProcessor *WsNotification
 	connection            Connection
 	apiClient             *provider_client.APIClient
+	targetRelay           *broadcast.Relay[*apiv1.TargetsResponse]
 }
 
 func New(ctx context.Context,
@@ -61,9 +64,10 @@ func New(ctx context.Context,
 	}
 
 	service := &Service{
-		devStorage: devStorage,
-		httpClient: httpClient,
-		connection: connection,
+		devStorage:  devStorage,
+		httpClient:  httpClient,
+		connection:  connection,
+		targetRelay: broadcast.NewRelay[*apiv1.TargetsResponse](),
 	}
 
 	go service.start(ctx, jammerNotifier, sensorNotifier)
@@ -123,7 +127,7 @@ func (s *Service) connect(ctx context.Context,
 
 		s.apiClient = apiClient
 
-		s.notificationProcessor = NewWsNotification(jammerNotifier, sensorNotifier, s.devStorage, apiClient)
+		s.notificationProcessor = NewWsNotification(jammerNotifier, sensorNotifier, s.devStorage, apiClient, s.targetRelay)
 
 		go func() {
 			healthRetryDelay := time.Second
@@ -171,4 +175,9 @@ func (s *Service) createAPIConfiguration(baseUrl string) *provider_client.Config
 	}
 	config.HTTPClient = s.httpClient
 	return config
+}
+
+func (s *Service) SubscribeTargets() (<-chan *apiv1.TargetsResponse, func()) {
+	listener := s.targetRelay.Listener(10)
+	return listener.Ch(), listener.Close
 }

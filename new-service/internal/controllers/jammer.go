@@ -128,7 +128,7 @@ func (s *Controllers) JammerInfoDynamic(
 func (s *Controllers) GetGroups(ctx context.Context) ([]*apiv1.JammerGroup, error) {
 	logger := logging.WithCtxFields(ctx)
 
-	logger.Debug("Getting Groups (decoupled)")
+	logger.Debug("Getting Groups")
 
 	ids := s.svcDevStorage.ListJammers()
 	unique := make(map[string]struct{})

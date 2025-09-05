@@ -4,10 +4,13 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/teivah/broadcast"
+
 	"dds-provider/internal/core"
 	"dds-provider/internal/core/components"
 	"dds-provider/internal/devices/proxy"
 	"dds-provider/internal/devices/proxy/mapping"
+	apiv1 "dds-provider/internal/generated/api/proto"
 	"dds-provider/internal/generated/provider_client"
 	"dds-provider/internal/services/device_container"
 	"dds-provider/internal/services/parsers"
@@ -20,6 +23,7 @@ type WsNotification struct {
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic]
 	devStorage     device_container.DeviceContainerService
 	apiClient      *provider_client.APIClient
+	targetRelay    *broadcast.Relay[*apiv1.TargetsResponse]
 }
 
 func NewWsNotification(
@@ -27,12 +31,14 @@ func NewWsNotification(
 	sensorNotifier *components.Notifier[*core.SensorInfoDynamic],
 	devStorage device_container.DeviceContainerService,
 	apiClient *provider_client.APIClient,
+	targetRelay *broadcast.Relay[*apiv1.TargetsResponse],
 ) *WsNotification {
 	return &WsNotification{
 		jammerNotifier: jammerNotifier,
 		sensorNotifier: sensorNotifier,
 		devStorage:     devStorage,
 		apiClient:      apiClient,
+		targetRelay:    targetRelay,
 	}
 }
 
@@ -48,8 +54,8 @@ func (n *WsNotification) HandleNotification(ctx context.Context, message string,
 		return n.licenseStatusUpdate(ctx, data)
 	case msgTypeJammerInfo:
 		return n.processJammerInfo(ctx, data)
-	case msgTypeTargetInfo:
-		return n.processTargetInfo(ctx, data)
+	case msgTypeTargetUpdated:
+		return n.processTargetUpdate(ctx, data)
 	default:
 		logger.Tracef("Unknown message type: %s", message)
 		return nil
@@ -164,8 +170,26 @@ func (n *WsNotification) licenseStatusUpdate(ctx context.Context, dataRaw json.R
 	return nil
 }
 
-func (n *WsNotification) processTargetInfo(ctx context.Context, dataRaw json.RawMessage) error {
-	//logger := logging.WithCtxFields(ctx)
+func (n *WsNotification) processTargetUpdate(ctx context.Context, dataRaw json.RawMessage) error {
+	logger := logging.WithCtxFields(ctx)
+
+	target, err := parsers.ParseTargetInfo(dataRaw)
+	if err != nil {
+		logger.WithError(serviceError("%v", err)).Error("Failed to parse target info")
+		return err
+	}
+
+	resp, err := mapping.ConvertToTargetsResponse(target)
+	if err != nil {
+		logger.WithError(serviceError("%v", err)).Error("Failed to map target info to API")
+		return err
+	}
+
+	if n.targetRelay != nil {
+		go n.targetRelay.NotifyCtx(ctx, resp)
+	} else {
+		logger.Warn("targetRelay is nil; dropping target update")
+	}
 
 	return nil
 }

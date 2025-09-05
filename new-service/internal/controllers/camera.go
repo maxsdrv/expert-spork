@@ -25,7 +25,10 @@ func (s *Controllers) GetCameraId(
 	if !ok {
 		return "", controllersError("sensor %s does not support camera id retrieval", sensorId)
 	}
-	cameraId := cameraCapable.GetCameraId()
+	cameraId, err := cameraCapable.GetCameraId()
+	if err != nil {
+		return "", err
+	}
 
 	logger.Infof("Successfully get camera id for sensor %s to %s", sensorId, cameraId)
 
