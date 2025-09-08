@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/empty.proto";
+
+import "components.proto";
+
+service CommonService {
+  rpc Settings(google.protobuf.Empty) returns (SettingsResponse) {}
+  
+  rpc SetSettings(SetSettingsRequest) returns (google.protobuf.Empty) {}
+  
+  rpc LicenseStatus(google.protobuf.Empty) returns (LicenseStatusResponse) {}
+  
+  rpc UploadLicense(UploadLicenseRequest) returns (google.protobuf.Empty) {}
+}
+
+message SettingsResponse {
+  optional Settings settings = 1 [(buf.validate.field).required = true];
+}
+
+message SetSettingsRequest {
+  optional Settings settings = 1 [(buf.validate.field).required = true];
+}
+
+message LicenseStatusResponse {
+  optional bool valid = 1 [(buf.validate.field).required = true];
+  optional string description = 2 [(buf.validate.field).required = true];
+  optional string expiry_date = 3 [(buf.validate.field).required = true];
+  optional string signature = 4 [(buf.validate.field).required = true];
+}
+
+message UploadLicenseRequest {
+  optional string license_data = 1 [(buf.validate.field).required = true];
+}
+
+message Settings {
+  repeated DeviceIdMapping device_id_mapping = 1;
+  repeated DeviceSettings devices = 2 [(buf.validate.field).required = true];
+}
+
+message DeviceIdMapping {
+  optional string device_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional string fingerprint = 2 [(buf.validate.field).required = true];
+  optional string class = 3 [(buf.validate.field).required = true];
+}
+
+message DeviceSettings {
+  optional string device_id = 1 [(buf.validate.field).required = true, (buf.validate.field).string.uuid = true];
+  optional bool disabled = 2 [(buf.validate.field).required = true];
+  optional GeoPositionMode position_mode = 3 [(buf.validate.field).required = true];
+  optional GeoPosition position = 4 [(buf.validate.field).required = true];
+}
+
+
