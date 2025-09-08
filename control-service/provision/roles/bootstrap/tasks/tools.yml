@@ -1,7 +1,0 @@
-- name: Install TuneD
-  apt:
-    name: tuned
-
-#- name: Install UFW
-#  apt:
-#    name: ufw

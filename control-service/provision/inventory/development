@@ -1,8 +1,0 @@
-[development]
-tamerlan-dev ansible_host=192.168.56.101
-
-[all:vars]
-swapsize=1
-
-ansible_user=vagrant
-ansible_ssh_pass=vagrant

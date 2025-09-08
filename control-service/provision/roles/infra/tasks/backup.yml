@@ -1,5 +1,0 @@
-- name: Install backup requirements
-  apt:
-    name:
-      - xz-utils
-      - duplicity

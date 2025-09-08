@@ -1,9 +1,0 @@
-__pycache__/
-build/
-dist/
-*.egg-info/
-.pytest_cache/
-
-# PDM
-.pdm-python
-.venv/

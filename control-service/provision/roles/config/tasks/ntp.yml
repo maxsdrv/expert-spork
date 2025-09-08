@@ -1,2 +1,0 @@
-- name: Update NTP servers
-  include_role: name=host tasks_from=ntp-update

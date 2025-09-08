@@ -1,8 +1,0 @@
-- hosts: all
-  tasks:
-    - include_role: name=services tasks_from=load-firmware
-    - include_role: name=services tasks_from=update-self
-      vars:
-        image_tag: "{{ firmware.version }}"
-  become: true
-  gather_facts: no

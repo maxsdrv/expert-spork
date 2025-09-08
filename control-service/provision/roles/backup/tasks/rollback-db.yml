@@ -1,5 +1,0 @@
-- name: Restore databases
-  shell: "set -o pipefail && xz -dc {{ paths.data_root_host }}/control/rollback/{{ item }}.dump.xz | docker exec -i dds-infra-postgres pg_restore -c -d {{ item }} -U postgres"
-  args:
-    executable: /bin/bash
-  loop: "{{ db.postgres.databases }}"

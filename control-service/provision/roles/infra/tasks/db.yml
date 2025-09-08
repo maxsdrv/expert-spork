@@ -1,5 +1,0 @@
-- name: Install postgres python adapter
-  apt:
-    name: python3-psycopg2
-    state: latest
-    install_recommends: no

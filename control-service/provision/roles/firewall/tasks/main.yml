@@ -1,2 +1,0 @@
-- import_tasks: ufw.yml
-  tags: platform, firewall

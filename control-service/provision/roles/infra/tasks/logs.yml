@@ -1,5 +1,0 @@
-- name: Install logrotate
-  apt:
-    name:
-      - logrotate
-    state: latest

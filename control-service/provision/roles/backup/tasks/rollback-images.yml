@@ -1,5 +1,0 @@
-- name: Load rollback images
-  community.docker.docker_image_load:
-    path: "{{ data_root }}/control/rollback/{{ item }}.tar"
-    timeout: 200
-  loop: "{{ rollback_info.versions | list }}"

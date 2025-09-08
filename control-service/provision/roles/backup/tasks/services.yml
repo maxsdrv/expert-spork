@@ -1,7 +1,0 @@
-- name: Backup services
-  include_role:
-    name: backup
-    tasks_from: image
-  vars:
-    service: "{{ item }}"
-  loop: "{{ services.split(' ') }}"

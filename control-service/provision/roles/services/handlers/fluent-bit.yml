@@ -1,7 +1,0 @@
-- name: restart fluent-bit
-  community.docker.docker_container:
-    name: dds-infra-fluent-bit
-    image: "{{ registry }}/{{ registry_path }}/{{ services['dds-infra-fluent-bit'].image }}:{{ rollback_image_tag | default(image_tag) }}"
-    restart: yes
-    comparisons:
-      '*': ignore

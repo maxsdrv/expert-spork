@@ -1,5 +1,0 @@
-- hosts: all
-  roles:
-    - services
-  become: true
-  gather_facts: no

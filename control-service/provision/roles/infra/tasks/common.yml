@@ -1,4 +1,0 @@
-- name: Install common packages
-  apt:
-    name:
-      - cron
